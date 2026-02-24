@@ -49,7 +49,7 @@ table.dataTable thead th.text-left, table.dataTable tbody td.text-left { text-al
 .badge-short { display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 600; background: rgba(234,179,8,0.12); color: #facc15; border: 1px solid rgba(234,179,8,0.2); margin-left: 4px; }
 .tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 600; margin: 1px; }
 .value-up { color: #f87171; } .value-down { color: #60a5fa; }
-.row-legacy td { opacity: 0.5; }
+.row-legacy td { opacity: 0.45; text-decoration: line-through; }
 .mine-badge { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 0.68rem; font-weight: 800; box-shadow: 0 0 10px rgba(251,191,36,0.4); }
 
 /* Filter controls */
@@ -165,14 +165,6 @@ let state = {
 
 let table;
 
-const tagColors = {
-    '배당':'bg-yellow-600 text-yellow-100','테크/IT':'bg-sky-600','헬스케어':'bg-rose-600 text-rose-100',
-    '성장주':'bg-indigo-600','가치주':'bg-amber-600','중소형주':'bg-green-600','반도체':'bg-blue-500',
-    'AI/로봇':'bg-purple-600 text-purple-100','메타버스':'bg-pink-600','금융':'bg-cyan-600',
-    '에너지':'bg-orange-600','부동산':'bg-teal-600','ESG':'bg-emerald-600',
-    '퀄리티':'bg-violet-600','모멘텀':'bg-fuchsia-600','저변동성':'bg-lime-600',
-    '우주항공':'bg-slate-600','인프라':'bg-zinc-600','원자재':'bg-stone-600'
-};
 
 function formatMCap(val) {
     if (!val) return '-';
@@ -261,14 +253,6 @@ $(document).ready(function() {
                 render: function(d, type, row) {
                     if (type !== 'display') return d;
                     let h = '<div class="leading-tight">'+d+'</div>';
-                    if (row.tags && row.tags.length) {
-                        h += '<div class="mt-0.5 flex flex-wrap gap-0.5">';
-                        row.tags.forEach(function(t) {
-                            let c = tagColors[t] || 'bg-gray-600';
-                            h += '<span class="tag '+c+' bg-opacity-80">'+t+'</span>';
-                        });
-                        h += '</div>';
-                    }
                     if (myPortfolio.includes(row.t)) {
                         h += '<div class="mt-1"><span class="mine-badge">MY</span></div>';
                     }
@@ -323,10 +307,9 @@ $(document).ready(function() {
             { data: 'isl', render: function(d,t,row) {
                 if(t!=='display') return d ? 1 : 0;
                 if(!d) return '<span class="badge-active">Active</span>';
-                let reasons = (row.lr||[]).join(', ');
-                let details = (row.ld||[]).join('\n');
-                return '<div class="tooltip-container"><span class="badge-legacy">Legacy</span>'
-                    + '<div class="tooltip-content"><b>'+reasons+'</b><br>'+details.replace(/\n/g,'<br>')+'</div></div>';
+                let detail = (row.ld||[]).join(' / ');
+                return '<span class="badge-legacy">Legacy</span>'
+                    + (detail ? '<div class="text-xs text-red-400 mt-0.5 opacity-80">'+detail+'</div>' : '');
             } }
         ],
         createdRow: function(row, data) {

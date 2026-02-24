@@ -159,27 +159,8 @@ KEYWORD_RULES = {
 }
 
 # ── 태그 규칙 (대시보드 표시용) ──────────────────────
-TAG_RULES = {
-    'AI/로봇':      ['AI', 'ARTIFICIAL INTELLIGENCE', 'ROBOT', 'BOT', 'AUTONOMOUS', 'MACHINE LEARNING'],
-    '메타버스':      ['METAVERSE', 'VIRTUAL REALITY', 'AUGMENTED REALITY'],
-    '반도체':        ['SEMICONDUCTOR', 'CHIP'],
-    '중소형주':      ['SMALL CAP', 'SMALL-CAP', 'MID CAP', 'MID-CAP', 'MICRO CAP', 'RUSSELL 2000'],
-    '배당':          ['DIVIDEND', 'YIELD', 'INCOME'],
-    '성장주':        ['GROWTH'],
-    '가치주':        ['VALUE'],
-    '테크/IT':       ['TECHNOLOGY', 'TECH', 'SOFTWARE', 'CLOUD', 'CYBERSECURITY', 'INTERNET', 'INNOVATION'],
-    '헬스케어':      ['HEALTHCARE', 'BIOTECH', 'MEDICAL', 'GENOMIC', 'PHARMA'],
-    '금융':          ['FINANCIAL', 'BANK', 'FINANCE', 'INSURANCE'],
-    '에너지':        ['ENERGY', 'OIL', 'GAS', 'PIPELINE', 'MLP', 'CLEAN ENERGY', 'SOLAR', 'WIND'],
-    '부동산':        ['REAL ESTATE', 'REIT'],
-    'ESG':           ['ESG', 'CLEAN', 'CLIMATE', 'SUSTAINABLE', 'GREEN', 'CARBON'],
-    '퀄리티':        ['QUALITY', 'MOAT'],
-    '모멘텀':        ['MOMENTUM'],
-    '저변동성':      ['LOW VOL', 'MINIMUM VOL', 'MIN VOL'],
-    '우주항공':      ['AEROSPACE', 'DEFENSE', 'SPACE'],
-    '인프라':        ['INFRASTRUCTURE'],
-    '원자재':        ['COMMODITY', 'COMMODITIES', 'NATURAL RESOURCE', 'AGRICULTURE', 'TIMBER', 'WATER'],
-}
+# 태그 기능 비활성화
+TAG_RULES = {}
 
 # ── 레거시 임계값 ────────────────────────────────────
 LEGACY_MIN_AUM = 100_000_000           # $100M
