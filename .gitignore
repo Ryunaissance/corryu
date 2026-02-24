@@ -1,0 +1,16 @@
+# 대용량 데이터 (GitHub 제외)
+*.pkl
+*.pickle
+correlation_matrix.csv
+correlation_matrix_monthly.csv
+data_processed/
+data_scraped/
+archive/
+
+# 시스템
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+.vercel/
+.claude/
