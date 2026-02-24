@@ -181,7 +181,7 @@ table.dataTable thead th.text-left, table.dataTable tbody td.text-left {{ text-a
             <!-- Filters -->
             <div class="flex flex-wrap items-center gap-3 text-sm">
                 <label class="flex items-center gap-1.5 text-gray-400 cursor-pointer">
-                    <input type="checkbox" id="filterLegacy" class="filter-check" checked>
+                    <input type="checkbox" id="filterLegacy" class="filter-check">
                     <span>Legacy 숨기기</span>
                 </label>
                 <label class="flex items-center gap-1.5 text-gray-400 cursor-pointer">
@@ -239,7 +239,7 @@ const myPortfolio = {json_my_portfolio};
 let state = {{
     activeAC: 'ALL',
     activeSector: 'S01',
-    hideLegacy: true,
+    hideLegacy: false,
     hideShort: false,
     minAum: 0,
     minSortino: -999
