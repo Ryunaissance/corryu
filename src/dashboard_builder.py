@@ -57,7 +57,7 @@ def build_all_etf_data(sector_members, classification, legacy_results,
 
 
 def generate_html(sector_meta, all_etf_data):
-    """HTML 대시보드 생성"""
+    """HTML 대시보드 생성 (데이터는 etf_data.json으로 분리)"""
     today = datetime.now().strftime('%Y-%m-%d')
     total_etfs = sum(m['count'] for m in sector_meta.values())
     total_sectors = len([s for s in sector_meta.values() if s['count'] > 0])
@@ -70,8 +70,7 @@ def generate_html(sector_meta, all_etf_data):
             ac_sectors[ac] = []
         ac_sectors[ac].append(sid)
 
-    json_meta = json.dumps(sector_meta, ensure_ascii=False)
-    json_data = json.dumps(all_etf_data, ensure_ascii=False)
+    # sectorMeta + allData는 etf_data.json에 저장 (HTML에 미임베드)
     json_ac_sectors = json.dumps(ac_sectors, ensure_ascii=False)
     json_ac_defs = json.dumps({k: v for k, v in ASSET_CLASSES.items()}, ensure_ascii=False)
     json_sector_defs = json.dumps({k: {'name': v['name'], 'name_en': v['name_en'],
@@ -181,7 +180,7 @@ table.dataTable thead th.text-left, table.dataTable tbody td.text-left {{ text-a
             <!-- Filters -->
             <div class="flex flex-wrap items-center gap-3 text-sm">
                 <label class="flex items-center gap-1.5 text-gray-400 cursor-pointer">
-                    <input type="checkbox" id="filterLegacy" class="filter-check" checked>
+                    <input type="checkbox" id="filterLegacy" class="filter-check">
                     <span>Legacy 숨기기</span>
                 </label>
                 <label class="flex items-center gap-1.5 text-gray-400 cursor-pointer">
@@ -229,8 +228,9 @@ table.dataTable thead th.text-left, table.dataTable tbody td.text-left {{ text-a
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
-const sectorMeta = {json_meta};
-const allData = {json_data};
+// sectorMeta, allData는 etf_data.json에서 fetch로 로드됩니다
+let sectorMeta = {{}};
+let allData = {{}};
 const acSectors = {json_ac_sectors};
 const acDefs = {json_ac_defs};
 const sectorDefs = {json_sector_defs};
@@ -239,7 +239,7 @@ const myPortfolio = {json_my_portfolio};
 let state = {{
     activeAC: 'ALL',
     activeSector: 'S01',
-    hideLegacy: true,
+    hideLegacy: false,
     hideShort: false,
     minAum: 0,
     minSortino: -999
@@ -307,7 +307,7 @@ function loadSector(sectorId) {{
     table.clear().rows.add(data).draw();
 }}
 
-$(document).ready(function() {{
+function initDashboard() {{
     renderACTabs();
     renderSectorTabs();
     renderSummary();
@@ -438,6 +438,16 @@ $(document).ready(function() {{
         state.minSortino = isNaN(v) ? -999 : v;
         table.draw();
     }});
+}}
+
+$(document).ready(function() {{
+    fetch('etf_data.json')
+        .then(function(r) {{ return r.json(); }})
+        .then(function(d) {{
+            sectorMeta = d.sectorMeta;
+            allData = d.allData;
+            initDashboard();
+        }});
 }});
 </script>
 </body>
@@ -483,11 +493,18 @@ def main():
     # 6. 섹터 메타 생성
     sector_meta = build_sector_meta(sector_members, all_etf_data)
 
-    # 7. HTML 생성
+    # 7. etf_data.json 저장 (HTML과 분리된 데이터 파일)
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    etf_data_path = os.path.join(OUTPUT_DIR, 'etf_data.json')
+    with open(etf_data_path, 'w', encoding='utf-8') as f:
+        json.dump({'sectorMeta': sector_meta, 'allData': all_etf_data},
+                  f, ensure_ascii=False, separators=(',', ':'))
+    print(f"ETF 데이터 JSON 저장: {etf_data_path}")
+
+    # 8. HTML 생성 (UI 셸만 포함, 데이터는 etf_data.json에서 fetch)
     print("HTML 대시보드 생성 중...")
     html = generate_html(sector_meta, all_etf_data)
 
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
     out_path = os.path.join(OUTPUT_DIR, 'master_dashboard.html')
     with open(out_path, 'w', encoding='utf-8') as f:
         f.write(html)
@@ -499,7 +516,7 @@ def main():
     print(f"  Legacy: {sum(m['legacy'] for m in sector_meta.values()):,}개")
     print(f"{'='*50}")
 
-    # 8. classification.json 저장
+    # 9. classification.json 저장
     cls_path = os.path.join(OUTPUT_DIR, 'classification.json')
     cls_export = {}
     for ticker, info in classification.items():

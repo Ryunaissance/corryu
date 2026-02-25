@@ -148,6 +148,8 @@ KEYWORD_RULES = {
                            'ICF', 'MORT', 'REM'],
     },
     # 금/귀금속 (S18)
+    # exclude_if: 'goldman' → "Goldman Sachs" ETF명 오매칭 방지
+    #             'golden dragon' → Invesco Golden Dragon China(PGJ) 오매칭 방지
     'S18': {
         'keywords': ['gold', 'silver', 'precious metal', 'platinum', 'palladium',
                      'gold miner', 'silver miner', 'mining'],
@@ -155,6 +157,7 @@ KEYWORD_RULES = {
                            'GLDM', 'SGOL', 'PHYS', 'PSLV', 'RING', 'GOAU',
                            'AAAU', 'BAR', 'OUNZ', 'GLTR', 'PPLT', 'PALL',
                            'SIVR', 'SLVP', 'GDLM'],
+        'exclude_if': ['goldman', 'golden dragon'],
     },
 }
 
