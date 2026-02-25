@@ -1263,8 +1263,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7966,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "BND": {
     "sector_id": "S14",
@@ -4529,8 +4530,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9885,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "FIGB": {
     "sector_id": "S14",
@@ -5306,8 +5308,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8799,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "FXI": {
     "sector_id": "S12",
@@ -7364,8 +7367,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8034,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "IHI": {
     "sector_id": "S03",
@@ -8050,8 +8054,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9556,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "IXN": {
     "sector_id": "S02",
@@ -8113,8 +8118,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9068,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "IYJ": {
     "sector_id": "S07",
@@ -8245,8 +8251,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.927,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "JEPI": {
     "sector_id": "S01",
@@ -9098,8 +9105,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.794,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "METV": {
     "sector_id": "S23",
@@ -10519,8 +10527,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7626,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "PTLC": {
     "sector_id": "S01",
@@ -11231,8 +11240,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9395,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "RSPN": {
     "sector_id": "S07",
@@ -13880,8 +13890,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9884,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "VICE": {
     "sector_id": "S13",
