@@ -201,7 +201,7 @@ const myPortfolio = {json_my_portfolio};
 
 let state = {{
     activeAC: 'ALL',
-    activeSector: 'S01',
+    activeSector: 'ALL',
     hideLegacy: false,
     hideShort: false,
     minAum: 0,
@@ -235,7 +235,10 @@ function renderSectorTabs() {{
     }} else {{
         sectors = (acSectors[state.activeAC] || []).sort();
     }}
-    let html = '';
+    let allActive = state.activeSector === 'ALL' ? ' active' : '';
+    let totalCount = sectors.reduce((s, sid) => s + ((sectorMeta[sid]||{{}}).count||0), 0);
+    let totalActive = sectors.reduce((s, sid) => s + ((sectorMeta[sid]||{{}}).active||0), 0);
+    let html = '<button class="sec-tab' + allActive + '" data-sector="ALL">전체<span class="sec-count">' + totalActive + '/' + totalCount + '</span></button>';
     for (let sid of sectors) {{
         let sd = sectorDefs[sid];
         let meta = sectorMeta[sid];
@@ -249,16 +252,26 @@ function renderSectorTabs() {{
 }}
 
 function renderSummary() {{
-    let meta = sectorMeta[state.activeSector] || {{}};
-    let sd = sectorDefs[state.activeSector] || {{}};
     let html = '';
-    html += '<div class="stat-card"><div class="stat-value text-white">' + (meta.count||0) + '</div><div class="stat-label">ETFs</div></div>';
-    html += '<div class="stat-card"><div class="stat-value text-green-400">' + (meta.active||0) + '</div><div class="stat-label">Active</div></div>';
-    html += '<div class="stat-card"><div class="stat-value text-red-400">' + (meta.legacy||0) + '</div><div class="stat-label">Legacy</div></div>';
-    html += '<div class="stat-card"><div class="stat-value text-blue-300">' + (meta.avg_cagr > 0 ? '+' : '') + (meta.avg_cagr||0).toFixed(1) + '%</div><div class="stat-label">Avg CAGR</div></div>';
-    html += '<div class="stat-card"><div class="stat-value text-gray-300">' + (meta.avg_vol||0).toFixed(1) + '%</div><div class="stat-label">Avg Vol</div></div>';
-    html += '<div class="stat-card"><div class="stat-value text-purple-400">' + (meta.avg_sortino||0).toFixed(2) + '</div><div class="stat-label">Avg Sortino</div></div>';
-    html += '<div class="stat-card" style="min-width:120px"><div class="stat-value text-yellow-300 text-sm">' + (sd.anchor||'—') + '</div><div class="stat-label">Anchor</div></div>';
+    if (state.activeSector === 'ALL') {{
+        let metas = Object.values(sectorMeta);
+        let totalCount  = metas.reduce((s,m) => s+(m.count||0), 0);
+        let totalActive = metas.reduce((s,m) => s+(m.active||0), 0);
+        let totalLegacy = metas.reduce((s,m) => s+(m.legacy||0), 0);
+        html += '<div class="stat-card"><div class="stat-value text-white">' + totalCount + '</div><div class="stat-label">ETFs</div></div>';
+        html += '<div class="stat-card"><div class="stat-value text-green-400">' + totalActive + '</div><div class="stat-label">Active</div></div>';
+        html += '<div class="stat-card"><div class="stat-value text-red-400">' + totalLegacy + '</div><div class="stat-label">Legacy</div></div>';
+    }} else {{
+        let meta = sectorMeta[state.activeSector] || {{}};
+        let sd = sectorDefs[state.activeSector] || {{}};
+        html += '<div class="stat-card"><div class="stat-value text-white">' + (meta.count||0) + '</div><div class="stat-label">ETFs</div></div>';
+        html += '<div class="stat-card"><div class="stat-value text-green-400">' + (meta.active||0) + '</div><div class="stat-label">Active</div></div>';
+        html += '<div class="stat-card"><div class="stat-value text-red-400">' + (meta.legacy||0) + '</div><div class="stat-label">Legacy</div></div>';
+        html += '<div class="stat-card"><div class="stat-value text-blue-300">' + (meta.avg_cagr > 0 ? '+' : '') + (meta.avg_cagr||0).toFixed(1) + '%</div><div class="stat-label">Avg CAGR</div></div>';
+        html += '<div class="stat-card"><div class="stat-value text-gray-300">' + (meta.avg_vol||0).toFixed(1) + '%</div><div class="stat-label">Avg Vol</div></div>';
+        html += '<div class="stat-card"><div class="stat-value text-purple-400">' + (meta.avg_sortino||0).toFixed(2) + '</div><div class="stat-label">Avg Sortino</div></div>';
+        html += '<div class="stat-card" style="min-width:120px"><div class="stat-value text-yellow-300 text-sm">' + (sd.anchor||'—') + '</div><div class="stat-label">Anchor</div></div>';
+    }}
     $('#summaryCards').html(html);
 }}
 
@@ -266,7 +279,9 @@ function loadSector(sectorId) {{
     state.activeSector = sectorId;
     renderSectorTabs();
     renderSummary();
-    let data = allData[sectorId] || [];
+    let data = sectorId === 'ALL'
+        ? Object.values(allData).flat()
+        : (allData[sectorId] || []);
     table.clear().rows.add(data).draw();
 }}
 
@@ -276,7 +291,7 @@ function initDashboard() {{
     renderSummary();
 
     table = $('#masterTable').DataTable({{
-        data: allData[state.activeSector] || [],
+        data: Object.values(allData).flat(),
         pageLength: 50,
         deferRender: true,
         lengthMenu: [[25, 50, 100, 200, -1], [25, 50, 100, 200, "All"]],
@@ -379,12 +394,14 @@ function initDashboard() {{
     $(document).on('click', '.ac-tab', function() {{
         state.activeAC = $(this).data('ac');
         renderACTabs();
-        let sectors = state.activeAC === 'ALL'
-            ? Object.keys(sectorDefs).sort()
-            : (acSectors[state.activeAC] || []).sort();
-        let firstWithData = sectors.find(s => sectorMeta[s] && sectorMeta[s].count > 0);
-        if (firstWithData) loadSector(firstWithData);
-        else renderSectorTabs();
+        if (state.activeAC === 'ALL') {{
+            loadSector('ALL');
+        }} else {{
+            let sectors = (acSectors[state.activeAC] || []).sort();
+            let firstWithData = sectors.find(s => sectorMeta[s] && sectorMeta[s].count > 0);
+            if (firstWithData) loadSector(firstWithData);
+            else renderSectorTabs();
+        }}
     }});
 
     // Event: Sector tab click
