@@ -144,8 +144,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9232,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "AGMI": {
     "sector_id": "S18",
@@ -238,8 +239,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9096,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "AIVI": {
     "sector_id": "S11",
@@ -750,8 +752,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9341,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "BALI": {
     "sector_id": "S01",
@@ -1263,8 +1266,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7966,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "BND": {
     "sector_id": "S14",
@@ -1900,8 +1904,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9206,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "CHAU": {
     "sector_id": "S23",
@@ -1927,8 +1932,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8854,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "CHPY": {
     "sector_id": "S02",
@@ -1936,8 +1942,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9159,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "CIBR": {
     "sector_id": "S23",
@@ -2118,8 +2125,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6609,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "CSHP": {
     "sector_id": "S15",
@@ -4529,8 +4537,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9885,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "FIGB": {
     "sector_id": "S14",
@@ -4925,8 +4934,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8547,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "FMHI": {
     "sector_id": "S14",
@@ -5306,8 +5316,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8799,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "FXI": {
     "sector_id": "S12",
@@ -5760,8 +5771,9 @@
     "asset_class": "REAL_ASSETS",
     "method": "keyword_fixed",
     "r_anchor": 0.1052,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "GPIX": {
     "sector_id": "S01",
@@ -5778,8 +5790,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9307,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "GRID": {
     "sector_id": "S01",
@@ -5931,8 +5944,9 @@
     "asset_class": "REAL_ASSETS",
     "method": "keyword_fixed",
     "r_anchor": 0.2288,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "GTIP": {
     "sector_id": "S17",
@@ -7364,8 +7378,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8034,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "IHI": {
     "sector_id": "S03",
@@ -8050,8 +8065,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9556,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "IXN": {
     "sector_id": "S02",
@@ -8113,8 +8129,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9068,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "IYJ": {
     "sector_id": "S07",
@@ -8245,8 +8262,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.927,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "JEPI": {
     "sector_id": "S01",
@@ -9098,8 +9116,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.794,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "METV": {
     "sector_id": "S23",
@@ -9833,8 +9852,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7739,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "NWLG": {
     "sector_id": "S23",
@@ -10519,8 +10539,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7626,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "PTLC": {
     "sector_id": "S01",
@@ -11231,8 +11252,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9395,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "RSPN": {
     "sector_id": "S07",
@@ -12212,8 +12234,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9385,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "SOYB": {
     "sector_id": "S24",
@@ -12821,8 +12844,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7887,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "TCHI": {
     "sector_id": "S12",
@@ -13880,8 +13904,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9884,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "XLV와 상관계수 매우 높음"
   },
   "VICE": {
     "sector_id": "S13",
@@ -14382,8 +14407,9 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8361,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "WBAT": {
     "sector_id": "S11",
