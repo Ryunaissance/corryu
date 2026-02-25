@@ -248,8 +248,8 @@ function getNodeColor(node) {
 }
 
 function getNodeVal(node) {
-  // log 스케일 AUM → 노드 크기
-  return Math.max(1, Math.log10(node.a * 10 + 1) * 4);
+  // log² 스케일: 10배 AUM마다 radius +4px ($100M≈8, $1B≈12, $10B≈16, $100B≈20)
+  return Math.max(1, Math.pow(Math.log10(node.a * 1000 + 1), 2));
 }
 
 function getLinkColor(link) {
