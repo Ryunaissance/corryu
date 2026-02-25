@@ -6,8 +6,8 @@ import re
 from collections import defaultdict
 
 from config import (
-    SECTOR_DEFS, KEYWORD_RULES, CORR_THRESHOLD, PROTECT_EQUITIES,
-    SHORT_TERM_BOND_WORDS, ANCHOR_TO_SECTOR,
+    SECTOR_DEFS, SUPER_SECTOR_DEFS, KEYWORD_RULES, CORR_THRESHOLD,
+    PROTECT_EQUITIES, SHORT_TERM_BOND_WORDS, ANCHOR_TO_SECTOR,
 )
 from data_loader import get_fullname, get_corr_value
 
@@ -178,3 +178,26 @@ def fill_anchor_correlations(classification, sector_members, df_corr_monthly, df
             if classification[ticker]['r_anchor'] == 0.0 or classification[ticker]['method'] == 'keyword':
                 r = get_corr_value(anchor, ticker, df_corr_monthly, df_corr_daily)
                 classification[ticker]['r_anchor'] = round(r, 4)
+
+
+def fill_super_anchor_correlations(classification, df_corr_monthly, df_corr_daily):
+    """슈퍼섹터 소속 ETF의 r_anchor를 슈퍼섹터 앵커(QQQ)로 전면 재계산.
+
+    분류 방법(키워드/상관계수)에 관계없이 모든 해당 섹터 ETF에 적용.
+    """
+    # 섹터ID → 슈퍼섹터 앵커 매핑
+    sector_to_ss_anchor = {}
+    for ss_def in SUPER_SECTOR_DEFS.values():
+        for sid in ss_def['sub_sectors']:
+            sector_to_ss_anchor[sid] = ss_def['anchor']
+
+    updated = 0
+    for ticker, info in classification.items():
+        sid = info['sector']
+        if sid in sector_to_ss_anchor:
+            anchor = sector_to_ss_anchor[sid]
+            r = get_corr_value(anchor, ticker, df_corr_monthly, df_corr_daily)
+            classification[ticker]['r_anchor'] = round(r, 4)
+            updated += 1
+
+    print(f"  슈퍼섹터 앵커 재계산 완료: {updated}개 ETF (앵커: QQQ)")

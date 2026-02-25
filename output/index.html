@@ -24,6 +24,14 @@ body { background-color: var(--bg-primary); color: var(--text-primary); font-fam
 .sec-tab:hover { color: var(--text-primary); border-color: rgba(255,255,255,0.15); }
 .sec-tab.active { background: rgba(59,130,246,0.15); color: #93c5fd; border-color: rgba(59,130,246,0.4); }
 .sec-tab .sec-count { font-size: 0.7rem; opacity: 0.6; margin-left: 4px; }
+/* Super-sector tab */
+.super-sec-tab { background: rgba(59,130,246,0.07); border-color: rgba(59,130,246,0.2); color: #93c5fd; }
+.super-sec-tab:hover { background: rgba(59,130,246,0.15); border-color: rgba(59,130,246,0.4); }
+.super-sec-tab.active { background: rgba(59,130,246,0.22); color: #fff; border-color: rgba(59,130,246,0.6); box-shadow: 0 0 12px rgba(59,130,246,0.2); }
+/* Sub-sector tabs row */
+#subSecTabs { display:none; padding: 6px 0 2px 0; border-top: 1px solid rgba(59,130,246,0.15); margin-top: 4px; }
+.sub-sec-tab { font-size: 0.77rem; padding: 4px 11px; }
+.expand-arrow { font-size: 0.65rem; margin-left: 4px; opacity: 0.7; }
 
 /* Summary Cards */
 .stat-card { display: flex; flex-direction: column; align-items: center; padding: 12px 8px; background: rgba(10,13,20,0.5); border-radius: 10px; border: 1px solid var(--border); min-width: 90px; }
@@ -86,9 +94,10 @@ table.dataTable thead th.text-left, table.dataTable tbody td.text-left { text-al
         </div>
     </div>
 
-    <!-- Sector Tabs (Level 2) -->
+    <!-- Sector Tabs (Level 2) + Sub-sector Tabs (Level 3) -->
     <div class="glass p-4 mb-4">
         <div class="flex flex-wrap" id="secTabs"></div>
+        <div class="flex flex-wrap" id="subSecTabs"></div>
     </div>
 
     <!-- Sector Summary + Filters -->
@@ -153,12 +162,20 @@ let sectorMeta = {};
 let allData = {};
 const acSectors = {"EQUITY": ["S01", "S02", "S03", "S04", "S05", "S06", "S07", "S08", "S09", "S10", "S11", "S12", "S13"], "FIXED_INCOME": ["S14", "S15", "S16", "S17"], "REAL_ASSETS": ["S18", "S19", "S20"], "ALTERNATIVE": ["S21", "S22"], "THEMATIC": ["S24"]};
 const acDefs = {"EQUITY": {"name": "주식", "name_en": "Equity", "icon": "📈", "order": 1}, "FIXED_INCOME": {"name": "채권", "name_en": "Fixed Income", "icon": "🛡️", "order": 2}, "REAL_ASSETS": {"name": "실물자산", "name_en": "Real Assets", "icon": "🏗️", "order": 3}, "ALTERNATIVE": {"name": "대안", "name_en": "Alternatives", "icon": "⚡", "order": 4}, "THEMATIC": {"name": "테마", "name_en": "Thematic", "icon": "🧩", "order": 5}};
-const sectorDefs = {"S01": {"name": "US 대형주 종합", "name_en": "US Large Cap", "icon": "🇺🇸", "anchor": "VOO", "asset_class": "EQUITY"}, "S02": {"name": "테크놀로지", "name_en": "Technology", "icon": "💻", "anchor": "XLK", "asset_class": "EQUITY"}, "S03": {"name": "헬스케어", "name_en": "Healthcare", "icon": "🏥", "anchor": "XLV", "asset_class": "EQUITY"}, "S04": {"name": "금융", "name_en": "Financials", "icon": "🏦", "anchor": "XLF", "asset_class": "EQUITY"}, "S05": {"name": "경기소비재", "name_en": "Consumer Discretionary", "icon": "🛍️", "anchor": "XLY", "asset_class": "EQUITY"}, "S06": {"name": "필수소비재", "name_en": "Consumer Staples", "icon": "🛒", "anchor": "XLP", "asset_class": "EQUITY"}, "S07": {"name": "산업재", "name_en": "Industrials", "icon": "🏭", "anchor": "XLI", "asset_class": "EQUITY"}, "S08": {"name": "유틸리티", "name_en": "Utilities", "icon": "⚡", "anchor": "XLU", "asset_class": "EQUITY"}, "S09": {"name": "커뮤니케이션", "name_en": "Communication", "icon": "📡", "anchor": "XLC", "asset_class": "EQUITY"}, "S10": {"name": "소재", "name_en": "Materials", "icon": "⛏️", "anchor": "XLB", "asset_class": "EQUITY"}, "S11": {"name": "국제선진국", "name_en": "Intl Developed", "icon": "🌍", "anchor": "VEA", "asset_class": "EQUITY"}, "S12": {"name": "신흥국", "name_en": "Emerging Markets", "icon": "🌏", "anchor": "VWO", "asset_class": "EQUITY"}, "S13": {"name": "중소형주", "name_en": "Small/Mid Cap", "icon": "📊", "anchor": "IWM", "asset_class": "EQUITY"}, "S14": {"name": "투자등급 채권", "name_en": "Investment Grade", "icon": "🏛️", "anchor": "BND", "asset_class": "FIXED_INCOME"}, "S15": {"name": "단기채/현금성", "name_en": "Short-Term/Cash", "icon": "💵", "anchor": "SHV", "asset_class": "FIXED_INCOME"}, "S16": {"name": "하이일드/신흥채", "name_en": "High Yield/EM Debt", "icon": "⚠️", "anchor": "HYG", "asset_class": "FIXED_INCOME"}, "S17": {"name": "TIPS/인플레이션", "name_en": "TIPS/Inflation", "icon": "📈", "anchor": "SCHP", "asset_class": "FIXED_INCOME"}, "S18": {"name": "금/귀금속", "name_en": "Gold/Precious Metals", "icon": "✨", "anchor": "GLD", "asset_class": "REAL_ASSETS"}, "S19": {"name": "에너지/원자재", "name_en": "Energy/Commodities", "icon": "🛢️", "anchor": "XLE", "asset_class": "REAL_ASSETS"}, "S20": {"name": "부동산/REITs", "name_en": "Real Estate/REITs", "icon": "🏘️", "anchor": "VNQ", "asset_class": "REAL_ASSETS"}, "S21": {"name": "가상자산", "name_en": "Crypto/Digital", "icon": "₿", "anchor": "GBTC", "asset_class": "ALTERNATIVE"}, "S22": {"name": "인버스/숏", "name_en": "Inverse/Short", "icon": "📉", "anchor": "SQQQ", "asset_class": "ALTERNATIVE"}, "S24": {"name": "테마/특수목적", "name_en": "Thematic/Specialty", "icon": "🧩", "anchor": "—", "asset_class": "THEMATIC"}};
+const sectorDefs = {"S01": {"name": "US 대형주 종합", "name_en": "US Large Cap", "icon": "🇺🇸", "anchor": "VOO", "asset_class": "EQUITY", "super_sector": "EQUITY_MARKET"}, "S02": {"name": "테크놀로지", "name_en": "Technology", "icon": "💻", "anchor": "XLK", "asset_class": "EQUITY", "super_sector": "EQUITY_MARKET"}, "S03": {"name": "헬스케어", "name_en": "Healthcare", "icon": "🏥", "anchor": "XLV", "asset_class": "EQUITY", "super_sector": null}, "S04": {"name": "금융", "name_en": "Financials", "icon": "🏦", "anchor": "XLF", "asset_class": "EQUITY", "super_sector": "EQUITY_MARKET"}, "S05": {"name": "경기소비재", "name_en": "Consumer Discretionary", "icon": "🛍️", "anchor": "XLY", "asset_class": "EQUITY", "super_sector": null}, "S06": {"name": "필수소비재", "name_en": "Consumer Staples", "icon": "🛒", "anchor": "XLP", "asset_class": "EQUITY", "super_sector": null}, "S07": {"name": "산업재", "name_en": "Industrials", "icon": "🏭", "anchor": "XLI", "asset_class": "EQUITY", "super_sector": "EQUITY_MARKET"}, "S08": {"name": "유틸리티", "name_en": "Utilities", "icon": "⚡", "anchor": "XLU", "asset_class": "EQUITY", "super_sector": null}, "S09": {"name": "커뮤니케이션", "name_en": "Communication", "icon": "📡", "anchor": "XLC", "asset_class": "EQUITY", "super_sector": "EQUITY_MARKET"}, "S10": {"name": "소재", "name_en": "Materials", "icon": "⛏️", "anchor": "XLB", "asset_class": "EQUITY", "super_sector": null}, "S11": {"name": "국제선진국", "name_en": "Intl Developed", "icon": "🌍", "anchor": "VEA", "asset_class": "EQUITY", "super_sector": "EQUITY_MARKET"}, "S12": {"name": "신흥국", "name_en": "Emerging Markets", "icon": "🌏", "anchor": "VWO", "asset_class": "EQUITY", "super_sector": null}, "S13": {"name": "중소형주", "name_en": "Small/Mid Cap", "icon": "📊", "anchor": "IWM", "asset_class": "EQUITY", "super_sector": "EQUITY_MARKET"}, "S14": {"name": "투자등급 채권", "name_en": "Investment Grade", "icon": "🏛️", "anchor": "BND", "asset_class": "FIXED_INCOME", "super_sector": null}, "S15": {"name": "단기채/현금성", "name_en": "Short-Term/Cash", "icon": "💵", "anchor": "SHV", "asset_class": "FIXED_INCOME", "super_sector": null}, "S16": {"name": "하이일드/신흥채", "name_en": "High Yield/EM Debt", "icon": "⚠️", "anchor": "HYG", "asset_class": "FIXED_INCOME", "super_sector": null}, "S17": {"name": "TIPS/인플레이션", "name_en": "TIPS/Inflation", "icon": "📈", "anchor": "SCHP", "asset_class": "FIXED_INCOME", "super_sector": null}, "S18": {"name": "금/귀금속", "name_en": "Gold/Precious Metals", "icon": "✨", "anchor": "GLD", "asset_class": "REAL_ASSETS", "super_sector": null}, "S19": {"name": "에너지/원자재", "name_en": "Energy/Commodities", "icon": "🛢️", "anchor": "XLE", "asset_class": "REAL_ASSETS", "super_sector": null}, "S20": {"name": "부동산/REITs", "name_en": "Real Estate/REITs", "icon": "🏘️", "anchor": "VNQ", "asset_class": "REAL_ASSETS", "super_sector": null}, "S21": {"name": "가상자산", "name_en": "Crypto/Digital", "icon": "₿", "anchor": "GBTC", "asset_class": "ALTERNATIVE", "super_sector": null}, "S22": {"name": "인버스/숏", "name_en": "Inverse/Short", "icon": "📉", "anchor": "SQQQ", "asset_class": "ALTERNATIVE", "super_sector": null}, "S24": {"name": "테마/특수목적", "name_en": "Thematic/Specialty", "icon": "🧩", "anchor": "—", "asset_class": "THEMATIC", "super_sector": null}};
+const superSectorDefs = {"EQUITY_MARKET": {"name": "주식 시장", "name_en": "Equity Market", "anchor": "QQQ", "icon": "🌐", "color": "#3b82f6", "sub_sectors": ["S01", "S02", "S04", "S07", "S09", "S11", "S13"]}};
 const myPortfolio = ["PEY", "HYG", "GBTC", "GLD", "VNQ", "UYR", "XLE"];
+
+// 섹터ID → 슈퍼섹터ID 역방향 맵
+const sectorToSuperSector = {};
+for (const [ssId, ss] of Object.entries(superSectorDefs)) {
+    for (const sid of ss.sub_sectors) sectorToSuperSector[sid] = ssId;
+}
 
 let state = {
     activeAC: 'ALL',
-    activeSector: 'ALL',
+    activeSector: 'ALL',       // 'ALL' | 섹터ID | 'SS_<ssId>' (슈퍼섹터 전체)
+    expandedSuperSector: null, // null | 슈퍼섹터ID (서브탭 표시 여부)
     hideLegacy: false,
     hideShort: false,
     minAum: 0,
@@ -185,6 +202,17 @@ function renderACTabs() {
     $('#acTabs').html(html);
 }
 
+function getSuperSectorMeta(ssId) {
+    let ss = superSectorDefs[ssId];
+    if (!ss) return {};
+    let metas = ss.sub_sectors.map(sid => sectorMeta[sid] || {});
+    return {
+        count:  metas.reduce((s,m) => s+(m.count||0), 0),
+        active: metas.reduce((s,m) => s+(m.active||0), 0),
+        legacy: metas.reduce((s,m) => s+(m.legacy||0), 0),
+    };
+}
+
 function renderSectorTabs() {
     let sectors = [];
     if (state.activeAC === 'ALL') {
@@ -193,24 +221,61 @@ function renderSectorTabs() {
         sectors = (acSectors[state.activeAC] || []).sort();
     }
     let allActive = state.activeSector === 'ALL' ? ' active' : '';
-    let totalCount = sectors.reduce((s, sid) => s + ((sectorMeta[sid]||{}).count||0), 0);
-    let totalActive = sectors.reduce((s, sid) => s + ((sectorMeta[sid]||{}).active||0), 0);
-    let html = '<button class="sec-tab' + allActive + '" data-sector="ALL">전체<span class="sec-count">' + totalActive + '/' + totalCount + '</span></button>';
+    let totalCount  = sectors.reduce((s, sid) => s + ((sectorMeta[sid]||{}).count||0), 0);
+    let totalActiveN = sectors.reduce((s, sid) => s + ((sectorMeta[sid]||{}).active||0), 0);
+    let html = '<button class="sec-tab' + allActive + '" data-sector="ALL">전체<span class="sec-count">' + totalActiveN + '/' + totalCount + '</span></button>';
+
+    let renderedSS = new Set();
     for (let sid of sectors) {
         let sd = sectorDefs[sid];
         let meta = sectorMeta[sid];
         if (!meta || meta.count === 0) continue;
+
+        let ssId = sd.super_sector;
+        if (ssId) {
+            if (renderedSS.has(ssId)) continue;  // 이미 슈퍼섹터 탭 추가됨
+            renderedSS.add(ssId);
+            let ss = superSectorDefs[ssId];
+            let ssMeta = getSuperSectorMeta(ssId);
+            let ssIsActive = state.expandedSuperSector === ssId;
+            let isActiveSS = (state.activeSector === 'SS_' + ssId) ? ' active' : '';
+            let arrow = ssIsActive ? ' ▾' : ' ▸';
+            html += '<button class="sec-tab super-sec-tab' + isActiveSS + '" data-supersec="' + ssId + '">';
+            html += ss.icon + ' ' + ss.name;
+            html += '<span class="sec-count">' + ssMeta.active + '/' + ssMeta.count + '</span>';
+            html += '<span class="expand-arrow">' + arrow + '</span></button>';
+        } else {
+            let isActive = state.activeSector === sid ? ' active' : '';
+            html += '<button class="sec-tab' + isActive + '" data-sector="' + sid + '">';
+            html += sd.icon + ' ' + sd.name;
+            html += '<span class="sec-count">' + (meta.active||0) + '/' + meta.count + '</span></button>';
+        }
+    }
+    $('#secTabs').html(html);
+    renderSubSecTabs();
+}
+
+function renderSubSecTabs() {
+    let ssId = state.expandedSuperSector;
+    if (!ssId) { $('#subSecTabs').hide(); return; }
+    let ss = superSectorDefs[ssId];
+    let html = '';
+    for (let sid of ss.sub_sectors) {
+        let sd = sectorDefs[sid];
+        let meta = sectorMeta[sid];
+        if (!meta || meta.count === 0) continue;
         let isActive = state.activeSector === sid ? ' active' : '';
-        html += '<button class="sec-tab' + isActive + '" data-sector="' + sid + '">';
+        html += '<button class="sec-tab sub-sec-tab' + isActive + '" data-sector="' + sid + '">';
         html += sd.icon + ' ' + sd.name;
         html += '<span class="sec-count">' + (meta.active||0) + '/' + meta.count + '</span></button>';
     }
-    $('#secTabs').html(html);
+    $('#subSecTabs').html(html).show();
 }
 
 function renderSummary() {
     let html = '';
-    if (state.activeSector === 'ALL') {
+    let sec = state.activeSector;
+    if (sec === 'ALL') {
         let metas = Object.values(sectorMeta);
         let totalCount  = metas.reduce((s,m) => s+(m.count||0), 0);
         let totalActive = metas.reduce((s,m) => s+(m.active||0), 0);
@@ -218,9 +283,17 @@ function renderSummary() {
         html += '<div class="stat-card"><div class="stat-value text-white">' + totalCount + '</div><div class="stat-label">ETFs</div></div>';
         html += '<div class="stat-card"><div class="stat-value text-green-400">' + totalActive + '</div><div class="stat-label">Active</div></div>';
         html += '<div class="stat-card"><div class="stat-value text-red-400">' + totalLegacy + '</div><div class="stat-label">Legacy</div></div>';
+    } else if (sec && sec.startsWith('SS_')) {
+        let ssId = sec.slice(3);
+        let ssMeta = getSuperSectorMeta(ssId);
+        let ss = superSectorDefs[ssId] || {};
+        html += '<div class="stat-card"><div class="stat-value text-white">' + ssMeta.count + '</div><div class="stat-label">ETFs</div></div>';
+        html += '<div class="stat-card"><div class="stat-value text-green-400">' + ssMeta.active + '</div><div class="stat-label">Active</div></div>';
+        html += '<div class="stat-card"><div class="stat-value text-red-400">' + ssMeta.legacy + '</div><div class="stat-label">Legacy</div></div>';
+        html += '<div class="stat-card" style="min-width:120px"><div class="stat-value text-yellow-300 text-sm">' + (ss.anchor||'—') + '</div><div class="stat-label">Anchor</div></div>';
     } else {
-        let meta = sectorMeta[state.activeSector] || {};
-        let sd = sectorDefs[state.activeSector] || {};
+        let meta = sectorMeta[sec] || {};
+        let sd = sectorDefs[sec] || {};
         html += '<div class="stat-card"><div class="stat-value text-white">' + (meta.count||0) + '</div><div class="stat-label">ETFs</div></div>';
         html += '<div class="stat-card"><div class="stat-value text-green-400">' + (meta.active||0) + '</div><div class="stat-label">Active</div></div>';
         html += '<div class="stat-card"><div class="stat-value text-red-400">' + (meta.legacy||0) + '</div><div class="stat-label">Legacy</div></div>';
@@ -234,11 +307,37 @@ function renderSummary() {
 
 function loadSector(sectorId) {
     state.activeSector = sectorId;
+    // 슈퍼섹터 소속 섹터를 직접 클릭하면 해당 슈퍼섹터를 자동 확장
+    if (sectorId && !sectorId.startsWith('SS_') && sectorId !== 'ALL') {
+        let sd = sectorDefs[sectorId];
+        if (sd && sd.super_sector) {
+            state.expandedSuperSector = sd.super_sector;
+        } else {
+            state.expandedSuperSector = null;
+        }
+    }
     renderSectorTabs();
     renderSummary();
-    let data = sectorId === 'ALL'
-        ? Object.values(allData).flat()
-        : (allData[sectorId] || []);
+    let data;
+    if (sectorId === 'ALL') {
+        data = Object.values(allData).flat();
+    } else if (sectorId && sectorId.startsWith('SS_')) {
+        let ssId = sectorId.slice(3);
+        let ss = superSectorDefs[ssId];
+        data = ss ? ss.sub_sectors.flatMap(sid => allData[sid] || []) : [];
+    } else {
+        data = allData[sectorId] || [];
+    }
+    table.clear().rows.add(data).draw();
+}
+
+function loadSuperSector(ssId) {
+    state.activeSector = 'SS_' + ssId;
+    state.expandedSuperSector = ssId;
+    renderSectorTabs();
+    renderSummary();
+    let ss = superSectorDefs[ssId];
+    let data = ss ? ss.sub_sectors.flatMap(sid => allData[sid] || []) : [];
     table.clear().rows.add(data).draw();
 }
 
@@ -350,6 +449,7 @@ function initDashboard() {
     // Event: Asset Class tab click
     $(document).on('click', '.ac-tab', function() {
         state.activeAC = $(this).data('ac');
+        state.expandedSuperSector = null;
         renderACTabs();
         if (state.activeAC === 'ALL') {
             loadSector('ALL');
@@ -361,8 +461,20 @@ function initDashboard() {
         }
     });
 
-    // Event: Sector tab click
-    $(document).on('click', '.sec-tab', function() {
+    // Event: Super-sector tab click (슈퍼섹터 탭 → 서브탭 토글)
+    $(document).on('click', '.super-sec-tab', function() {
+        let ssId = $(this).data('supersec');
+        if (state.expandedSuperSector === ssId) {
+            // 이미 열려 있으면 닫고 전체 보기
+            state.expandedSuperSector = null;
+            loadSector('ALL');
+        } else {
+            loadSuperSector(ssId);
+        }
+    });
+
+    // Event: Sector tab click (서브섹터 탭 포함)
+    $(document).on('click', '.sec-tab:not(.super-sec-tab)', function() {
         loadSector($(this).data('sector'));
     });
 
