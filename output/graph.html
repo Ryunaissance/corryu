@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ETF 상관관계 그래프</title>
+  <script src="https://unpkg.com/force-graph@1.43.5/dist/force-graph.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0d1117;
+      color: #e6edf3;
+      font-family: 'SF Mono', 'Consolas', 'Menlo', monospace;
+      overflow: hidden;
+    }
+    #graph-container { width: 100vw; height: 100vh; }
+
+    /* ── 컨트롤 패널 ── */
+    #controls {
+      position: fixed; top: 14px; left: 14px; z-index: 100;
+      background: rgba(13,17,23,0.90);
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 14px 16px;
+      min-width: 240px;
+      backdrop-filter: blur(10px);
+    }
+    #controls h1 {
+      font-size: 13px; font-weight: 700;
+      color: #60a5fa; margin-bottom: 12px; letter-spacing: 0.3px;
+    }
+    .ctrl-row { margin-bottom: 10px; }
+    .ctrl-label {
+      font-size: 11px; color: #8b949e;
+      display: flex; justify-content: space-between; margin-bottom: 4px;
+    }
+    .ctrl-label span { color: #e6edf3; font-weight: 600; }
+    input[type=range] { width: 100%; accent-color: #60a5fa; cursor: pointer; }
+    #search {
+      width: 100%;
+      background: #161b22; border: 1px solid #30363d;
+      color: #e6edf3; font-family: inherit; font-size: 12px;
+      padding: 5px 8px; border-radius: 6px; outline: none;
+      transition: border-color 0.2s;
+    }
+    #search:focus { border-color: #60a5fa; }
+    #search::placeholder { color: #484f58; }
+    #stats {
+      font-size: 11px; color: #8b949e;
+      margin-top: 10px; border-top: 1px solid #21262d; padding-top: 8px;
+      line-height: 1.7;
+    }
+    #stats b { color: #e6edf3; }
+    #progress-bar {
+      width: 100%; height: 2px; background: #21262d;
+      border-radius: 2px; margin-top: 6px; overflow: hidden;
+    }
+    #progress-fill {
+      height: 100%; background: #60a5fa; width: 0%;
+      transition: width 0.3s ease;
+    }
+    .sim-running { color: #fbbf24 !important; }
+
+    /* ── 레전드 ── */
+    #legend {
+      position: fixed; top: 14px; right: 14px; z-index: 100;
+      background: rgba(13,17,23,0.90);
+      border: 1px solid #30363d;
+      border-radius: 10px; padding: 12px 14px;
+      max-height: calc(100vh - 28px); overflow-y: auto;
+      backdrop-filter: blur(10px); min-width: 185px;
+    }
+    #legend::-webkit-scrollbar { width: 4px; }
+    #legend::-webkit-scrollbar-track { background: transparent; }
+    #legend::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+    #legend h2 {
+      font-size: 10px; color: #8b949e; margin-bottom: 8px;
+      letter-spacing: 0.8px; text-transform: uppercase;
+    }
+    .legend-ac {
+      font-size: 10px; color: #484f58; margin: 7px 0 3px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 7px;
+      padding: 3px 4px; border-radius: 4px; cursor: pointer;
+      transition: background 0.12s;
+    }
+    .legend-item:hover { background: #161b22; }
+    .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .legend-text { font-size: 11px; color: #c9d1d9; }
+
+    /* ── 툴팁 ── */
+    #tooltip {
+      position: fixed; display: none; z-index: 200;
+      background: rgba(13,17,23,0.96);
+      border: 1px solid #30363d;
+      border-radius: 8px; padding: 10px 13px;
+      font-size: 12px; pointer-events: none; max-width: 270px;
+    }
+    .tt-ticker { font-weight: 700; font-size: 14px; }
+    .tt-name   { color: #8b949e; margin-top: 3px; line-height: 1.4; font-size: 11px; }
+    .tt-divider{ border-top: 1px solid #21262d; margin: 7px 0 5px; }
+    .tt-row    { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 2px; }
+    .tt-key    { color: #8b949e; font-size: 11px; }
+    .tt-val    { color: #e6edf3; font-size: 11px; font-weight: 600; }
+    .tt-hint   { font-size: 10px; color: #484f58; margin-top: 6px; }
+
+    /* ── 하단 힌트 ── */
+    #hint {
+      position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+      z-index: 100; font-size: 10px; color: #484f58; pointer-events: none;
+      white-space: nowrap;
+    }
+
+    /* ── 홈 링크 ── */
+    #home-link {
+      position: fixed; bottom: 14px; left: 14px; z-index: 100;
+      font-size: 11px; color: #8b949e; text-decoration: none;
+      background: rgba(13,17,23,0.88); border: 1px solid #30363d;
+      border-radius: 6px; padding: 5px 10px; transition: color 0.15s;
+    }
+    #home-link:hover { color: #60a5fa; border-color: #60a5fa; }
+
+    /* ── 에러 화면 ── */
+    #error-screen {
+      display: none; position: fixed; inset: 0;
+      background: #0d1117; z-index: 300;
+      align-items: center; justify-content: center;
+      flex-direction: column; text-align: center; gap: 14px;
+    }
+    #error-screen.show { display: flex; }
+    #error-screen h2 { color: #ef4444; font-size: 18px; }
+    #error-screen code {
+      background: #161b22; border: 1px solid #30363d;
+      border-radius: 8px; padding: 10px 20px;
+      font-size: 13px; color: #60a5fa; font-family: inherit;
+    }
+    #error-screen p { color: #8b949e; font-size: 13px; line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+<!-- 컨트롤 패널 -->
+<div id="controls">
+  <h1>ETF 상관관계 그래프</h1>
+
+  <div class="ctrl-row">
+    <div class="ctrl-label">
+      임계값 (r ≥) <span id="r-val">0.95</span>
+    </div>
+    <input type="range" id="r-slider" min="85" max="99" value="95" step="1">
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:#484f58;margin-top:2px">
+      <span id="r-min-label">0.85</span><span>0.99</span>
+    </div>
+  </div>
+
+  <div class="ctrl-row">
+    <input type="text" id="search" placeholder="티커 검색 (예: SPY, QQQ, GLD)">
+  </div>
+
+  <div id="stats">데이터 로딩 중...</div>
+  <div id="progress-bar"><div id="progress-fill"></div></div>
+</div>
+
+<!-- 레전드 -->
+<div id="legend">
+  <h2>섹터</h2>
+  <div id="legend-items"></div>
+</div>
+
+<!-- 그래프 -->
+<div id="graph-container"></div>
+
+<!-- 툴팁 -->
+<div id="tooltip">
+  <div class="tt-ticker" id="tt-ticker"></div>
+  <div class="tt-name"   id="tt-name"></div>
+  <div class="tt-divider"></div>
+  <div id="tt-meta"></div>
+  <div class="tt-hint">클릭 → 해당 노드 포커스 | 배경 클릭 → 전체 보기</div>
+</div>
+
+<!-- 하단 힌트 -->
+<div id="hint">r = 1 이면 가깝게 · r = −1 이면 멀게 &nbsp;|&nbsp; 스크롤로 줌 · 드래그로 이동</div>
+
+<!-- 홈 -->
+<a href="/" id="home-link">← 대시보드</a>
+
+<!-- 에러 -->
+<div id="error-screen">
+  <h2>graph_data.json 없음</h2>
+  <p>그래프 데이터가 아직 생성되지 않았습니다.<br>로컬에서 아래 명령어를 실행한 후 배포하세요.</p>
+  <code>python build_graph.py</code>
+  <p style="font-size:11px;color:#484f58">
+    (사전 조건: python build_monthly_corr.py 로<br>correlation_matrix_monthly.csv 생성 필요)
+  </p>
+</div>
+
+<script>
+// ── 상수 ──────────────────────────────────────────────
+const DEFAULT_R    = 0.95;
+const LINK_DIST_K  = 800;   // link distance = (1 - r) * K  →  r=1: 0px, r=0: 800px
+const LINK_STRENGTH_K = 0.8; // link strength = (r - 0.8) * K  →  r=0.95: 0.12
+
+// ── 전역 상태 ──────────────────────────────────────────
+let allNodes    = [];
+let allLinks    = [];
+let sectorMeta  = {};
+let Graph;
+let storeMinR   = 0.85;
+let currentR    = DEFAULT_R;
+
+let hoverNode       = null;
+let highlightNodeIds = new Set();
+let searchTicker    = '';
+
+// ── 색상 / 크기 함수 ─────────────────────────────────
+function sectorColor(sid) {
+  return (sectorMeta[sid] || {}).color || '#888888';
+}
+
+function getNodeColor(node) {
+  const base = sectorColor(node.s);
+  if (searchTicker && node.id === searchTicker) return '#ffffff';
+  if (hoverNode) {
+    if (node === hoverNode)              return '#ffffff';
+    if (highlightNodeIds.has(node.id))  return base;
+    return base + '22';  // 흐리게
+  }
+  return base;
+}
+
+function getNodeVal(node) {
+  // log 스케일 AUM → 노드 크기
+  return Math.max(1, Math.log10(node.a * 10 + 1) * 4);
+}
+
+function getLinkColor(link) {
+  if (hoverNode) {
+    const sid = typeof link.source === 'object' ? link.source.id : link.source;
+    const tid = typeof link.target === 'object' ? link.target.id : link.target;
+    const active = sid === hoverNode.id || tid === hoverNode.id;
+    if (!active) return 'rgba(255,255,255,0.02)';
+    // 높은 r → 따뜻한 색, 낮은 r → 차가운 색
+    const t = Math.max(0, Math.min(1, (link.r - 0.8) / 0.2));
+    return `rgba(${Math.round(255*t)},${Math.round(120+80*t)},${Math.round(255*(1-t))},0.85)`;
+  }
+  const t = Math.max(0, (link.r - storeMinR) / (1 - storeMinR));
+  return `rgba(148,163,184,${0.04 + t * 0.22})`;
+}
+
+function getLinkWidth(link) {
+  if (hoverNode) {
+    const sid = typeof link.source === 'object' ? link.source.id : link.source;
+    const tid = typeof link.target === 'object' ? link.target.id : link.target;
+    return (sid === hoverNode.id || tid === hoverNode.id) ? 1.8 : 0.1;
+  }
+  return Math.max(0.1, (link.r - 0.88) * 4);
+}
+
+// ── 통계 업데이트 ─────────────────────────────────────
+function updateStats(nNodes, nLinks, simRunning) {
+  const el = document.getElementById('stats');
+  el.innerHTML =
+    `<b>${nNodes.toLocaleString()}</b>개 노드 &nbsp;|&nbsp; <b>${nLinks.toLocaleString()}</b>개 엣지` +
+    (simRunning ? `<br><span class="sim-running">⟳ 레이아웃 계산 중...</span>` : '');
+}
+
+function fmtAUM(b) {
+  if (b >= 100) return `$${b.toFixed(0)}B`;
+  if (b >= 1)   return `$${b.toFixed(1)}B`;
+  if (b >= 0.1) return `$${(b * 1000).toFixed(0)}M`;
+  return '<$100M';
+}
+
+// ── 레전드 렌더 ──────────────────────────────────────
+function renderLegend() {
+  const AC_ORDER = ['EQUITY','FIXED_INCOME','REAL_ASSETS','ALTERNATIVE','THEMATIC'];
+  const AC_KO = {
+    EQUITY: '주식', FIXED_INCOME: '채권',
+    REAL_ASSETS: '실물자산', ALTERNATIVE: '대안', THEMATIC: '테마'
+  };
+  const grouped = {};
+  for (const [sid, s] of Object.entries(sectorMeta)) {
+    (grouped[s.ac] = grouped[s.ac] || []).push({ sid, ...s });
+  }
+
+  let html = '';
+  for (const ac of AC_ORDER) {
+    if (!grouped[ac]) continue;
+    html += `<div class="legend-ac">${AC_KO[ac]}</div>`;
+    for (const s of grouped[ac]) {
+      html += `
+        <div class="legend-item" title="${s.name_en}">
+          <div class="legend-dot" style="background:${s.color}"></div>
+          <span class="legend-text">${s.name}</span>
+        </div>`;
+    }
+  }
+  document.getElementById('legend-items').innerHTML = html;
+}
+
+// ── 필터 적용 (슬라이더 변경 시) ───────────────────────
+function applyFilter(minR) {
+  currentR = minR;
+  const filtered = allLinks.filter(l => l.r >= minR);
+  Graph.graphData({ nodes: allNodes, links: filtered });
+  updateStats(allNodes.length, filtered.length, true);
+}
+
+// ── 데이터 로드 & 그래프 초기화 ──────────────────────
+const progFill = document.getElementById('progress-fill');
+progFill.style.width = '20%';
+
+fetch('graph_data.json')
+  .then(res => {
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    progFill.style.width = '55%';
+    return res.json();
+  })
+  .then(data => {
+    progFill.style.width = '85%';
+
+    allNodes   = data.nodes;
+    allLinks   = data.links;
+    sectorMeta = data.sectors;
+    storeMinR  = data.meta.store_min_r;
+
+    // 슬라이더 최솟값 동기화
+    const slider = document.getElementById('r-slider');
+    const minInt = Math.round(storeMinR * 100);
+    slider.min = minInt;
+    document.getElementById('r-min-label').textContent = storeMinR.toFixed(2);
+
+    renderLegend();
+
+    // ── ForceGraph 초기화 ────────────────────────────
+    Graph = ForceGraph()(document.getElementById('graph-container'))
+      .backgroundColor('#0d1117')
+      .nodeId('id')
+      .linkSource('s')
+      .linkTarget('t')
+      .nodeLabel(() => '')          // 커스텀 툴팁 사용
+      .nodeVal(getNodeVal)
+      .nodeColor(getNodeColor)
+      .linkColor(getLinkColor)
+      .linkWidth(getLinkWidth)
+      .linkCurvature(0)
+      // r=1 → 거리 0, r=0 → 거리 LINK_DIST_K
+      .d3LinkDistance(link => Math.max(5, (1 - (link.r || 0.9)) * LINK_DIST_K))
+      .d3LinkStrength(link => Math.max(0, ((link.r || 0.9) - 0.8) * LINK_STRENGTH_K))
+      .d3AlphaDecay(0.015)
+      .d3VelocityDecay(0.35)
+      .cooldownTime(20000)
+      .enableNodeDrag(true)
+      .enableZoomInteraction(true)
+      .onEngineStop(() => {
+        const gd = Graph.graphData();
+        updateStats(gd.nodes.length, gd.links.length, false);
+      })
+      .onNodeHover(node => {
+        hoverNode = node || null;
+        highlightNodeIds.clear();
+
+        if (node) {
+          highlightNodeIds.add(node.id);
+          (Graph.graphData().links || []).forEach(l => {
+            const s = typeof l.source === 'object' ? l.source.id : l.source;
+            const t = typeof l.target === 'object' ? l.target.id : l.target;
+            if (s === node.id || t === node.id) {
+              highlightNodeIds.add(s);
+              highlightNodeIds.add(t);
+            }
+          });
+
+          // 이웃 수 계산
+          const neighborCount = highlightNodeIds.size - 1;
+          const sc = sectorMeta[node.s] || {};
+          document.getElementById('tt-ticker').style.color = sc.color || '#e6edf3';
+          document.getElementById('tt-ticker').textContent = node.id;
+          document.getElementById('tt-name').textContent   = node.n;
+          document.getElementById('tt-meta').innerHTML = `
+            <div class="tt-row">
+              <span class="tt-key">섹터</span>
+              <span class="tt-val" style="color:${sc.color}">${sc.name || node.s}</span>
+            </div>
+            <div class="tt-row">
+              <span class="tt-key">AUM</span>
+              <span class="tt-val">${fmtAUM(node.a)}</span>
+            </div>
+            <div class="tt-row">
+              <span class="tt-key">연결(r≥${currentR.toFixed(2)})</span>
+              <span class="tt-val">${neighborCount}개</span>
+            </div>`;
+          document.getElementById('tooltip').style.display = 'block';
+        } else {
+          document.getElementById('tooltip').style.display = 'none';
+        }
+        Graph.refresh();
+      })
+      .onNodeClick(node => {
+        Graph.centerAt(node.x, node.y, 500);
+        Graph.zoom(5, 500);
+      })
+      .onBackgroundClick(() => {
+        Graph.zoomToFit(400, 40);
+      });
+
+    // 반발력 강화 (노드가 겹치지 않게)
+    Graph.d3Force('charge').strength(-80);
+
+    progFill.style.width = '100%';
+    setTimeout(() => { progFill.style.width = '0%'; }, 600);
+
+    // 기본 임계값으로 데이터 적용
+    applyFilter(DEFAULT_R);
+  })
+  .catch(err => {
+    console.error(err);
+    document.getElementById('error-screen').classList.add('show');
+  });
+
+// ── 툴팁 마우스 추적 ─────────────────────────────────
+document.getElementById('graph-container').addEventListener('mousemove', e => {
+  const tt = document.getElementById('tooltip');
+  if (tt.style.display === 'none') return;
+  const x = e.clientX + 14;
+  const y = e.clientY + 14;
+  tt.style.left = (x + tt.offsetWidth  > window.innerWidth  ? x - tt.offsetWidth  - 28 : x) + 'px';
+  tt.style.top  = (y + tt.offsetHeight > window.innerHeight ? y - tt.offsetHeight - 28 : y) + 'px';
+});
+
+// ── 슬라이더 ─────────────────────────────────────────
+document.getElementById('r-slider').addEventListener('input', e => {
+  const v = parseInt(e.target.value) / 100;
+  document.getElementById('r-val').textContent = v.toFixed(2);
+  applyFilter(v);
+});
+
+// ── 검색 ─────────────────────────────────────────────
+document.getElementById('search').addEventListener('input', e => {
+  searchTicker = e.target.value.trim().toUpperCase();
+  if (!Graph) return;
+  if (searchTicker) {
+    const gNode = (Graph.graphData().nodes || []).find(n => n.id === searchTicker);
+    if (gNode && gNode.x != null) {
+      Graph.centerAt(gNode.x, gNode.y, 500);
+      Graph.zoom(6, 500);
+    }
+  }
+  Graph.refresh();
+});
+</script>
+</body>
+</html>
