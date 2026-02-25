@@ -376,16 +376,26 @@ fetch('graph_data.json')
       .nodeLabel(() => '')          // 커스텀 툴팁 사용
       .nodeVal(getNodeVal)
       .nodeColor(getNodeColor)
-      .nodeCanvasObjectMode(node => node.anchor ? 'after' : undefined)
-      .nodeCanvasObject((node, ctx, globalScale) => {
-        const label = node.id;
-        const fontSize = Math.max(9, Math.min(13, 11 / Math.max(1, Math.log2(globalScale + 1))));
-        ctx.font = `600 ${fontSize}px 'SF Mono',Consolas,Menlo,monospace`;
-        const r = Math.sqrt(getNodeVal(node)) * 4;
-        ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      .onRenderFramePost((ctx, globalScale) => {
+        const anchorNodes = (Graph.graphData().nodes || []).filter(n => n.anchor);
+        if (!anchorNodes.length) return;
+        const fontSize = Math.max(12, 14 / Math.max(1, Math.log2(globalScale + 1)));
+        ctx.font = `800 ${fontSize}px 'SF Mono',Consolas,Menlo,monospace`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
-        ctx.fillText(label, node.x, node.y + r + 2);
+        anchorNodes.forEach(node => {
+          const r = Math.sqrt(getNodeVal(node)) * 4;
+          const x = node.x, y = node.y + r + 3;
+          // 배경 박스
+          const metrics = ctx.measureText(node.id);
+          const tw = metrics.width, th = fontSize;
+          const pad = 3;
+          ctx.fillStyle = 'rgba(13,17,23,0.82)';
+          ctx.fillRect(x - tw/2 - pad, y - pad/2, tw + pad*2, th + pad);
+          // 텍스트
+          ctx.fillStyle = '#ffffff';
+          ctx.fillText(node.id, x, y);
+        });
       })
       .linkColor(getLinkColor)
       .linkWidth(getLinkWidth)
