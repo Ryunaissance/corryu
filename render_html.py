@@ -1,86 +1,44 @@
-"""
-CORRYU ETF Dashboard - HTML 대시보드 생성 (단일 진입점)
-데이터 로딩 → 분류 → 레거시 → 지표 → JSON 저장 → HTML 생성
+"""render_html.py — HTML 대시보드 렌더러
 
-HTML 템플릿은 루트의 render_html.py 가 단독 관리합니다.
-HTML 수정 시 render_html.py 만 편집하세요.
+output/etf_data.json 을 읽어 output/master_dashboard.html 을 생성합니다.
+pandas 불필요 · 단독 실행 가능 · Vercel 빌드 커맨드 진입점
+
+Usage:
+    python3 render_html.py
 """
 import json
 import os
-import subprocess
 import sys
+from datetime import datetime
+
+# src/ 모듈 접근
+ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(ROOT, 'src'))
 
 from config import SECTOR_DEFS, ASSET_CLASSES, MY_PORTFOLIO, OUTPUT_DIR
-from data_loader import load_all, get_all_tickers, get_fullname, get_market_cap, get_rank
-from classify import classify_all, get_sector_members, fill_anchor_correlations
-from verify import verify_mece, spot_check
-from legacy import assess_all_legacy
-from metrics import compute_etf_metrics, compute_sector_stats
 
 
-def build_sector_meta(sector_members, all_etf_data):
-    """섹터별 메타 정보 JSON 생성"""
-    meta = {}
-    for sid, sdef in SECTOR_DEFS.items():
-        etfs = all_etf_data.get(sid, [])
-        stats = compute_sector_stats(etfs)
-        meta[sid] = {
-            'name': sdef['name'],
-            'name_en': sdef['name_en'],
-            'asset_class': sdef['asset_class'],
-            'anchor': sdef['anchor'] or '—',
-            'icon': sdef['icon'],
-            **stats,
-        }
-    return meta
-
-
-def build_all_etf_data(sector_members, classification, legacy_results,
-                       df_price, perf_stats, scraped,
-                       df_corr_monthly, df_corr_daily):
-    """전체 섹터별 ETF 데이터 JSON 생성"""
-    all_data = {}
-
-    for sid in sorted(SECTOR_DEFS.keys()):
-        tickers = sector_members.get(sid, set())
-        etf_list = []
-
-        for ticker in tickers:
-            etf_info = compute_etf_metrics(
-                ticker, df_price, perf_stats, scraped, classification,
-                df_corr_monthly, df_corr_daily, legacy_results
-            )
-            etf_info['mine'] = 1 if ticker in MY_PORTFOLIO else 0
-            etf_list.append(etf_info)
-
-        # 정렬: 내 보유종목 최우선, 그다음 시가총액 순
-        etf_list.sort(key=lambda x: (-x['mine'], x['rk']))
-        all_data[sid] = etf_list
-
-    return all_data
-
-
-def _generate_html_REMOVED():
-    """HTML 생성은 루트의 render_html.py 로 이관됨. 이 함수는 사용하지 않습니다."""
+def generate_html(sector_meta):
+    """HTML 대시보드 생성 (데이터는 etf_data.json 에서 fetch, pandas 불필요)"""
     today = datetime.now().strftime('%Y-%m-%d')
-    total_etfs = sum(m['count'] for m in sector_meta.values())
+    total_etfs    = sum(m['count']  for m in sector_meta.values())
+    total_active  = sum(m['active'] for m in sector_meta.values())
+    total_legacy  = sum(m['legacy'] for m in sector_meta.values())
     total_sectors = len([s for s in sector_meta.values() if s['count'] > 0])
 
     # 자산군별 섹터 그룹핑
     ac_sectors = {}
     for sid, sdef in SECTOR_DEFS.items():
         ac = sdef['asset_class']
-        if ac not in ac_sectors:
-            ac_sectors[ac] = []
-        ac_sectors[ac].append(sid)
+        ac_sectors.setdefault(ac, []).append(sid)
 
-    # sectorMeta + allData는 etf_data.json에 저장 (HTML에 미임베드)
-    json_ac_sectors = json.dumps(ac_sectors, ensure_ascii=False)
-    json_ac_defs = json.dumps({k: v for k, v in ASSET_CLASSES.items()}, ensure_ascii=False)
-    json_sector_defs = json.dumps({k: {'name': v['name'], 'name_en': v['name_en'],
-                                       'icon': v['icon'], 'anchor': v['anchor'] or '—',
-                                       'asset_class': v['asset_class']}
-                                  for k, v in SECTOR_DEFS.items()}, ensure_ascii=False)
+    json_ac_sectors  = json.dumps(ac_sectors, ensure_ascii=False)
+    json_ac_defs     = json.dumps({k: v for k, v in ASSET_CLASSES.items()}, ensure_ascii=False)
+    json_sector_defs = json.dumps(
+        {k: {'name': v['name'], 'name_en': v['name_en'],
+             'icon': v['icon'], 'anchor': v['anchor'] or '—',
+             'asset_class': v['asset_class']}
+         for k, v in SECTOR_DEFS.items()}, ensure_ascii=False)
     json_my_portfolio = json.dumps(MY_PORTFOLIO)
 
     html = f"""<!DOCTYPE html>
@@ -157,7 +115,8 @@ table.dataTable thead th.text-left, table.dataTable tbody td.text-left {{ text-a
             <span class="text-gradient">CORRYU</span> Master Valuation Dashboard
         </h1>
         <p class="text-sm text-gray-500">
-            Total <span class="text-white font-bold">{total_etfs:,}</span> ETFs |
+            Total <span class="text-white font-bold">{total_etfs:,}</span> ETFs
+            <span class="text-gray-600">(레거시 <span class="text-yellow-400 font-bold">{total_legacy:,}</span>개 제외 시 <span class="text-green-400 font-bold">{total_active:,}</span> active)</span> |
             <span class="text-white font-bold">{total_sectors}</span> Sectors |
             Updated: <span class="text-gray-400">{today}</span>
         </p>
@@ -420,7 +379,6 @@ function initDashboard() {{
     $(document).on('click', '.ac-tab', function() {{
         state.activeAC = $(this).data('ac');
         renderACTabs();
-        // 해당 자산군의 첫 번째 섹터로 자동 전환
         let sectors = state.activeAC === 'ALL'
             ? Object.keys(sectorDefs).sort()
             : (acSectors[state.activeAC] || []).sort();
@@ -462,80 +420,27 @@ $(document).ready(function() {{
 
 
 def main():
-    """메인 실행: 데이터 로딩 → 분류 → 레거시 → 지표 → HTML"""
-    # 1. 데이터 로딩
-    df_price, perf_stats, scraped, df_corr_monthly, df_corr_daily = load_all()
-    all_tickers = get_all_tickers(df_corr_daily)
-    print(f"\n전체 ETF 유니버스: {len(all_tickers)}개")
-
-    # 2. MECE 분류
-    print("\n=== 섹터 분류 실행 ===")
-    classification = classify_all(all_tickers, scraped, df_corr_monthly, df_corr_daily)
-    sector_members = get_sector_members(classification)
-    fill_anchor_correlations(classification, sector_members, df_corr_monthly, df_corr_daily)
-
-    # 3. MECE 검증
-    print("\n=== MECE 검증 ===")
-    verify_mece(classification, all_tickers)
-    spot_check(classification, scraped)
-
-    # 4. 레거시 판별
-    print("\n=== 레거시 판별 ===")
-    legacy_results = assess_all_legacy(
-        sector_members, classification,
-        df_corr_monthly, df_corr_daily,
-        scraped, perf_stats, df_price
-    )
-
-    # 5. 전체 ETF 데이터 생성
-    print("\n대시보드 데이터 생성 중...")
-    all_etf_data = build_all_etf_data(
-        sector_members, classification, legacy_results,
-        df_price, perf_stats, scraped,
-        df_corr_monthly, df_corr_daily
-    )
-
-    # 6. 섹터 메타 생성
-    sector_meta = build_sector_meta(sector_members, all_etf_data)
-
-    # 7. etf_data.json 저장 (HTML과 분리된 데이터 파일)
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
     etf_data_path = os.path.join(OUTPUT_DIR, 'etf_data.json')
-    with open(etf_data_path, 'w', encoding='utf-8') as f:
-        json.dump({'sectorMeta': sector_meta, 'allData': all_etf_data},
-                  f, ensure_ascii=False, separators=(',', ':'))
-    print(f"ETF 데이터 JSON 저장: {etf_data_path}")
+    if not os.path.exists(etf_data_path):
+        print(f"ERROR: {etf_data_path} 없음. dashboard_builder.py 를 먼저 실행하세요.")
+        sys.exit(1)
 
-    # 8. HTML 생성 — render_html.py 호출 (pandas 불필요, 단독 실행 가능)
-    print("HTML 대시보드 생성 중...")
-    render_script = os.path.join(os.path.dirname(OUTPUT_DIR), 'render_html.py')
-    subprocess.run([sys.executable, render_script], check=True)
+    with open(etf_data_path, 'r', encoding='utf-8') as f:
+        etf_data = json.load(f)
 
-    print(f"\n{'='*50}")
-    print(f"대시보드 생성 완료")
-    print(f"  전체 ETF: {sum(m['count'] for m in sector_meta.values()):,}개")
-    print(f"  Active: {sum(m['active'] for m in sector_meta.values()):,}개")
-    print(f"  Legacy: {sum(m['legacy'] for m in sector_meta.values()):,}개")
-    print(f"{'='*50}")
+    sector_meta = etf_data['sectorMeta']
+    html = generate_html(sector_meta)
 
-    # 9. classification.json 저장
-    cls_path = os.path.join(OUTPUT_DIR, 'classification.json')
-    cls_export = {}
-    for ticker, info in classification.items():
-        sid = info['sector']
-        sdef = SECTOR_DEFS[sid]
-        cls_export[ticker] = {
-            'sector_id': sid,
-            'sector_name': sdef['name'],
-            'asset_class': sdef['asset_class'],
-            'method': info['method'],
-            'r_anchor': info['r_anchor'],
-            'is_legacy': legacy_results.get(ticker, {}).get('is_legacy', False),
-            'legacy_reasons': legacy_results.get(ticker, {}).get('reasons', []),
-        }
-    with open(cls_path, 'w', encoding='utf-8') as f:
-        json.dump(cls_export, f, ensure_ascii=False, indent=2)
-    print(f"분류 JSON 저장: {cls_path}")
+    out_path = os.path.join(OUTPUT_DIR, 'master_dashboard.html')
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    with open(out_path, 'w', encoding='utf-8') as f:
+        f.write(html)
+
+    total = sum(m['count']  for m in sector_meta.values())
+    active = sum(m['active'] for m in sector_meta.values())
+    legacy = sum(m['legacy'] for m in sector_meta.values())
+    print(f"HTML 생성 완료: {out_path}")
+    print(f"  전체 {total:,}개 | Active {active:,}개 | Legacy {legacy:,}개")
 
 
 if __name__ == '__main__':
