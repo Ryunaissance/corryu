@@ -86,6 +86,9 @@ def main():
         legacy_tickers = {tk for tk, info in classif.items() if info.get('is_legacy')}
         print(f"   레거시 티커: {len(legacy_tickers)}개")
 
+    # 앵커 티커 집합
+    anchor_tickers = {v['anchor'] for v in SECTOR_DEFS.values() if v.get('anchor')}
+
     # 3. 노드 목록 (상관행렬에 있는 티커 기준)
     nodes = []
     for tk in tickers:
@@ -98,6 +101,8 @@ def main():
         }
         if tk in legacy_tickers:
             node['l'] = 1
+        if tk in anchor_tickers:
+            node['anchor'] = 1
         nodes.append(node)
 
     # 4. 엣지 계산 (numpy 벡터화, 상삼각만)
