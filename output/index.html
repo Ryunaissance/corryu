@@ -73,8 +73,8 @@ table.dataTable thead th.text-left, table.dataTable tbody td.text-left { text-al
         </h1>
         <p class="text-sm text-gray-500">
             Total <span class="text-white font-bold">1,651</span> ETFs
-            <span class="text-gray-600">(레거시 <span class="text-yellow-400 font-bold">654</span>개 제외 시 <span class="text-green-400 font-bold">997</span> active)</span> |
-            <span class="text-white font-bold">24</span> Sectors |
+            <span class="text-gray-600">(레거시 <span class="text-yellow-400 font-bold">671</span>개 제외 시 <span class="text-green-400 font-bold">980</span> active)</span> |
+            <span class="text-white font-bold">23</span> Sectors |
             Updated: <span class="text-gray-400">2026-02-25</span>
         </p>
     </div>
@@ -151,9 +151,9 @@ table.dataTable thead th.text-left, table.dataTable tbody td.text-left { text-al
 // sectorMeta, allData는 etf_data.json에서 fetch로 로드됩니다
 let sectorMeta = {};
 let allData = {};
-const acSectors = {"EQUITY": ["S01", "S02", "S03", "S04", "S05", "S06", "S07", "S08", "S09", "S10", "S11", "S12", "S13"], "FIXED_INCOME": ["S14", "S15", "S16", "S17"], "REAL_ASSETS": ["S18", "S19", "S20"], "ALTERNATIVE": ["S21", "S22", "S23"], "THEMATIC": ["S24"]};
+const acSectors = {"EQUITY": ["S01", "S02", "S03", "S04", "S05", "S06", "S07", "S08", "S09", "S10", "S11", "S12", "S13"], "FIXED_INCOME": ["S14", "S15", "S16", "S17"], "REAL_ASSETS": ["S18", "S19", "S20"], "ALTERNATIVE": ["S21", "S22"], "THEMATIC": ["S24"]};
 const acDefs = {"EQUITY": {"name": "주식", "name_en": "Equity", "icon": "📈", "order": 1}, "FIXED_INCOME": {"name": "채권", "name_en": "Fixed Income", "icon": "🛡️", "order": 2}, "REAL_ASSETS": {"name": "실물자산", "name_en": "Real Assets", "icon": "🏗️", "order": 3}, "ALTERNATIVE": {"name": "대안", "name_en": "Alternatives", "icon": "⚡", "order": 4}, "THEMATIC": {"name": "테마", "name_en": "Thematic", "icon": "🧩", "order": 5}};
-const sectorDefs = {"S01": {"name": "US 대형주 종합", "name_en": "US Large Cap", "icon": "🇺🇸", "anchor": "VOO", "asset_class": "EQUITY"}, "S02": {"name": "테크놀로지", "name_en": "Technology", "icon": "💻", "anchor": "XLK", "asset_class": "EQUITY"}, "S03": {"name": "헬스케어", "name_en": "Healthcare", "icon": "🏥", "anchor": "XLV", "asset_class": "EQUITY"}, "S04": {"name": "금융", "name_en": "Financials", "icon": "🏦", "anchor": "XLF", "asset_class": "EQUITY"}, "S05": {"name": "경기소비재", "name_en": "Consumer Discretionary", "icon": "🛍️", "anchor": "XLY", "asset_class": "EQUITY"}, "S06": {"name": "필수소비재", "name_en": "Consumer Staples", "icon": "🛒", "anchor": "XLP", "asset_class": "EQUITY"}, "S07": {"name": "산업재", "name_en": "Industrials", "icon": "🏭", "anchor": "XLI", "asset_class": "EQUITY"}, "S08": {"name": "유틸리티", "name_en": "Utilities", "icon": "⚡", "anchor": "XLU", "asset_class": "EQUITY"}, "S09": {"name": "커뮤니케이션", "name_en": "Communication", "icon": "📡", "anchor": "XLC", "asset_class": "EQUITY"}, "S10": {"name": "소재", "name_en": "Materials", "icon": "⛏️", "anchor": "XLB", "asset_class": "EQUITY"}, "S11": {"name": "국제선진국", "name_en": "Intl Developed", "icon": "🌍", "anchor": "VEA", "asset_class": "EQUITY"}, "S12": {"name": "신흥국", "name_en": "Emerging Markets", "icon": "🌏", "anchor": "VWO", "asset_class": "EQUITY"}, "S13": {"name": "중소형주", "name_en": "Small/Mid Cap", "icon": "📊", "anchor": "IWM", "asset_class": "EQUITY"}, "S14": {"name": "투자등급 채권", "name_en": "Investment Grade", "icon": "🏛️", "anchor": "BND", "asset_class": "FIXED_INCOME"}, "S15": {"name": "단기채/현금성", "name_en": "Short-Term/Cash", "icon": "💵", "anchor": "SHV", "asset_class": "FIXED_INCOME"}, "S16": {"name": "하이일드/신흥채", "name_en": "High Yield/EM Debt", "icon": "⚠️", "anchor": "HYG", "asset_class": "FIXED_INCOME"}, "S17": {"name": "TIPS/인플레이션", "name_en": "TIPS/Inflation", "icon": "📈", "anchor": "SCHP", "asset_class": "FIXED_INCOME"}, "S18": {"name": "금/귀금속", "name_en": "Gold/Precious Metals", "icon": "✨", "anchor": "GLD", "asset_class": "REAL_ASSETS"}, "S19": {"name": "에너지/원자재", "name_en": "Energy/Commodities", "icon": "🛢️", "anchor": "XLE", "asset_class": "REAL_ASSETS"}, "S20": {"name": "부동산/REITs", "name_en": "Real Estate/REITs", "icon": "🏘️", "anchor": "VNQ", "asset_class": "REAL_ASSETS"}, "S21": {"name": "가상자산", "name_en": "Crypto/Digital", "icon": "₿", "anchor": "GBTC", "asset_class": "ALTERNATIVE"}, "S22": {"name": "인버스/숏", "name_en": "Inverse/Short", "icon": "📉", "anchor": "SQQQ", "asset_class": "ALTERNATIVE"}, "S23": {"name": "레버리지 롱", "name_en": "Leveraged Long", "icon": "🚀", "anchor": "TQQQ", "asset_class": "ALTERNATIVE"}, "S24": {"name": "테마/특수목적", "name_en": "Thematic/Specialty", "icon": "🧩", "anchor": "—", "asset_class": "THEMATIC"}};
+const sectorDefs = {"S01": {"name": "US 대형주 종합", "name_en": "US Large Cap", "icon": "🇺🇸", "anchor": "VOO", "asset_class": "EQUITY"}, "S02": {"name": "테크놀로지", "name_en": "Technology", "icon": "💻", "anchor": "XLK", "asset_class": "EQUITY"}, "S03": {"name": "헬스케어", "name_en": "Healthcare", "icon": "🏥", "anchor": "XLV", "asset_class": "EQUITY"}, "S04": {"name": "금융", "name_en": "Financials", "icon": "🏦", "anchor": "XLF", "asset_class": "EQUITY"}, "S05": {"name": "경기소비재", "name_en": "Consumer Discretionary", "icon": "🛍️", "anchor": "XLY", "asset_class": "EQUITY"}, "S06": {"name": "필수소비재", "name_en": "Consumer Staples", "icon": "🛒", "anchor": "XLP", "asset_class": "EQUITY"}, "S07": {"name": "산업재", "name_en": "Industrials", "icon": "🏭", "anchor": "XLI", "asset_class": "EQUITY"}, "S08": {"name": "유틸리티", "name_en": "Utilities", "icon": "⚡", "anchor": "XLU", "asset_class": "EQUITY"}, "S09": {"name": "커뮤니케이션", "name_en": "Communication", "icon": "📡", "anchor": "XLC", "asset_class": "EQUITY"}, "S10": {"name": "소재", "name_en": "Materials", "icon": "⛏️", "anchor": "XLB", "asset_class": "EQUITY"}, "S11": {"name": "국제선진국", "name_en": "Intl Developed", "icon": "🌍", "anchor": "VEA", "asset_class": "EQUITY"}, "S12": {"name": "신흥국", "name_en": "Emerging Markets", "icon": "🌏", "anchor": "VWO", "asset_class": "EQUITY"}, "S13": {"name": "중소형주", "name_en": "Small/Mid Cap", "icon": "📊", "anchor": "IWM", "asset_class": "EQUITY"}, "S14": {"name": "투자등급 채권", "name_en": "Investment Grade", "icon": "🏛️", "anchor": "BND", "asset_class": "FIXED_INCOME"}, "S15": {"name": "단기채/현금성", "name_en": "Short-Term/Cash", "icon": "💵", "anchor": "SHV", "asset_class": "FIXED_INCOME"}, "S16": {"name": "하이일드/신흥채", "name_en": "High Yield/EM Debt", "icon": "⚠️", "anchor": "HYG", "asset_class": "FIXED_INCOME"}, "S17": {"name": "TIPS/인플레이션", "name_en": "TIPS/Inflation", "icon": "📈", "anchor": "SCHP", "asset_class": "FIXED_INCOME"}, "S18": {"name": "금/귀금속", "name_en": "Gold/Precious Metals", "icon": "✨", "anchor": "GLD", "asset_class": "REAL_ASSETS"}, "S19": {"name": "에너지/원자재", "name_en": "Energy/Commodities", "icon": "🛢️", "anchor": "XLE", "asset_class": "REAL_ASSETS"}, "S20": {"name": "부동산/REITs", "name_en": "Real Estate/REITs", "icon": "🏘️", "anchor": "VNQ", "asset_class": "REAL_ASSETS"}, "S21": {"name": "가상자산", "name_en": "Crypto/Digital", "icon": "₿", "anchor": "GBTC", "asset_class": "ALTERNATIVE"}, "S22": {"name": "인버스/숏", "name_en": "Inverse/Short", "icon": "📉", "anchor": "SQQQ", "asset_class": "ALTERNATIVE"}, "S24": {"name": "테마/특수목적", "name_en": "Thematic/Specialty", "icon": "🧩", "anchor": "—", "asset_class": "THEMATIC"}};
 const myPortfolio = ["PEY", "HYG", "GBTC", "GLD", "VNQ", "UYR", "XLE"];
 
 let state = {
@@ -240,94 +240,94 @@ function initDashboard() {
         order: [],
         columns: [
             {
-                data: 't', className: 'text-left font-semibold',
+                data: 'ticker', className: 'text-left font-semibold',
                 render: function(d, type, row) {
                     if (type !== 'display') return d;
                     let isMine = myPortfolio.includes(d);
                     let cls = isMine ? 'text-yellow-400 text-base' : 'text-blue-300';
                     let h = '<span class="'+cls+'">'+d+'</span>';
-                    if (row.sh) h += '<span class="badge-short" title="상장 3년 미만">짧은연혁</span>';
+                    if (row.short_history) h += '<span class="badge-short" title="상장 3년 미만">짧은연혁</span>';
                     return h;
                 }
             },
             {
-                data: 'n', className: 'text-left text-xs text-gray-400',
+                data: 'name', className: 'text-left text-xs text-gray-400',
                 render: function(d, type, row) {
                     if (type !== 'display') return d;
                     let h = '<div class="leading-tight">'+d+'</div>';
-                    if (myPortfolio.includes(row.t)) {
+                    if (myPortfolio.includes(row.ticker)) {
                         h += '<div class="mt-1"><span class="mine-badge">MY</span></div>';
                     }
                     return h;
                 }
             },
-            { data: 'rk', render: function(d,t){ return t==='display'?(d===9999?'-':d):d; } },
-            { data: 'mc', render: function(d,t){ return t==='display'?formatMCap(d):d; } },
-            { data: 'r', render: function(d,t) {
+            { data: 'rank', render: function(d,t){ return t==='display'?(d===9999?'-':d):d; } },
+            { data: 'aum', render: function(d,t){ return t==='display'?formatMCap(d):d; } },
+            { data: 'r_anchor', render: function(d,t) {
                 if(t!=='display') return d;
                 let c = d >= 0.70 ? 'text-pink-400 font-bold' : (d <= -0.3 ? 'text-green-400 font-bold' : 'text-gray-400');
                 return '<span class="'+c+'">'+d.toFixed(2)+'</span>';
             } },
-            { data: 'z', render: function(d,t,row) {
-                if(row.sh && t==='display') return '<span class="text-gray-600">-</span>';
-                if(t!=='display') return row.sh ? -999999 : d;
+            { data: 'z_score', render: function(d,t,row) {
+                if(row.short_history && t==='display') return '<span class="text-gray-600">-</span>';
+                if(t!=='display') return row.short_history ? -999999 : d;
                 let c = d <= -1.5 ? 'value-down font-bold' : (d >= 2.0 ? 'value-up font-bold' : 'text-gray-500');
                 return '<span class="'+c+'">'+d.toFixed(2)+'</span>';
             } },
-            { data: 'ma', render: function(d,t,row) {
-                if(row.sh && t==='display') return '<span class="text-gray-600">-</span>';
-                if(t!=='display') return row.sh ? -999999 : d;
+            { data: 'ma200_pct', render: function(d,t,row) {
+                if(row.short_history && t==='display') return '<span class="text-gray-600">-</span>';
+                if(t!=='display') return row.short_history ? -999999 : d;
                 let c = d <= -10 ? 'value-down font-bold' : (d >= 15 ? 'value-up font-bold' : 'text-gray-500');
                 return '<span class="'+c+'">'+(d>0?'+':'')+d.toFixed(1)+'%</span>';
             } },
-            { data: 'h52', render: function(d,t,row) {
-                if(row.sh && t==='display') return '<span class="text-gray-600">-</span>';
-                if(t!=='display') return row.sh ? -999999 : d;
+            { data: 'mdd_52w', render: function(d,t,row) {
+                if(row.short_history && t==='display') return '<span class="text-gray-600">-</span>';
+                if(t!=='display') return row.short_history ? -999999 : d;
                 let c = d <= -20 ? 'value-down font-bold' : 'text-gray-500';
                 return '<span class="'+c+'">'+d.toFixed(1)+'%</span>';
             } },
             { data: 'cagr', render: function(d,t,row) {
-                if(row.sh && t==='display') return '<span class="text-gray-600">-</span>';
-                if(t!=='display') return row.sh ? -999999 : (d||0);
+                if(row.short_history && t==='display') return '<span class="text-gray-600">-</span>';
+                if(t!=='display') return row.short_history ? -999999 : (d||0);
                 return '<span class="text-gray-300 font-semibold">'+(d>0?'+':'')+d.toFixed(1)+'%</span>';
             } },
-            { data: 'v', render: function(d,t,row) {
-                if(row.sh && t==='display') return '<span class="text-gray-600">-</span>';
-                if(t!=='display') return row.sh ? -999999 : (d||0);
+            { data: 'vol', render: function(d,t,row) {
+                if(row.short_history && t==='display') return '<span class="text-gray-600">-</span>';
+                if(t!=='display') return row.short_history ? -999999 : (d||0);
                 return '<span class="text-gray-500">'+d.toFixed(1)+'%</span>';
             } },
-            { data: 's', render: function(d,t,row) {
-                if(row.sh && t==='display') return '<span class="text-gray-600">-</span>';
-                if(t!=='display') return row.sh ? -999999 : (d===null?-999999:d);
+            { data: 'sortino', render: function(d,t,row) {
+                if(row.short_history && t==='display') return '<span class="text-gray-600">-</span>';
+                if(t!=='display') return row.short_history ? -999999 : (d===null?-999999:d);
                 let c = d > 1.2 ? 'text-purple-400 font-bold' : 'text-gray-500';
                 return '<span class="'+c+'">'+d.toFixed(2)+'</span>';
             } },
-            { data: 'inc', className: 'text-xs text-gray-600', render: function(d, t) {
+            { data: 'inception', className: 'text-xs text-gray-600', render: function(d, t) {
                 if(t !== 'display') return d || '';
                 if(!d || d==='1900-01-01') return '-';
                 return d.substring(2);
             } },
-            { data: 'isl', render: function(d,t,row) {
+            { data: 'is_legacy', render: function(d,t,row) {
                 if(t!=='display') return d ? 1 : 0;
                 if(!d) return '<span class="badge-active">Active</span>';
-                let detail = (row.ld||[]).join(' / ');
+                let detail = (row.legacy_detail||[]).join(' / ');
                 return '<span class="badge-legacy">Legacy</span>'
                     + (detail ? '<div class="text-xs text-red-400 mt-0.5 opacity-80">'+detail+'</div>' : '');
             } }
         ],
         createdRow: function(row, data) {
-            if (data.isl) $(row).addClass('row-legacy');
+            if (data.is_legacy) $(row).addClass('row-legacy');
         }
     });
 
     // Custom filter
     $.fn.dataTable.ext.search.push(function(settings, searchData, dataIndex) {
         let row = settings.aoData[dataIndex]._aData;
-        if (state.hideLegacy && row.isl) return false;
-        if (state.hideShort && row.sh) return false;
-        if (state.minAum > 0 && row.mc < state.minAum * 1e6) return false;
-        if (state.minSortino > -999 && !row.sh) {
-            if (row.s < state.minSortino) return false;
+        if (state.hideLegacy && row.is_legacy) return false;
+        if (state.hideShort && row.short_history) return false;
+        if (state.minAum > 0 && row.aum < state.minAum * 1e6) return false;
+        if (state.minSortino > -999 && !row.short_history) {
+            if (row.sortino < state.minSortino) return false;
         }
         return true;
     });
