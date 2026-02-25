@@ -405,7 +405,7 @@ fetch('graph_data.json')
         } else {
           document.getElementById('tooltip').style.display = 'none';
         }
-        Graph.refresh();
+        requestAnimationFrame(() => { if (Graph) Graph.refresh(); });
       })
       .onNodeClick(node => {
         Graph.centerAt(node.x, node.y, 500);
