@@ -432,10 +432,9 @@ def main():
     html = generate_html(sector_meta)
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    for filename in ('index.html', 'master_dashboard.html'):
-        out_path = os.path.join(OUTPUT_DIR, filename)
-        with open(out_path, 'w', encoding='utf-8') as f:
-            f.write(html)
+    out_path = os.path.join(OUTPUT_DIR, 'index.html')
+    with open(out_path, 'w', encoding='utf-8') as f:
+        f.write(html)
 
     total = sum(m['count']  for m in sector_meta.values())
     active = sum(m['active'] for m in sector_meta.values())
