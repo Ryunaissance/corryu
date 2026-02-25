@@ -13965,8 +13965,8 @@
     "legacy_reasons": []
   },
   "VNM": {
-    "sector_id": "S09",
-    "sector_name": "커뮤니케이션",
+    "sector_id": "S12",
+    "sector_name": "신흥국",
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6526,
