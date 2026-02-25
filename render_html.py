@@ -431,8 +431,8 @@ def main():
     sector_meta = etf_data['sectorMeta']
     html = generate_html(sector_meta)
 
-    out_path = os.path.join(OUTPUT_DIR, 'master_dashboard.html')
     os.makedirs(OUTPUT_DIR, exist_ok=True)
+    out_path = os.path.join(OUTPUT_DIR, 'index.html')
     with open(out_path, 'w', encoding='utf-8') as f:
         f.write(html)
 
