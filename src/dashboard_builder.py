@@ -280,7 +280,7 @@ function renderSectorTabs() {{
         let isActive = state.activeSector === sid ? ' active' : '';
         html += '<button class="sec-tab' + isActive + '" data-sector="' + sid + '">';
         html += sd.icon + ' ' + sd.name;
-        html += '<span class="sec-count">' + meta.count + '</span></button>';
+        html += '<span class="sec-count">' + (meta.active||0) + '/' + meta.count + '</span></button>';
     }}
     $('#secTabs').html(html);
 }}
