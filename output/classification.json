@@ -1049,8 +1049,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7032,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "시가총액 너무 작음"
+    ]
   },
   "BILS": {
     "sector_id": "S15",
@@ -5266,8 +5268,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9971,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLU와 상관계수 매우 높음"
+    ]
   },
   "FV": {
     "sector_id": "S01",
@@ -5338,8 +5342,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9085,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLU와 상관계수 매우 높음"
+    ]
   },
   "GARP": {
     "sector_id": "S02",
@@ -7079,8 +7085,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9465,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLU와 상관계수 매우 높음"
+    ]
   },
   "IDV": {
     "sector_id": "S11",
@@ -8479,8 +8487,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8862,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "시가총액 너무 작음"
+    ]
   },
   "KALL": {
     "sector_id": "S12",
@@ -10516,8 +10526,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9345,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "시가총액 너무 작음"
+    ]
   },
   "PVAL": {
     "sector_id": "S07",
@@ -11236,8 +11248,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9533,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLU와 상관계수 매우 높음"
+    ]
   },
   "RSSL": {
     "sector_id": "S13",
@@ -14086,8 +14100,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9947,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLU와 상관계수 매우 높음"
+    ]
   },
   "VRP": {
     "sector_id": "S16",
