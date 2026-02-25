@@ -1,0 +1,56 @@
+name: Patch r_anchor (QQQ 기준)
+
+on:
+  # 수동 트리거 — Actions 탭에서 "Run workflow" 버튼
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: '업데이트할 브랜치 (기본: 현재 브랜치)'
+        required: false
+        default: ''
+
+  # 매월 1일 02:00 UTC 자동 실행 (원하면 주석 해제)
+  # schedule:
+  #   - cron: '0 2 1 * *'
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write   # 결과 파일 커밋·푸시 권한
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # workflow_dispatch inputs.branch 가 있으면 그 브랜치, 없으면 트리거된 브랜치
+          ref: ${{ inputs.branch || github.ref }}
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install --upgrade numpy pandas requests
+
+      - name: Run patch_r_anchor_qqq.py
+        run: python patch_r_anchor_qqq.py
+
+      - name: Commit and push updated files
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add output/etf_data.json output/index.html
+
+          # 변경사항 없으면 커밋 생략
+          if git diff --cached --quiet; then
+            echo "변경사항 없음 — 커밋 생략"
+          else
+            git commit -m "feat: r_anchor QQQ 기준으로 업데이트 [automated]"
+            git push
+          fi
