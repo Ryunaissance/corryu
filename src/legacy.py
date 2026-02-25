@@ -53,7 +53,7 @@ def assess_sector_legacy(sector_id, sector_tickers, classification,
         if ticker not in MANUAL_LEGACY_OVERRIDES and ticker not in LEGACY_EXEMPTIONS:
             try:
                 inc = str(scraped.get(ticker, {}).get('inception_date', '1900-01-01'))[:10]
-                if inc != '1900-01-01' and int(inc[:4]) >= 2023:
+                if inc != '1900-01-01' and inc > '2021-05-20':
                     reasons.append('SHORT_HISTORY')
                     details.append('상장기간 너무 짧음')
             except Exception:

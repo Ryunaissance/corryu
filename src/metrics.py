@@ -73,10 +73,10 @@ def compute_etf_metrics(ticker, df_price, perf_stats, scraped, classification,
     # 짧은 연혁 판별
     is_short_history = True
     try:
-        if '1900' not in inc_date:
-            inc_year = int(inc_date[:4])
-            if inc_year <= 2022:
-                is_short_history = False
+        if '1900' not in inc_date and inc_date > '2021-05-20':
+            is_short_history = True
+        elif '1900' not in inc_date:
+            is_short_history = False
     except Exception:
         pass
 
