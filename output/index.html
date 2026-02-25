@@ -301,7 +301,8 @@ function initDashboard() {
                 let c = d > 1.2 ? 'text-purple-400 font-bold' : 'text-gray-500';
                 return '<span class="'+c+'">'+d.toFixed(2)+'</span>';
             } },
-            { data: 'inc', className: 'text-xs text-gray-600', render: function(d) {
+            { data: 'inc', className: 'text-xs text-gray-600', render: function(d, t) {
+                if(t !== 'display') return d || '';
                 if(!d || d==='1900-01-01') return '-';
                 return d.substring(2);
             } },
