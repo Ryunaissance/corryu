@@ -30,6 +30,14 @@
       color: #60a5fa; margin-bottom: 12px; letter-spacing: 0.3px;
     }
     .ctrl-row { margin-bottom: 10px; }
+    .ctrl-check {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 11px; color: #8b949e; cursor: pointer; user-select: none;
+    }
+    .ctrl-check input[type=checkbox] {
+      accent-color: #60a5fa; cursor: pointer; width: 13px; height: 13px;
+    }
+    .ctrl-check span { color: #e6edf3; }
     .ctrl-label {
       font-size: 11px; color: #8b949e;
       display: flex; justify-content: space-between; margin-bottom: 4px;
@@ -159,6 +167,13 @@
     <input type="text" id="search" placeholder="티커 검색 (예: SPY, QQQ, GLD)">
   </div>
 
+  <div class="ctrl-row">
+    <label class="ctrl-check">
+      <input type="checkbox" id="hide-legacy" checked>
+      레거시 숨기기 <span id="legacy-count"></span>
+    </label>
+  </div>
+
   <div id="stats">데이터 로딩 중...</div>
   <div id="progress-bar"><div id="progress-fill"></div></div>
 </div>
@@ -214,6 +229,7 @@ let currentR    = DEFAULT_R;
 let hoverNode       = null;
 let highlightNodeIds = new Set();
 let searchTicker    = '';
+let hideLegacy      = true;
 
 // ── 색상 / 크기 함수 ─────────────────────────────────
 function sectorColor(sid) {
@@ -304,8 +320,10 @@ function renderLegend() {
 // ── 필터 적용 (슬라이더 변경 시) ───────────────────────
 function applyFilter(minR) {
   currentR = minR;
-  const filtered = allLinks.filter(l => l.r >= minR);
-  Graph.graphData({ nodes: allNodes, links: filtered });
+  const visibleNodes = hideLegacy ? allNodes.filter(n => !n.l) : allNodes;
+  const visibleIds   = new Set(visibleNodes.map(n => n.id));
+  const filtered     = allLinks.filter(l => l.r >= minR && visibleIds.has(l.s) && visibleIds.has(l.t));
+  Graph.graphData({ nodes: visibleNodes, links: filtered });
 
   // r=1 → 가깝게, r≈0 → 멀게  (graphData 호출 후 직접 설정)
   const lf = Graph.d3Force('link');
@@ -336,6 +354,10 @@ fetch('graph_data.json')
     allLinks   = data.links;
     sectorMeta = data.sectors;
     storeMinR  = data.meta.store_min_r;
+
+    // 레거시 카운트 표시
+    const legacyCount = allNodes.filter(n => n.l).length;
+    document.getElementById('legacy-count').textContent = `(${legacyCount}개)`;
 
     // 슬라이더 최솟값 동기화
     const slider = document.getElementById('r-slider');
@@ -441,6 +463,12 @@ document.getElementById('r-slider').addEventListener('input', e => {
   const v = parseInt(e.target.value) / 100;
   document.getElementById('r-val').textContent = v.toFixed(2);
   applyFilter(v);
+});
+
+// ── 레거시 토글 ──────────────────────────────────────
+document.getElementById('hide-legacy').addEventListener('change', e => {
+  hideLegacy = e.target.checked;
+  if (Graph) applyFilter(currentR);
 });
 
 // ── 검색 ─────────────────────────────────────────────

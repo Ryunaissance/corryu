@@ -20,8 +20,9 @@ from config import SECTOR_DEFS, CORR_MONTHLY_CSV
 
 # ── 설정 ──────────────────────────────────────────────
 STORE_MIN_R   = 0.85   # JSON 저장 최소 r (슬라이더 하한)
-ETF_DATA_JSON = os.path.join(ROOT, 'output', 'etf_data.json')
-OUT_JSON      = os.path.join(ROOT, 'output', 'graph_data.json')
+ETF_DATA_JSON    = os.path.join(ROOT, 'output', 'etf_data.json')
+CLASSIF_JSON     = os.path.join(ROOT, 'output', 'classification.json')
+OUT_JSON         = os.path.join(ROOT, 'output', 'graph_data.json')
 
 # 섹터별 색상 (다크 테마)
 SECTOR_COLORS = {
@@ -77,16 +78,27 @@ def main():
                 'a': round(e.get('aum', 0) / 1e9, 2),
             }
 
+    # 레거시 티커 로드
+    legacy_tickers = set()
+    if os.path.exists(CLASSIF_JSON):
+        with open(CLASSIF_JSON, encoding='utf-8') as f:
+            classif = json.load(f)
+        legacy_tickers = {tk for tk, info in classif.items() if info.get('is_legacy')}
+        print(f"   레거시 티커: {len(legacy_tickers)}개")
+
     # 3. 노드 목록 (상관행렬에 있는 티커 기준)
     nodes = []
     for tk in tickers:
         m = meta.get(tk, {})
-        nodes.append({
+        node = {
             'id': tk,
             'n':  m.get('n', tk),
             's':  m.get('s', 'S24'),
             'a':  m.get('a', 0.0),
-        })
+        }
+        if tk in legacy_tickers:
+            node['l'] = 1
+        nodes.append(node)
 
     # 4. 엣지 계산 (numpy 벡터화, 상삼각만)
     print(f"   엣지 계산 중 (r ≥ {STORE_MIN_R})...")
