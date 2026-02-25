@@ -59,6 +59,13 @@ def assess_sector_legacy(sector_id, sector_tickers, classification,
             except Exception:
                 pass
 
+        # 자동 규칙: AUM ≤ $100M → AUM 너무 적음 (active ETF에만 적용)
+        if not reasons and ticker not in LEGACY_EXEMPTIONS:
+            aum = scraped.get(ticker, {}).get('market_cap', 0)
+            if 0 < aum <= LEGACY_MIN_AUM:
+                reasons.append('LOW_AUM')
+                details.append('AUM 너무 적음')
+
         is_legacy = len(reasons) >= 1
         results[ticker] = {
             'is_legacy': is_legacy,
