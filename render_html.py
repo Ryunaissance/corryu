@@ -283,94 +283,94 @@ function initDashboard() {{
         order: [],
         columns: [
             {{
-                data: 't', className: 'text-left font-semibold',
+                data: 'ticker', className: 'text-left font-semibold',
                 render: function(d, type, row) {{
                     if (type !== 'display') return d;
                     let isMine = myPortfolio.includes(d);
                     let cls = isMine ? 'text-yellow-400 text-base' : 'text-blue-300';
                     let h = '<span class="'+cls+'">'+d+'</span>';
-                    if (row.sh) h += '<span class="badge-short" title="상장 3년 미만">짧은연혁</span>';
+                    if (row.short_history) h += '<span class="badge-short" title="상장 3년 미만">짧은연혁</span>';
                     return h;
                 }}
             }},
             {{
-                data: 'n', className: 'text-left text-xs text-gray-400',
+                data: 'name', className: 'text-left text-xs text-gray-400',
                 render: function(d, type, row) {{
                     if (type !== 'display') return d;
                     let h = '<div class="leading-tight">'+d+'</div>';
-                    if (myPortfolio.includes(row.t)) {{
+                    if (myPortfolio.includes(row.ticker)) {{
                         h += '<div class="mt-1"><span class="mine-badge">MY</span></div>';
                     }}
                     return h;
                 }}
             }},
-            {{ data: 'rk', render: function(d,t){{ return t==='display'?(d===9999?'-':d):d; }} }},
-            {{ data: 'mc', render: function(d,t){{ return t==='display'?formatMCap(d):d; }} }},
-            {{ data: 'r', render: function(d,t) {{
+            {{ data: 'rank', render: function(d,t){{ return t==='display'?(d===9999?'-':d):d; }} }},
+            {{ data: 'aum', render: function(d,t){{ return t==='display'?formatMCap(d):d; }} }},
+            {{ data: 'r_anchor', render: function(d,t) {{
                 if(t!=='display') return d;
                 let c = d >= 0.70 ? 'text-pink-400 font-bold' : (d <= -0.3 ? 'text-green-400 font-bold' : 'text-gray-400');
                 return '<span class="'+c+'">'+d.toFixed(2)+'</span>';
             }} }},
-            {{ data: 'z', render: function(d,t,row) {{
-                if(row.sh && t==='display') return '<span class="text-gray-600">-</span>';
-                if(t!=='display') return row.sh ? -999999 : d;
+            {{ data: 'z_score', render: function(d,t,row) {{
+                if(row.short_history && t==='display') return '<span class="text-gray-600">-</span>';
+                if(t!=='display') return row.short_history ? -999999 : d;
                 let c = d <= -1.5 ? 'value-down font-bold' : (d >= 2.0 ? 'value-up font-bold' : 'text-gray-500');
                 return '<span class="'+c+'">'+d.toFixed(2)+'</span>';
             }} }},
-            {{ data: 'ma', render: function(d,t,row) {{
-                if(row.sh && t==='display') return '<span class="text-gray-600">-</span>';
-                if(t!=='display') return row.sh ? -999999 : d;
+            {{ data: 'ma200_pct', render: function(d,t,row) {{
+                if(row.short_history && t==='display') return '<span class="text-gray-600">-</span>';
+                if(t!=='display') return row.short_history ? -999999 : d;
                 let c = d <= -10 ? 'value-down font-bold' : (d >= 15 ? 'value-up font-bold' : 'text-gray-500');
                 return '<span class="'+c+'">'+(d>0?'+':'')+d.toFixed(1)+'%</span>';
             }} }},
-            {{ data: 'h52', render: function(d,t,row) {{
-                if(row.sh && t==='display') return '<span class="text-gray-600">-</span>';
-                if(t!=='display') return row.sh ? -999999 : d;
+            {{ data: 'mdd_52w', render: function(d,t,row) {{
+                if(row.short_history && t==='display') return '<span class="text-gray-600">-</span>';
+                if(t!=='display') return row.short_history ? -999999 : d;
                 let c = d <= -20 ? 'value-down font-bold' : 'text-gray-500';
                 return '<span class="'+c+'">'+d.toFixed(1)+'%</span>';
             }} }},
             {{ data: 'cagr', render: function(d,t,row) {{
-                if(row.sh && t==='display') return '<span class="text-gray-600">-</span>';
-                if(t!=='display') return row.sh ? -999999 : (d||0);
+                if(row.short_history && t==='display') return '<span class="text-gray-600">-</span>';
+                if(t!=='display') return row.short_history ? -999999 : (d||0);
                 return '<span class="text-gray-300 font-semibold">'+(d>0?'+':'')+d.toFixed(1)+'%</span>';
             }} }},
-            {{ data: 'v', render: function(d,t,row) {{
-                if(row.sh && t==='display') return '<span class="text-gray-600">-</span>';
-                if(t!=='display') return row.sh ? -999999 : (d||0);
+            {{ data: 'vol', render: function(d,t,row) {{
+                if(row.short_history && t==='display') return '<span class="text-gray-600">-</span>';
+                if(t!=='display') return row.short_history ? -999999 : (d||0);
                 return '<span class="text-gray-500">'+d.toFixed(1)+'%</span>';
             }} }},
-            {{ data: 's', render: function(d,t,row) {{
-                if(row.sh && t==='display') return '<span class="text-gray-600">-</span>';
-                if(t!=='display') return row.sh ? -999999 : (d===null?-999999:d);
+            {{ data: 'sortino', render: function(d,t,row) {{
+                if(row.short_history && t==='display') return '<span class="text-gray-600">-</span>';
+                if(t!=='display') return row.short_history ? -999999 : (d===null?-999999:d);
                 let c = d > 1.2 ? 'text-purple-400 font-bold' : 'text-gray-500';
                 return '<span class="'+c+'">'+d.toFixed(2)+'</span>';
             }} }},
-            {{ data: 'inc', className: 'text-xs text-gray-600', render: function(d, t) {{
+            {{ data: 'inception', className: 'text-xs text-gray-600', render: function(d, t) {{
                 if(t !== 'display') return d || '';
                 if(!d || d==='1900-01-01') return '-';
                 return d.substring(2);
             }} }},
-            {{ data: 'isl', render: function(d,t,row) {{
+            {{ data: 'is_legacy', render: function(d,t,row) {{
                 if(t!=='display') return d ? 1 : 0;
                 if(!d) return '<span class="badge-active">Active</span>';
-                let detail = (row.ld||[]).join(' / ');
+                let detail = (row.legacy_detail||[]).join(' / ');
                 return '<span class="badge-legacy">Legacy</span>'
                     + (detail ? '<div class="text-xs text-red-400 mt-0.5 opacity-80">'+detail+'</div>' : '');
             }} }}
         ],
         createdRow: function(row, data) {{
-            if (data.isl) $(row).addClass('row-legacy');
+            if (data.is_legacy) $(row).addClass('row-legacy');
         }}
     }});
 
     // Custom filter
     $.fn.dataTable.ext.search.push(function(settings, searchData, dataIndex) {{
         let row = settings.aoData[dataIndex]._aData;
-        if (state.hideLegacy && row.isl) return false;
-        if (state.hideShort && row.sh) return false;
-        if (state.minAum > 0 && row.mc < state.minAum * 1e6) return false;
-        if (state.minSortino > -999 && !row.sh) {{
-            if (row.s < state.minSortino) return false;
+        if (state.hideLegacy && row.is_legacy) return false;
+        if (state.hideShort && row.short_history) return false;
+        if (state.minAum > 0 && row.aum < state.minAum * 1e6) return false;
+        if (state.minSortino > -999 && !row.short_history) {{
+            if (row.sortino < state.minSortino) return false;
         }}
         return true;
     }});

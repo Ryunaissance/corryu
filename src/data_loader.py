@@ -82,3 +82,24 @@ def get_market_cap(ticker, scraped):
 def get_rank(ticker, scraped):
     """시가총액 순위 반환"""
     return scraped.get(ticker, {}).get('rank', 9999)
+
+
+def get_corr_value(ref_ticker, ticker, df_corr_monthly, df_corr_daily):
+    """두 티커 간 상관계수 반환 (월간 우선, 없으면 일간 fallback)
+
+    Args:
+        ref_ticker: 기준 티커 (예: 앵커 ETF, 'SPY')
+        ticker: 대상 티커
+        df_corr_monthly: 월간 상관계수 매트릭스
+        df_corr_daily: 일간 상관계수 매트릭스
+
+    Returns:
+        float: 상관계수 (데이터 없으면 0.0)
+    """
+    if ref_ticker in df_corr_monthly.columns and ticker in df_corr_monthly.columns:
+        r = df_corr_monthly[ref_ticker].get(ticker, 0.0)
+    elif ref_ticker in df_corr_daily.columns and ticker in df_corr_daily.columns:
+        r = df_corr_daily[ref_ticker].get(ticker, 0.0)
+    else:
+        return 0.0
+    return 0.0 if pd.isna(r) else float(r)

@@ -9,7 +9,7 @@ from config import (
     SECTOR_DEFS, MANUAL_LEGACY_OVERRIDES, LEGACY_EXEMPTIONS,
     LEGACY_MIN_AUM, LEGACY_MIN_TRADING_DAYS,
     LEGACY_TRACKING_ERROR_THRESHOLD, LEGACY_NEAR_DUPLICATE_CORR,
-    LEGACY_NEAR_DUPLICATE_TOP_N,
+    LEGACY_NEAR_DUPLICATE_TOP_N, SHORT_HISTORY_CUTOFF,
 )
 
 
@@ -53,7 +53,7 @@ def assess_sector_legacy(sector_id, sector_tickers, classification,
         if ticker not in MANUAL_LEGACY_OVERRIDES and ticker not in LEGACY_EXEMPTIONS:
             try:
                 inc = str(scraped.get(ticker, {}).get('inception_date', '1900-01-01'))[:10]
-                if inc != '1900-01-01' and inc > '2021-05-20':
+                if inc != '1900-01-01' and inc > SHORT_HISTORY_CUTOFF:
                     reasons.append('SHORT_HISTORY')
                     details.append('상장기간 너무 짧음')
             except Exception:

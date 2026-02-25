@@ -153,11 +153,8 @@ KEYWORD_RULES = {
     },
 }
 
-# ── 태그 규칙 (대시보드 표시용) ──────────────────────
-# 태그 기능 비활성화
-TAG_RULES = {}
-
 # ── 레거시 임계값 ────────────────────────────────────
+SHORT_HISTORY_CUTOFF = '2021-05-20'  # 이 날짜 이후 상장 ETF는 상장기간 부족으로 레거시 처리
 LEGACY_MIN_AUM = 100_000_000           # $100M
 LEGACY_MIN_TRADING_DAYS = 750          # ~3년
 LEGACY_TRACKING_ERROR_THRESHOLD = 0.50 # 앵커 대비 r
