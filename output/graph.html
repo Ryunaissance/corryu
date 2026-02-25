@@ -306,6 +306,16 @@ function applyFilter(minR) {
   currentR = minR;
   const filtered = allLinks.filter(l => l.r >= minR);
   Graph.graphData({ nodes: allNodes, links: filtered });
+
+  // r=1 → 가깝게, r≈0 → 멀게  (graphData 호출 후 직접 설정)
+  const lf = Graph.d3Force('link');
+  if (lf) {
+    lf.distance(l => Math.max(5, (1 - (l.r || 0.9)) * LINK_DIST_K))
+      .strength(l => Math.max(0, ((l.r || 0.9) - 0.8) * LINK_STRENGTH_K));
+  }
+  Graph.d3Force('charge').strength(-80);
+  Graph.d3ReheatSimulation();
+
   updateStats(allNodes.length, filtered.length, true);
 }
 
@@ -347,9 +357,6 @@ fetch('graph_data.json')
       .linkColor(getLinkColor)
       .linkWidth(getLinkWidth)
       .linkCurvature(0)
-      // r=1 → 거리 0, r=0 → 거리 LINK_DIST_K
-      .d3LinkDistance(link => Math.max(5, (1 - (link.r || 0.9)) * LINK_DIST_K))
-      .d3LinkStrength(link => Math.max(0, ((link.r || 0.9) - 0.8) * LINK_STRENGTH_K))
       .d3AlphaDecay(0.015)
       .d3VelocityDecay(0.35)
       .cooldownTime(20000)
@@ -406,9 +413,6 @@ fetch('graph_data.json')
       .onBackgroundClick(() => {
         Graph.zoomToFit(400, 40);
       });
-
-    // 반발력 강화 (노드가 겹치지 않게)
-    Graph.d3Force('charge').strength(-80);
 
     progFill.style.width = '100%';
     setTimeout(() => { progFill.style.width = '0%'; }, 600);
