@@ -5250,8 +5250,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8413,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLP와 상관계수 매우 높음"
+    ]
   },
   "FTXL": {
     "sector_id": "S02",
@@ -8119,8 +8121,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8903,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLP와 상관계수 매우 높음"
+    ]
   },
   "IYR": {
     "sector_id": "S20",
@@ -10066,8 +10070,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8045,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLP와 상관계수 매우 높음"
+    ]
   },
   "PBUS": {
     "sector_id": "S01",
@@ -13711,8 +13717,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9909,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLP와 상관계수 매우 높음"
+    ]
   },
   "VDE": {
     "sector_id": "S19",
