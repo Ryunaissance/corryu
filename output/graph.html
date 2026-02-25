@@ -92,9 +92,11 @@
     .legend-item {
       display: flex; align-items: center; gap: 7px;
       padding: 3px 4px; border-radius: 4px; cursor: pointer;
-      transition: background 0.12s;
+      transition: background 0.12s, opacity 0.12s;
     }
     .legend-item:hover { background: #161b22; }
+    .legend-item.active { background: rgba(96,165,250,0.12); outline: 1px solid rgba(96,165,250,0.35); }
+    .legend-item.dimmed { opacity: 0.35; }
     .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
     .legend-text { font-size: 11px; color: #c9d1d9; }
 
@@ -230,6 +232,7 @@ let hoverNode       = null;
 let highlightNodeIds = new Set();
 let searchTicker    = '';
 let hideLegacy      = true;
+let focusSector     = null;   // 레전드 클릭으로 선택된 섹터 ID
 
 // ── 색상 / 크기 함수 ─────────────────────────────────
 function sectorColor(sid) {
@@ -243,6 +246,9 @@ function getNodeColor(node) {
     if (node === hoverNode)              return '#ffffff';
     if (highlightNodeIds.has(node.id))  return base;
     return base + '22';  // 흐리게
+  }
+  if (focusSector) {
+    return node.s === focusSector ? base : base + '18';
   }
   return base;
 }
@@ -263,6 +269,14 @@ function getLinkColor(link) {
     return `rgba(${Math.round(255*t)},${Math.round(120+80*t)},${Math.round(255*(1-t))},0.85)`;
   }
   const t = Math.max(0, (link.r - storeMinR) / (1 - storeMinR));
+  if (focusSector) {
+    const sn = typeof link.source === 'object' ? link.source : (Graph.graphData().nodes||[]).find(n=>n.id===link.source);
+    const tn = typeof link.target === 'object' ? link.target : (Graph.graphData().nodes||[]).find(n=>n.id===link.target);
+    if ((sn && sn.s === focusSector) || (tn && tn.s === focusSector)) {
+      return `rgba(148,163,184,${0.08 + t * 0.45})`;
+    }
+    return 'rgba(255,255,255,0.01)';
+  }
   return `rgba(148,163,184,${0.04 + t * 0.22})`;
 }
 
@@ -308,13 +322,30 @@ function renderLegend() {
     html += `<div class="legend-ac">${AC_KO[ac]}</div>`;
     for (const s of grouped[ac]) {
       html += `
-        <div class="legend-item" title="${s.name_en}">
+        <div class="legend-item" data-sid="${s.sid}" title="${s.name_en}">
           <div class="legend-dot" style="background:${s.color}"></div>
           <span class="legend-text">${s.name}</span>
         </div>`;
     }
   }
-  document.getElementById('legend-items').innerHTML = html;
+  const container = document.getElementById('legend-items');
+  container.innerHTML = html;
+
+  container.addEventListener('click', e => {
+    const item = e.target.closest('.legend-item');
+    if (!item) return;
+    const sid = item.dataset.sid;
+    focusSector = focusSector === sid ? null : sid;
+    // 레전드 스타일 업데이트
+    container.querySelectorAll('.legend-item').forEach(el => {
+      el.classList.remove('active', 'dimmed');
+      if (focusSector) {
+        if (el.dataset.sid === focusSector) el.classList.add('active');
+        else el.classList.add('dimmed');
+      }
+    });
+    if (Graph) Graph.refresh();
+  });
 }
 
 // ── 필터 적용 (슬라이더 변경 시) ───────────────────────
@@ -455,7 +486,13 @@ fetch('graph_data.json')
         Graph.zoom(5, 500);
       })
       .onBackgroundClick(() => {
-        Graph.zoomToFit(400, 40);
+        if (focusSector) {
+          focusSector = null;
+          document.querySelectorAll('.legend-item').forEach(el => el.classList.remove('active', 'dimmed'));
+          Graph.refresh();
+        } else {
+          Graph.zoomToFit(400, 40);
+        }
       });
 
     progFill.style.width = '100%';
