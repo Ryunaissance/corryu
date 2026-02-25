@@ -5178,8 +5178,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9941,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLP와 상관계수 매우 높음"
+    ]
   },
   "FTCS": {
     "sector_id": "S01",
