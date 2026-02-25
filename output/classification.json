@@ -429,8 +429,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.88,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "시가총액 너무 적음"
+    ]
   },
   "ASEA": {
     "sector_id": "S12",
@@ -1049,8 +1051,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7032,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "시가총액 너무 작음"
+    ]
   },
   "BILS": {
     "sector_id": "S15",
@@ -1136,8 +1140,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.871,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "상장기간 너무 짧음"
+    ]
   },
   "BITU": {
     "sector_id": "S23",
@@ -1210,8 +1216,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.7258,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "상장기간 너무 짧음"
+    ]
   },
   "BKLC": {
     "sector_id": "S01",
@@ -1670,8 +1678,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.9149,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "상장기간 너무 짧음"
+    ]
   },
   "BTFX": {
     "sector_id": "S21",
@@ -3702,8 +3712,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.6311,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "시가총액 너무 작음"
+    ]
   },
   "ETH": {
     "sector_id": "S21",
@@ -4294,8 +4306,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9668,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLC와 상관계수 매우 높음"
+    ]
   },
   "FCOR": {
     "sector_id": "S14",
@@ -5168,8 +5182,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9941,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLP와 상관계수 매우 높음"
+    ]
   },
   "FTCS": {
     "sector_id": "S01",
@@ -5240,8 +5256,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8413,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLP와 상관계수 매우 높음"
+    ]
   },
   "FTXL": {
     "sector_id": "S02",
@@ -5258,8 +5276,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9971,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLU와 상관계수 매우 높음"
+    ]
   },
   "FV": {
     "sector_id": "S01",
@@ -5330,8 +5350,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9085,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLU와 상관계수 매우 높음"
+    ]
   },
   "GARP": {
     "sector_id": "S02",
@@ -6759,8 +6781,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.6756,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "시가총액 너무 작음"
+    ]
   },
   "IBMN": {
     "sector_id": "S14",
@@ -7069,8 +7093,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9465,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLU와 상관계수 매우 높음"
+    ]
   },
   "IDV": {
     "sector_id": "S11",
@@ -8101,8 +8127,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8903,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLP와 상관계수 매우 높음"
+    ]
   },
   "IYR": {
     "sector_id": "S20",
@@ -8469,8 +8497,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8862,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "시가총액 너무 작음"
+    ]
   },
   "KALL": {
     "sector_id": "S12",
@@ -9272,8 +9302,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "correlation",
     "r_anchor": 0.8394,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "시가총액 너무 작음"
+    ]
   },
   "MSTX": {
     "sector_id": "S23",
@@ -9290,8 +9322,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "correlation",
     "r_anchor": 0.7591,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "커버드콜"
+    ]
   },
   "MTGP": {
     "sector_id": "S20",
@@ -9524,8 +9558,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7242,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "시가총액 너무 적음"
+    ]
   },
   "NFTY": {
     "sector_id": "S12",
@@ -9569,8 +9605,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "correlation",
     "r_anchor": 0.7174,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "시가총액 너무 작음"
+    ]
   },
   "NRGD": {
     "sector_id": "S22",
@@ -10040,8 +10078,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8045,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLP와 상관계수 매우 높음"
+    ]
   },
   "PBUS": {
     "sector_id": "S01",
@@ -10500,8 +10540,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9345,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "시가총액 너무 작음"
+    ]
   },
   "PVAL": {
     "sector_id": "S07",
@@ -11220,8 +11262,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9533,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLU와 상관계수 매우 높음"
+    ]
   },
   "RSSL": {
     "sector_id": "S13",
@@ -12586,8 +12630,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.6426,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "시가총액 너무 작음"
+    ]
   },
   "STIP": {
     "sector_id": "S17",
@@ -13679,8 +13725,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9909,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLP와 상관계수 매우 높음"
+    ]
   },
   "VDE": {
     "sector_id": "S19",
@@ -13917,8 +13965,8 @@
     "legacy_reasons": []
   },
   "VNM": {
-    "sector_id": "S09",
-    "sector_name": "커뮤니케이션",
+    "sector_id": "S12",
+    "sector_name": "신흥국",
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6526,
@@ -14041,8 +14089,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9794,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLC와 상관계수 매우 높음"
+    ]
   },
   "VPL": {
     "sector_id": "S11",
@@ -14068,8 +14118,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9947,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLU와 상관계수 매우 높음"
+    ]
   },
   "VRP": {
     "sector_id": "S16",
@@ -14410,8 +14462,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.6345,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "시가총액 너무 작음"
+    ]
   },
   "WHTX": {
     "sector_id": "S23",
@@ -14951,8 +15005,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "correlation",
     "r_anchor": 0.8051,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "시가총액 너무 작음"
+    ]
   },
   "XYLD": {
     "sector_id": "S01",
