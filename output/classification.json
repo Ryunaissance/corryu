@@ -5333,10 +5333,10 @@
     "legacy_reasons": []
   },
   "GCOR": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S14",
+    "sector_name": "투자등급 채권",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.3674,
     "is_legacy": false,
     "legacy_reasons": []
@@ -5391,10 +5391,10 @@
     ]
   },
   "GDOC": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S03",
+    "sector_name": "헬스케어",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.1804,
     "is_legacy": false,
     "legacy_reasons": []
@@ -5442,28 +5442,28 @@
     ]
   },
   "GEM": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S12",
+    "sector_name": "신흥국",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.3816,
     "is_legacy": false,
     "legacy_reasons": []
   },
   "GEMD": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S16",
+    "sector_name": "하이일드/신흥채",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.3979,
     "is_legacy": false,
     "legacy_reasons": []
   },
   "GGUS": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S01",
+    "sector_name": "US 대형주 종합",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.0868,
     "is_legacy": false,
     "legacy_reasons": []
@@ -5487,10 +5487,10 @@
     "legacy_reasons": []
   },
   "GIGB": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S14",
+    "sector_name": "투자등급 채권",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.3865,
     "is_legacy": false,
     "legacy_reasons": []
@@ -5505,19 +5505,19 @@
     "legacy_reasons": []
   },
   "GIND": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S12",
+    "sector_name": "신흥국",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.0449,
     "is_legacy": false,
     "legacy_reasons": []
   },
   "GINN": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S24",
+    "sector_name": "테마/특수목적",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.1945,
     "is_legacy": false,
     "legacy_reasons": []
@@ -5581,10 +5581,10 @@
     "legacy_reasons": []
   },
   "GLOV": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S11",
+    "sector_name": "국제선진국",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.2528,
     "is_legacy": false,
     "legacy_reasons": []
@@ -5610,10 +5610,10 @@
     "legacy_reasons": []
   },
   "GMUN": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S14",
+    "sector_name": "투자등급 채권",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.158,
     "is_legacy": false,
     "legacy_reasons": []
@@ -5686,19 +5686,19 @@
     "legacy_reasons": []
   },
   "GPIQ": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S02",
+    "sector_name": "테크놀로지",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.1052,
     "is_legacy": false,
     "legacy_reasons": []
   },
   "GPIX": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S01",
+    "sector_name": "US 대형주 종합",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.0949,
     "is_legacy": false,
     "legacy_reasons": []
@@ -5758,19 +5758,19 @@
     "legacy_reasons": []
   },
   "GSEU": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S11",
+    "sector_name": "국제선진국",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.2787,
     "is_legacy": false,
     "legacy_reasons": []
   },
   "GSEW": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S01",
+    "sector_name": "US 대형주 종합",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.128,
     "is_legacy": false,
     "legacy_reasons": []
@@ -5785,64 +5785,64 @@
     "legacy_reasons": []
   },
   "GSIE": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S11",
+    "sector_name": "국제선진국",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.2307,
     "is_legacy": false,
     "legacy_reasons": []
   },
   "GSIG": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S14",
+    "sector_name": "투자등급 채권",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.4034,
     "is_legacy": false,
     "legacy_reasons": []
   },
   "GSJY": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S11",
+    "sector_name": "국제선진국",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.2119,
     "is_legacy": false,
     "legacy_reasons": []
   },
   "GSLC": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S01",
+    "sector_name": "US 대형주 종합",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.0909,
     "is_legacy": false,
     "legacy_reasons": []
   },
   "GSSC": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S13",
+    "sector_name": "중소형주",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": -0.0067,
     "is_legacy": false,
     "legacy_reasons": []
   },
   "GSST": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S15",
+    "sector_name": "단기채/현금성",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.2667,
     "is_legacy": false,
     "legacy_reasons": []
   },
   "GSUS": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S01",
+    "sector_name": "US 대형주 종합",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.1015,
     "is_legacy": false,
     "legacy_reasons": []
@@ -5857,10 +5857,10 @@
     "legacy_reasons": []
   },
   "GTEK": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S02",
+    "sector_name": "테크놀로지",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.2288,
     "is_legacy": false,
     "legacy_reasons": []
@@ -5869,7 +5869,7 @@
     "sector_id": "S17",
     "sector_name": "TIPS/인플레이션",
     "asset_class": "FIXED_INCOME",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.9977,
     "is_legacy": false,
     "legacy_reasons": []
@@ -5893,10 +5893,10 @@
     "legacy_reasons": []
   },
   "GUSA": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S01",
+    "sector_name": "US 대형주 종합",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.0835,
     "is_legacy": false,
     "legacy_reasons": []
@@ -8394,10 +8394,10 @@
     "legacy_reasons": []
   },
   "JUST": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S01",
+    "sector_name": "US 대형주 종합",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.1129,
     "is_legacy": false,
     "legacy_reasons": []
@@ -10096,10 +10096,10 @@
     "legacy_reasons": []
   },
   "PGJ": {
-    "sector_id": "S18",
-    "sector_name": "금/귀금속",
+    "sector_id": "S12",
+    "sector_name": "신흥국",
     "asset_class": "REAL_ASSETS",
-    "method": "keyword",
+    "method": "keyword_fixed",
     "r_anchor": 0.2196,
     "is_legacy": false,
     "legacy_reasons": []
