@@ -60,10 +60,10 @@ SECTOR_DEFS = {
     'S18': {'name': '금/귀금속',        'name_en': 'Gold/Precious Metals',   'anchor': 'GLD',  'asset_class': 'REAL_ASSETS',  'icon': '✨'},
     'S19': {'name': '에너지/원자재',    'name_en': 'Energy/Commodities',     'anchor': 'XLE',  'asset_class': 'REAL_ASSETS',  'icon': '🛢️'},
     'S20': {'name': '부동산/REITs',     'name_en': 'Real Estate/REITs',      'anchor': 'VNQ',  'asset_class': 'REAL_ASSETS',  'icon': '🏘️'},
-    # --- ALTERNATIVE (3개) ---
+    # --- ALTERNATIVE (2개) ---
     'S21': {'name': '가상자산',         'name_en': 'Crypto/Digital',         'anchor': 'GBTC', 'asset_class': 'ALTERNATIVE',  'icon': '₿'},
     'S22': {'name': '인버스/숏',        'name_en': 'Inverse/Short',          'anchor': 'SQQQ', 'asset_class': 'ALTERNATIVE',  'icon': '📉'},
-    'S23': {'name': '레버리지 롱',      'name_en': 'Leveraged Long',         'anchor': 'TQQQ', 'asset_class': 'ALTERNATIVE',  'icon': '🚀'},
+    # S23 레버리지 롱 폐지: 레버리지 상품은 기초자산 섹터에 분류
     # --- THEMATIC (1개) ---
     'S24': {'name': '테마/특수목적',    'name_en': 'Thematic/Specialty',     'anchor': None,   'asset_class': 'THEMATIC',     'icon': '🧩'},
 }
@@ -98,18 +98,7 @@ KEYWORD_RULES = {
                            'SSG', 'SCO', 'SDP', 'BIS', 'SRS', 'KOLD', 'RXD', 'SDD'],
         'exclude_if': SHORT_TERM_BOND_WORDS,
     },
-    # 레버리지 롱 (S23)
-    'S23': {
-        'keywords': ['proshares ultra ', 'direxion daily.*bull', '2x ', '3x ',
-                     'triple-leveraged', 'double-leveraged', 'ultrapro'],
-        'ticker_patterns': ['TQQQ', 'QLD', 'SSO', 'UPRO', 'UDOW', 'URTY', 'TNA',
-                           'UWM', 'DDM', 'MVV', 'SAA', 'UYG', 'FAS', 'TECL',
-                           'SOXL', 'FNGU', 'LABU', 'CURE', 'DFEN', 'NAIL',
-                           'DRN', 'URE', 'NUGT', 'JNUG', 'AGQ', 'UCO', 'BOIL',
-                           'UGL', 'GUSH', 'WANT', 'MIDU', 'PILL', 'DUSL',
-                           'GDXU', 'UYR', 'ROM', 'UXI', 'UPW', 'UCC', 'UGE',
-                           'RXL', 'DIG', 'BIB', 'UJB'],
-    },
+    # S23 레버리지 롱 폐지: 키워드 룰 제거 → 상관계수로 기초자산 섹터에 자동 배정
     # 가상자산 (S21)
     'S21': {
         'keywords': ['bitcoin', 'crypto', 'ethereum', 'blockchain', 'digital asset',
