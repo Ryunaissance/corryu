@@ -1313,8 +1313,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.7823,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "BNKU": {
     "sector_id": "S23",
@@ -2892,8 +2893,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": -0.1085,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "DUSA": {
     "sector_id": "S01",
@@ -9647,8 +9649,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.4965,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "NRGU": {
     "sector_id": "S19",
@@ -11989,8 +11992,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "correlation",
     "r_anchor": 0.6258,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "SLV": {
     "sector_id": "S18",
@@ -14597,8 +14601,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": -0.167,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "WTIU": {
     "sector_id": "S23",
