@@ -44,10 +44,20 @@ def assess_sector_legacy(sector_id, sector_tickers, classification,
         reasons = []
         details = []
 
-        # 수동 오버라이드만 적용 (자동 규칙 비활성화)
+        # 수동 오버라이드
         if ticker in MANUAL_LEGACY_OVERRIDES:
             reasons.append('MANUAL')
             details.append(f'{MANUAL_LEGACY_OVERRIDES[ticker]}')
+
+        # 자동 규칙: 2023년 이후 상장 → 상장기간 너무 짧음 (모든 카테고리 적용)
+        if ticker not in MANUAL_LEGACY_OVERRIDES and ticker not in LEGACY_EXEMPTIONS:
+            try:
+                inc = str(scraped.get(ticker, {}).get('inception_date', '1900-01-01'))[:10]
+                if inc != '1900-01-01' and int(inc[:4]) >= 2023:
+                    reasons.append('SHORT_HISTORY')
+                    details.append('상장기간 너무 짧음')
+            except Exception:
+                pass
 
         is_legacy = len(reasons) >= 1
         results[ticker] = {
