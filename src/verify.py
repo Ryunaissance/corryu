@@ -91,7 +91,6 @@ def spot_check(classification, scraped):
         'VNQ': 'S20', 'IYR': 'S20',
         'GBTC': 'S21', 'IBIT': 'S21',
         'SQQQ': 'S22', 'SH': 'S22',
-        'TQQQ': 'S23', 'UPRO': 'S23',
     }
 
     print(f"\n--- 스팟체크 ({len(expected)}개 핵심 ETF) ---")

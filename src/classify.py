@@ -3,14 +3,13 @@ CORRYU ETF Dashboard - MECE 섹터 분류 엔진
 3-Pass Waterfall: 키워드 → 상관계수 → Fallback
 """
 import re
-import pandas as pd
 from collections import defaultdict
 
 from config import (
     SECTOR_DEFS, KEYWORD_RULES, CORR_THRESHOLD, PROTECT_EQUITIES,
     SHORT_TERM_BOND_WORDS, ANCHOR_TO_SECTOR,
 )
-from data_loader import get_fullname
+from data_loader import get_fullname, get_corr_value
 
 
 def _match_keywords(text_lower, keywords):
@@ -78,12 +77,10 @@ def classify_by_correlation(ticker, df_corr_monthly, df_corr_daily, scraped):
 
     for sector_id, sdef in SECTOR_DEFS.items():
         anchor = sdef['anchor']
-        if not anchor or anchor not in corr_source.columns:
+        if not anchor:
             continue
 
-        r = corr_source[anchor].get(ticker, 0.0)
-        if pd.isna(r):
-            r = 0.0
+        r = get_corr_value(anchor, ticker, df_corr_monthly, df_corr_daily)
 
         # 주식 보호: PROTECT_EQUITIES에 있는 티커는 비주식 앵커로 끌려가지 않게
         if ticker in PROTECT_EQUITIES and anchor in non_equity_anchors:
@@ -179,14 +176,5 @@ def fill_anchor_correlations(classification, sector_members, df_corr_monthly, df
 
         for ticker in tickers:
             if classification[ticker]['r_anchor'] == 0.0 or classification[ticker]['method'] == 'keyword':
-                # 상관계수 계산
-                if ticker in df_corr_monthly.columns and anchor in df_corr_monthly.columns:
-                    r = df_corr_monthly[anchor].get(ticker, 0.0)
-                elif ticker in df_corr_daily.columns and anchor in df_corr_daily.columns:
-                    r = df_corr_daily[anchor].get(ticker, 0.0)
-                else:
-                    r = 0.0
-
-                if pd.isna(r):
-                    r = 0.0
-                classification[ticker]['r_anchor'] = round(float(r), 4)
+                r = get_corr_value(anchor, ticker, df_corr_monthly, df_corr_daily)
+                classification[ticker]['r_anchor'] = round(r, 4)
