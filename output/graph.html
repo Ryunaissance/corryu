@@ -376,6 +376,17 @@ fetch('graph_data.json')
       .nodeLabel(() => '')          // 커스텀 툴팁 사용
       .nodeVal(getNodeVal)
       .nodeColor(getNodeColor)
+      .nodeCanvasObjectMode(node => node.anchor ? 'after' : undefined)
+      .nodeCanvasObject((node, ctx, globalScale) => {
+        const label = node.id;
+        const fontSize = Math.max(9, Math.min(13, 11 / Math.max(1, Math.log2(globalScale + 1))));
+        ctx.font = `600 ${fontSize}px 'SF Mono',Consolas,Menlo,monospace`;
+        const r = Math.sqrt(getNodeVal(node)) * 4;
+        ctx.fillStyle = 'rgba(255,255,255,0.92)';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(label, node.x, node.y + r + 2);
+      })
       .linkColor(getLinkColor)
       .linkWidth(getLinkWidth)
       .linkCurvature(0)
