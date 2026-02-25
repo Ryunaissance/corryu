@@ -76,7 +76,7 @@ ANCHOR_TO_SECTOR = {v['anchor']: k for k, v in SECTOR_DEFS.items() if v['anchor'
 # 단기채 보호용 키워드 (인버스로 잘못 분류되지 않게)
 SHORT_TERM_BOND_WORDS = [
     'short term', 'short-term', 'short duration', 'short-duration',
-    'short maturity', '0-1 year', '1-3 year', 'ultra-short', 'ultrashort',
+    'short maturity', '0-1 year', '1-3 year', 'ultra-short', 'ultra short',
     'floating rate', 'floating-rate', 'money market', 'treasury bill',
     'cash reserve',
 ]
@@ -92,7 +92,10 @@ KEYWORD_RULES = {
         'ticker_patterns': ['SH', 'PSQ', 'DOG', 'RWM', 'SDS', 'QID', 'DXD', 'TWM',
                            'SPXU', 'SQQQ', 'SDOW', 'SRTY', 'SPXS', 'TZA', 'FAZ',
                            'ERY', 'LABD', 'YANG', 'DUST', 'JDST', 'DRIP', 'GDXD',
-                           'WEBS', 'UVIX', 'VIXY', 'VXX', 'SVXY'],
+                           'WEBS', 'UVIX', 'VIXY', 'VXX', 'SVXY',
+                           # ProShares UltraShort 시리즈 (비주식 기초자산 인버스)
+                           'GLL', 'ZSL', 'EUO', 'BZQ', 'EWV', 'EPV', 'FXP',
+                           'SSG', 'SCO', 'SDP', 'BIS', 'SRS', 'KOLD', 'RXD', 'SDD'],
         'exclude_if': SHORT_TERM_BOND_WORDS,
     },
     # 레버리지 롱 (S23)
