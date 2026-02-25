@@ -28,7 +28,8 @@ def classify_by_keywords(ticker, fullname):
     fn_lower = fullname.lower()
 
     # VIX 관련은 무조건 인버스/숏 (S22)
-    if 'vix' in fn_lower or 'volatility index' in fn_lower:
+    # 단, "low volatility index" 같은 저변동성 전략 ETF는 제외
+    if 'vix' in fn_lower or ('volatility index' in fn_lower and 'low volatility' not in fn_lower):
         return 'S22'
 
     for sector_id, rules in KEYWORD_RULES.items():
