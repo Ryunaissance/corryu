@@ -552,8 +552,9 @@
     "asset_class": "REAL_ASSETS",
     "method": "correlation",
     "r_anchor": 0.8821,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "AVIG": {
     "sector_id": "S14",
@@ -973,8 +974,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.932,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "BETZ": {
     "sector_id": "S04",
@@ -1123,8 +1125,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.4631,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "BITO": {
     "sector_id": "S21",
@@ -1312,8 +1315,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.7823,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "BNKU": {
     "sector_id": "S23",
@@ -2807,8 +2811,9 @@
     "asset_class": "REAL_ASSETS",
     "method": "correlation",
     "r_anchor": 0.9956,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "DRN": {
     "sector_id": "S23",
@@ -2827,8 +2832,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.5948,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "DSI": {
     "sector_id": "S01",
@@ -2890,8 +2896,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": -0.1085,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "DUSA": {
     "sector_id": "S01",
@@ -2908,8 +2915,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.139,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "DVY": {
     "sector_id": "S04",
@@ -2980,8 +2988,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "correlation",
     "r_anchor": 0.6204,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "DWUS": {
     "sector_id": "S01",
@@ -3304,8 +3313,9 @@
     "asset_class": "REAL_ASSETS",
     "method": "correlation",
     "r_anchor": 0.7576,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "EIPX": {
     "sector_id": "S19",
@@ -3313,8 +3323,9 @@
     "asset_class": "REAL_ASSETS",
     "method": "correlation",
     "r_anchor": 0.9049,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "EIRL": {
     "sector_id": "S11",
@@ -4240,8 +4251,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.7,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "FB": {
     "sector_id": "S01",
@@ -4889,8 +4901,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.6724,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "FLYU": {
     "sector_id": "S23",
@@ -5034,8 +5047,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.8643,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "FNGO": {
     "sector_id": "S23",
@@ -5496,8 +5510,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.2185,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "GDXJ": {
     "sector_id": "S18",
@@ -6057,8 +6072,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.6584,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "HDV": {
     "sector_id": "S06",
@@ -6138,8 +6154,9 @@
     "asset_class": "REAL_ASSETS",
     "method": "correlation",
     "r_anchor": 0.6092,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "HIPS": {
     "sector_id": "S13",
@@ -8755,8 +8772,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.5791,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "LABU": {
     "sector_id": "S23",
@@ -9216,8 +9234,9 @@
     "asset_class": "REAL_ASSETS",
     "method": "correlation",
     "r_anchor": 0.6683,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "MLPX": {
     "sector_id": "S19",
@@ -9641,8 +9660,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.4965,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "NRGU": {
     "sector_id": "S19",
@@ -9650,8 +9670,9 @@
     "asset_class": "REAL_ASSETS",
     "method": "correlation",
     "r_anchor": 0.9685,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "NTSE": {
     "sector_id": "S12",
@@ -9925,8 +9946,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.1612,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "OILK": {
     "sector_id": "S19",
@@ -10483,8 +10505,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.9913,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "PSR": {
     "sector_id": "S20",
@@ -10771,8 +10794,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.998,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "QIG": {
     "sector_id": "S14",
@@ -11056,8 +11080,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.5847,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "REZ": {
     "sector_id": "S20",
@@ -11356,8 +11381,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.715,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "RWO": {
     "sector_id": "S20",
@@ -11724,8 +11750,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.9138,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "SDTY": {
     "sector_id": "S01",
@@ -11802,8 +11829,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.901,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "SHAG": {
     "sector_id": "S15",
@@ -11982,8 +12010,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "correlation",
     "r_anchor": 0.6258,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "SLV": {
     "sector_id": "S18",
@@ -12216,8 +12245,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.789,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "SOXX": {
     "sector_id": "S02",
@@ -12280,8 +12310,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.895,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "SPDW": {
     "sector_id": "S11",
@@ -12487,8 +12518,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.9217,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "SPXU": {
     "sector_id": "S22",
@@ -12496,8 +12528,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.9221,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "SPXV": {
     "sector_id": "S01",
@@ -12586,8 +12619,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "anchor",
     "r_anchor": 1.0,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "SRET": {
     "sector_id": "S20",
@@ -13160,8 +13194,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.758,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "UAE": {
     "sector_id": "S24",
@@ -13596,8 +13631,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.7269,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "UVXY": {
     "sector_id": "S22",
@@ -13605,8 +13641,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.6726,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "UWM": {
     "sector_id": "S23",
@@ -14590,8 +14627,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": -0.167,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "WTIU": {
     "sector_id": "S23",
@@ -15061,8 +15099,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.3309,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "YBIT": {
     "sector_id": "S21",
@@ -15130,8 +15169,9 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.3562,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "CAGR 음수"
   },
   "YYY": {
     "sector_id": "S01",
