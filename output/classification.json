@@ -429,8 +429,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.88,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "시가총액 너무 적음"
+    ]
   },
   "ASEA": {
     "sector_id": "S12",
@@ -4304,8 +4306,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9668,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLC와 상관계수 매우 높음"
+    ]
   },
   "FCOR": {
     "sector_id": "S14",
@@ -9554,8 +9558,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7242,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "시가총액 너무 적음"
+    ]
   },
   "NFTY": {
     "sector_id": "S12",
@@ -14083,8 +14089,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9794,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "XLC와 상관계수 매우 높음"
+    ]
   },
   "VPL": {
     "sector_id": "S11",
