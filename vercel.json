@@ -1,5 +1,4 @@
 {
-  "buildCommand": "python3 render_html.py",
   "outputDirectory": "output",
   "cleanUrls": true
 }
