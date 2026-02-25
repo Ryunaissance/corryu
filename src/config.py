@@ -265,6 +265,9 @@ MANUAL_LEGACY_OVERRIDES = {
     'MLPX': 'XLE와 상관계수 매우 높음',
     'MLPA': 'XLE와 상관계수 매우 높음',
     'AMLP': 'XLE와 상관계수 매우 높음',
+    # -- 경기소비재 섹터 (XLY 중복) --
+    'VCR':  'XLY와 상관계수 매우 높음',
+    'IYC':  'XLY와 상관계수 매우 높음',
 }
 
 # 자동 레거시에서 면제할 ETF (예: 앵커 ETF는 자동 면제)
