@@ -15,7 +15,7 @@ from datetime import datetime
 ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(ROOT, 'src'))
 
-from config import SECTOR_DEFS, ASSET_CLASSES, MY_PORTFOLIO, OUTPUT_DIR
+from config import SECTOR_DEFS, SUPER_SECTOR_DEFS, ASSET_CLASSES, MY_PORTFOLIO, OUTPUT_DIR
 
 
 def generate_html(sector_meta):
@@ -37,8 +37,14 @@ def generate_html(sector_meta):
     json_sector_defs = json.dumps(
         {k: {'name': v['name'], 'name_en': v['name_en'],
              'icon': v['icon'], 'anchor': v['anchor'] or '—',
-             'asset_class': v['asset_class']}
+             'asset_class': v['asset_class'],
+             'super_sector': v.get('super_sector')}
          for k, v in SECTOR_DEFS.items()}, ensure_ascii=False)
+    json_super_sector_defs = json.dumps(
+        {k: {'name': v['name'], 'name_en': v['name_en'],
+             'anchor': v['anchor'], 'icon': v['icon'],
+             'color': v['color'], 'sub_sectors': v['sub_sectors']}
+         for k, v in SUPER_SECTOR_DEFS.items()}, ensure_ascii=False)
     json_my_portfolio = json.dumps(MY_PORTFOLIO)
 
     html = f"""<!DOCTYPE html>
@@ -67,6 +73,14 @@ body {{ background-color: var(--bg-primary); color: var(--text-primary); font-fa
 .sec-tab:hover {{ color: var(--text-primary); border-color: rgba(255,255,255,0.15); }}
 .sec-tab.active {{ background: rgba(59,130,246,0.15); color: #93c5fd; border-color: rgba(59,130,246,0.4); }}
 .sec-tab .sec-count {{ font-size: 0.7rem; opacity: 0.6; margin-left: 4px; }}
+/* Super-sector tab */
+.super-sec-tab {{ background: rgba(59,130,246,0.07); border-color: rgba(59,130,246,0.2); color: #93c5fd; }}
+.super-sec-tab:hover {{ background: rgba(59,130,246,0.15); border-color: rgba(59,130,246,0.4); }}
+.super-sec-tab.active {{ background: rgba(59,130,246,0.22); color: #fff; border-color: rgba(59,130,246,0.6); box-shadow: 0 0 12px rgba(59,130,246,0.2); }}
+/* Sub-sector tabs row */
+#subSecTabs {{ display:none; padding: 6px 0 2px 0; border-top: 1px solid rgba(59,130,246,0.15); margin-top: 4px; }}
+.sub-sec-tab {{ font-size: 0.77rem; padding: 4px 11px; }}
+.expand-arrow {{ font-size: 0.65rem; margin-left: 4px; opacity: 0.7; }}
 
 /* Summary Cards */
 .stat-card {{ display: flex; flex-direction: column; align-items: center; padding: 12px 8px; background: rgba(10,13,20,0.5); border-radius: 10px; border: 1px solid var(--border); min-width: 90px; }}
@@ -129,9 +143,10 @@ table.dataTable thead th.text-left, table.dataTable tbody td.text-left {{ text-a
         </div>
     </div>
 
-    <!-- Sector Tabs (Level 2) -->
+    <!-- Sector Tabs (Level 2) + Sub-sector Tabs (Level 3) -->
     <div class="glass p-4 mb-4">
         <div class="flex flex-wrap" id="secTabs"></div>
+        <div class="flex flex-wrap" id="subSecTabs"></div>
     </div>
 
     <!-- Sector Summary + Filters -->
@@ -197,11 +212,19 @@ let allData = {{}};
 const acSectors = {json_ac_sectors};
 const acDefs = {json_ac_defs};
 const sectorDefs = {json_sector_defs};
+const superSectorDefs = {json_super_sector_defs};
 const myPortfolio = {json_my_portfolio};
+
+// 섹터ID → 슈퍼섹터ID 역방향 맵
+const sectorToSuperSector = {{}};
+for (const [ssId, ss] of Object.entries(superSectorDefs)) {{
+    for (const sid of ss.sub_sectors) sectorToSuperSector[sid] = ssId;
+}}
 
 let state = {{
     activeAC: 'ALL',
-    activeSector: 'S01',
+    activeSector: 'ALL',       // 'ALL' | 섹터ID | 'SS_<ssId>' (슈퍼섹터 전체)
+    expandedSuperSector: null, // null | 슈퍼섹터ID (서브탭 표시 여부)
     hideLegacy: false,
     hideShort: false,
     minAum: 0,
@@ -228,6 +251,17 @@ function renderACTabs() {{
     $('#acTabs').html(html);
 }}
 
+function getSuperSectorMeta(ssId) {{
+    let ss = superSectorDefs[ssId];
+    if (!ss) return {{}};
+    let metas = ss.sub_sectors.map(sid => sectorMeta[sid] || {{}});
+    return {{
+        count:  metas.reduce((s,m) => s+(m.count||0), 0),
+        active: metas.reduce((s,m) => s+(m.active||0), 0),
+        legacy: metas.reduce((s,m) => s+(m.legacy||0), 0),
+    }};
+}}
+
 function renderSectorTabs() {{
     let sectors = [];
     if (state.activeAC === 'ALL') {{
@@ -235,38 +269,124 @@ function renderSectorTabs() {{
     }} else {{
         sectors = (acSectors[state.activeAC] || []).sort();
     }}
-    let html = '';
+    let allActive = state.activeSector === 'ALL' ? ' active' : '';
+    let totalCount  = sectors.reduce((s, sid) => s + ((sectorMeta[sid]||{{}}).count||0), 0);
+    let totalActiveN = sectors.reduce((s, sid) => s + ((sectorMeta[sid]||{{}}).active||0), 0);
+    let html = '<button class="sec-tab' + allActive + '" data-sector="ALL">전체<span class="sec-count">' + totalActiveN + '/' + totalCount + '</span></button>';
+
+    let renderedSS = new Set();
     for (let sid of sectors) {{
         let sd = sectorDefs[sid];
         let meta = sectorMeta[sid];
         if (!meta || meta.count === 0) continue;
+
+        let ssId = sd.super_sector;
+        if (ssId) {{
+            if (renderedSS.has(ssId)) continue;  // 이미 슈퍼섹터 탭 추가됨
+            renderedSS.add(ssId);
+            let ss = superSectorDefs[ssId];
+            let ssMeta = getSuperSectorMeta(ssId);
+            let ssIsActive = state.expandedSuperSector === ssId;
+            let isActiveSS = (state.activeSector === 'SS_' + ssId) ? ' active' : '';
+            let arrow = ssIsActive ? ' ▾' : ' ▸';
+            html += '<button class="sec-tab super-sec-tab' + isActiveSS + '" data-supersec="' + ssId + '">';
+            html += ss.icon + ' ' + ss.name;
+            html += '<span class="sec-count">' + ssMeta.active + '/' + ssMeta.count + '</span>';
+            html += '<span class="expand-arrow">' + arrow + '</span></button>';
+        }} else {{
+            let isActive = state.activeSector === sid ? ' active' : '';
+            html += '<button class="sec-tab' + isActive + '" data-sector="' + sid + '">';
+            html += sd.icon + ' ' + sd.name;
+            html += '<span class="sec-count">' + (meta.active||0) + '/' + meta.count + '</span></button>';
+        }}
+    }}
+    $('#secTabs').html(html);
+    renderSubSecTabs();
+}}
+
+function renderSubSecTabs() {{
+    let ssId = state.expandedSuperSector;
+    if (!ssId) {{ $('#subSecTabs').hide(); return; }}
+    let ss = superSectorDefs[ssId];
+    let html = '';
+    for (let sid of ss.sub_sectors) {{
+        let sd = sectorDefs[sid];
+        let meta = sectorMeta[sid];
+        if (!meta || meta.count === 0) continue;
         let isActive = state.activeSector === sid ? ' active' : '';
-        html += '<button class="sec-tab' + isActive + '" data-sector="' + sid + '">';
+        html += '<button class="sec-tab sub-sec-tab' + isActive + '" data-sector="' + sid + '">';
         html += sd.icon + ' ' + sd.name;
         html += '<span class="sec-count">' + (meta.active||0) + '/' + meta.count + '</span></button>';
     }}
-    $('#secTabs').html(html);
+    $('#subSecTabs').html(html).show();
 }}
 
 function renderSummary() {{
-    let meta = sectorMeta[state.activeSector] || {{}};
-    let sd = sectorDefs[state.activeSector] || {{}};
     let html = '';
-    html += '<div class="stat-card"><div class="stat-value text-white">' + (meta.count||0) + '</div><div class="stat-label">ETFs</div></div>';
-    html += '<div class="stat-card"><div class="stat-value text-green-400">' + (meta.active||0) + '</div><div class="stat-label">Active</div></div>';
-    html += '<div class="stat-card"><div class="stat-value text-red-400">' + (meta.legacy||0) + '</div><div class="stat-label">Legacy</div></div>';
-    html += '<div class="stat-card"><div class="stat-value text-blue-300">' + (meta.avg_cagr > 0 ? '+' : '') + (meta.avg_cagr||0).toFixed(1) + '%</div><div class="stat-label">Avg CAGR</div></div>';
-    html += '<div class="stat-card"><div class="stat-value text-gray-300">' + (meta.avg_vol||0).toFixed(1) + '%</div><div class="stat-label">Avg Vol</div></div>';
-    html += '<div class="stat-card"><div class="stat-value text-purple-400">' + (meta.avg_sortino||0).toFixed(2) + '</div><div class="stat-label">Avg Sortino</div></div>';
-    html += '<div class="stat-card" style="min-width:120px"><div class="stat-value text-yellow-300 text-sm">' + (sd.anchor||'—') + '</div><div class="stat-label">Anchor</div></div>';
+    let sec = state.activeSector;
+    if (sec === 'ALL') {{
+        let metas = Object.values(sectorMeta);
+        let totalCount  = metas.reduce((s,m) => s+(m.count||0), 0);
+        let totalActive = metas.reduce((s,m) => s+(m.active||0), 0);
+        let totalLegacy = metas.reduce((s,m) => s+(m.legacy||0), 0);
+        html += '<div class="stat-card"><div class="stat-value text-white">' + totalCount + '</div><div class="stat-label">ETFs</div></div>';
+        html += '<div class="stat-card"><div class="stat-value text-green-400">' + totalActive + '</div><div class="stat-label">Active</div></div>';
+        html += '<div class="stat-card"><div class="stat-value text-red-400">' + totalLegacy + '</div><div class="stat-label">Legacy</div></div>';
+    }} else if (sec && sec.startsWith('SS_')) {{
+        let ssId = sec.slice(3);
+        let ssMeta = getSuperSectorMeta(ssId);
+        let ss = superSectorDefs[ssId] || {{}};
+        html += '<div class="stat-card"><div class="stat-value text-white">' + ssMeta.count + '</div><div class="stat-label">ETFs</div></div>';
+        html += '<div class="stat-card"><div class="stat-value text-green-400">' + ssMeta.active + '</div><div class="stat-label">Active</div></div>';
+        html += '<div class="stat-card"><div class="stat-value text-red-400">' + ssMeta.legacy + '</div><div class="stat-label">Legacy</div></div>';
+        html += '<div class="stat-card" style="min-width:120px"><div class="stat-value text-yellow-300 text-sm">' + (ss.anchor||'—') + '</div><div class="stat-label">Anchor</div></div>';
+    }} else {{
+        let meta = sectorMeta[sec] || {{}};
+        let sd = sectorDefs[sec] || {{}};
+        html += '<div class="stat-card"><div class="stat-value text-white">' + (meta.count||0) + '</div><div class="stat-label">ETFs</div></div>';
+        html += '<div class="stat-card"><div class="stat-value text-green-400">' + (meta.active||0) + '</div><div class="stat-label">Active</div></div>';
+        html += '<div class="stat-card"><div class="stat-value text-red-400">' + (meta.legacy||0) + '</div><div class="stat-label">Legacy</div></div>';
+        html += '<div class="stat-card"><div class="stat-value text-blue-300">' + (meta.avg_cagr > 0 ? '+' : '') + (meta.avg_cagr||0).toFixed(1) + '%</div><div class="stat-label">Avg CAGR</div></div>';
+        html += '<div class="stat-card"><div class="stat-value text-gray-300">' + (meta.avg_vol||0).toFixed(1) + '%</div><div class="stat-label">Avg Vol</div></div>';
+        html += '<div class="stat-card"><div class="stat-value text-purple-400">' + (meta.avg_sortino||0).toFixed(2) + '</div><div class="stat-label">Avg Sortino</div></div>';
+        html += '<div class="stat-card" style="min-width:120px"><div class="stat-value text-yellow-300 text-sm">' + (sd.anchor||'—') + '</div><div class="stat-label">Anchor</div></div>';
+    }}
     $('#summaryCards').html(html);
 }}
 
 function loadSector(sectorId) {{
     state.activeSector = sectorId;
+    // 슈퍼섹터 소속 섹터를 직접 클릭하면 해당 슈퍼섹터를 자동 확장
+    if (sectorId && !sectorId.startsWith('SS_') && sectorId !== 'ALL') {{
+        let sd = sectorDefs[sectorId];
+        if (sd && sd.super_sector) {{
+            state.expandedSuperSector = sd.super_sector;
+        }} else {{
+            state.expandedSuperSector = null;
+        }}
+    }}
     renderSectorTabs();
     renderSummary();
-    let data = allData[sectorId] || [];
+    let data;
+    if (sectorId === 'ALL') {{
+        data = Object.values(allData).flat();
+    }} else if (sectorId && sectorId.startsWith('SS_')) {{
+        let ssId = sectorId.slice(3);
+        let ss = superSectorDefs[ssId];
+        data = ss ? ss.sub_sectors.flatMap(sid => allData[sid] || []) : [];
+    }} else {{
+        data = allData[sectorId] || [];
+    }}
+    table.clear().rows.add(data).draw();
+}}
+
+function loadSuperSector(ssId) {{
+    state.activeSector = 'SS_' + ssId;
+    state.expandedSuperSector = ssId;
+    renderSectorTabs();
+    renderSummary();
+    let ss = superSectorDefs[ssId];
+    let data = ss ? ss.sub_sectors.flatMap(sid => allData[sid] || []) : [];
     table.clear().rows.add(data).draw();
 }}
 
@@ -276,7 +396,7 @@ function initDashboard() {{
     renderSummary();
 
     table = $('#masterTable').DataTable({{
-        data: allData[state.activeSector] || [],
+        data: Object.values(allData).flat(),
         pageLength: 50,
         deferRender: true,
         lengthMenu: [[25, 50, 100, 200, -1], [25, 50, 100, 200, "All"]],
@@ -378,17 +498,32 @@ function initDashboard() {{
     // Event: Asset Class tab click
     $(document).on('click', '.ac-tab', function() {{
         state.activeAC = $(this).data('ac');
+        state.expandedSuperSector = null;
         renderACTabs();
-        let sectors = state.activeAC === 'ALL'
-            ? Object.keys(sectorDefs).sort()
-            : (acSectors[state.activeAC] || []).sort();
-        let firstWithData = sectors.find(s => sectorMeta[s] && sectorMeta[s].count > 0);
-        if (firstWithData) loadSector(firstWithData);
-        else renderSectorTabs();
+        if (state.activeAC === 'ALL') {{
+            loadSector('ALL');
+        }} else {{
+            let sectors = (acSectors[state.activeAC] || []).sort();
+            let firstWithData = sectors.find(s => sectorMeta[s] && sectorMeta[s].count > 0);
+            if (firstWithData) loadSector(firstWithData);
+            else renderSectorTabs();
+        }}
     }});
 
-    // Event: Sector tab click
-    $(document).on('click', '.sec-tab', function() {{
+    // Event: Super-sector tab click (슈퍼섹터 탭 → 서브탭 토글)
+    $(document).on('click', '.super-sec-tab', function() {{
+        let ssId = $(this).data('supersec');
+        if (state.expandedSuperSector === ssId) {{
+            // 이미 열려 있으면 닫고 전체 보기
+            state.expandedSuperSector = null;
+            loadSector('ALL');
+        }} else {{
+            loadSuperSector(ssId);
+        }}
+    }});
+
+    // Event: Sector tab click (서브섹터 탭 포함)
+    $(document).on('click', '.sec-tab:not(.super-sec-tab)', function() {{
         loadSector($(this).data('sector'));
     }});
 

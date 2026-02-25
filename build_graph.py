@@ -16,7 +16,7 @@ import pandas as pd
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(ROOT, 'src'))
-from config import SECTOR_DEFS, CORR_MONTHLY_CSV
+from config import SECTOR_DEFS, SUPER_SECTOR_DEFS, CORR_MONTHLY_CSV
 
 # ── 설정 ──────────────────────────────────────────────
 STORE_MIN_R   = 0.85   # JSON 저장 최소 r (슬라이더 하한)
@@ -86,8 +86,9 @@ def main():
         legacy_tickers = {tk for tk, info in classif.items() if info.get('is_legacy')}
         print(f"   레거시 티커: {len(legacy_tickers)}개")
 
-    # 앵커 티커 집합
+    # 앵커 티커 집합 (섹터 앵커 + 슈퍼섹터 앵커 포함)
     anchor_tickers = {v['anchor'] for v in SECTOR_DEFS.values() if v.get('anchor')}
+    anchor_tickers |= {v['anchor'] for v in SUPER_SECTOR_DEFS.values() if v.get('anchor')}
 
     # 3. 노드 목록 (상관행렬에 있는 티커 기준)
     nodes = []
@@ -120,22 +121,36 @@ def main():
     ]
     print(f"   엣지 수: {len(links):,}개")
 
-    # 5. 섹터 메타 (이름 + 색상)
+    # 5. 섹터 메타 (이름 + 색상 + 슈퍼섹터 소속)
     sectors = {
         sid: {
             'name':    sdef['name'],
             'name_en': sdef['name_en'],
             'color':   SECTOR_COLORS.get(sid, '#888888'),
             'ac':      sdef['asset_class'],
+            'ss':      sdef.get('super_sector'),  # 슈퍼섹터 ID (없으면 None)
         }
         for sid, sdef in SECTOR_DEFS.items()
     }
 
+    # 슈퍼섹터 메타 (graph.html 토글에서 사용)
+    super_sectors = {
+        ssid: {
+            'name':        ss['name'],
+            'name_en':     ss['name_en'],
+            'color':       ss['color'],
+            'icon':        ss['icon'],
+            'sub_sectors': ss['sub_sectors'],
+        }
+        for ssid, ss in SUPER_SECTOR_DEFS.items()
+    }
+
     # 6. 저장
     out = {
-        'nodes': nodes,
-        'links': links,
-        'sectors': sectors,
+        'nodes':         nodes,
+        'links':         links,
+        'sectors':       sectors,
+        'super_sectors': super_sectors,
         'meta': {
             'n_nodes':        len(nodes),
             'n_links_stored': len(links),

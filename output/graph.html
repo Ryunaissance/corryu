@@ -92,9 +92,11 @@
     .legend-item {
       display: flex; align-items: center; gap: 7px;
       padding: 3px 4px; border-radius: 4px; cursor: pointer;
-      transition: background 0.12s;
+      transition: background 0.12s, opacity 0.12s;
     }
     .legend-item:hover { background: #161b22; }
+    .legend-item.active { background: rgba(96,165,250,0.12); outline: 1px solid rgba(96,165,250,0.35); }
+    .legend-item.dimmed { opacity: 0.35; }
     .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
     .legend-text { font-size: 11px; color: #c9d1d9; }
 
@@ -174,6 +176,13 @@
     </label>
   </div>
 
+  <div class="ctrl-row">
+    <label class="ctrl-check">
+      <input type="checkbox" id="super-sector-toggle">
+      🌐 주식 시장 통합 색상
+    </label>
+  </div>
+
   <div id="stats">데이터 로딩 중...</div>
   <div id="progress-bar"><div id="progress-fill"></div></div>
 </div>
@@ -226,23 +235,44 @@ let Graph;
 let storeMinR   = 0.85;
 let currentR    = DEFAULT_R;
 
-let hoverNode       = null;
+let hoverNode        = null;
 let highlightNodeIds = new Set();
-let searchTicker    = '';
-let hideLegacy      = true;
+let searchTicker     = '';
+let hideLegacy       = true;
+let focusSector      = null;   // 레전드 클릭으로 선택된 섹터 ID (or 'SS_<id>')
+let superSectorMode  = false;  // 슈퍼섹터 통합 색상 토글
+let superSectorMeta  = {};     // graph_data.json 에서 로드
 
 // ── 색상 / 크기 함수 ─────────────────────────────────
 function sectorColor(sid) {
   return (sectorMeta[sid] || {}).color || '#888888';
 }
 
+function effectiveColor(node) {
+  // 슈퍼섹터 모드일 때 해당 섹터는 슈퍼섹터 색으로 통일
+  if (superSectorMode) {
+    const ss = (sectorMeta[node.s] || {}).ss;
+    if (ss && superSectorMeta[ss]) return superSectorMeta[ss].color;
+  }
+  return sectorColor(node.s);
+}
+
 function getNodeColor(node) {
-  const base = sectorColor(node.s);
+  const base = effectiveColor(node);
   if (searchTicker && node.id === searchTicker) return '#ffffff';
   if (hoverNode) {
     if (node === hoverNode)              return '#ffffff';
     if (highlightNodeIds.has(node.id))  return base;
     return base + '22';  // 흐리게
+  }
+  if (focusSector) {
+    // 'SS_<id>' 형태이면 슈퍼섹터 소속 전체 하이라이트
+    if (focusSector.startsWith('SS_')) {
+      const ssId = focusSector.slice(3);
+      const nodeSS = (sectorMeta[node.s] || {}).ss;
+      return nodeSS === ssId ? base : base + '18';
+    }
+    return node.s === focusSector ? base : base + '18';
   }
   return base;
 }
@@ -263,6 +293,14 @@ function getLinkColor(link) {
     return `rgba(${Math.round(255*t)},${Math.round(120+80*t)},${Math.round(255*(1-t))},0.85)`;
   }
   const t = Math.max(0, (link.r - storeMinR) / (1 - storeMinR));
+  if (focusSector) {
+    const sn = typeof link.source === 'object' ? link.source : (Graph.graphData().nodes||[]).find(n=>n.id===link.source);
+    const tn = typeof link.target === 'object' ? link.target : (Graph.graphData().nodes||[]).find(n=>n.id===link.target);
+    if ((sn && sn.s === focusSector) || (tn && tn.s === focusSector)) {
+      return `rgba(148,163,184,${0.08 + t * 0.45})`;
+    }
+    return 'rgba(255,255,255,0.01)';
+  }
   return `rgba(148,163,184,${0.04 + t * 0.22})`;
 }
 
@@ -306,15 +344,50 @@ function renderLegend() {
   for (const ac of AC_ORDER) {
     if (!grouped[ac]) continue;
     html += `<div class="legend-ac">${AC_KO[ac]}</div>`;
+
+    let renderedSS = new Set();
     for (const s of grouped[ac]) {
-      html += `
-        <div class="legend-item" title="${s.name_en}">
-          <div class="legend-dot" style="background:${s.color}"></div>
-          <span class="legend-text">${s.name}</span>
-        </div>`;
+      const ss = s.ss;  // 슈퍼섹터 ID (있으면)
+      if (superSectorMode && ss && superSectorMeta[ss]) {
+        // 슈퍼섹터 통합 항목 (처음 한 번만 렌더)
+        if (!renderedSS.has(ss)) {
+          renderedSS.add(ss);
+          const ssDef = superSectorMeta[ss];
+          html += `
+            <div class="legend-item" data-sid="SS_${ss}" title="${ssDef.name_en}">
+              <div class="legend-dot" style="background:${ssDef.color}"></div>
+              <span class="legend-text">${ssDef.name}</span>
+            </div>`;
+        }
+      } else {
+        // 개별 섹터 항목
+        const color = (superSectorMode && ss && superSectorMeta[ss])
+          ? superSectorMeta[ss].color : s.color;
+        html += `
+          <div class="legend-item" data-sid="${s.sid}" title="${s.name_en}">
+            <div class="legend-dot" style="background:${color}"></div>
+            <span class="legend-text">${s.name}</span>
+          </div>`;
+      }
     }
   }
-  document.getElementById('legend-items').innerHTML = html;
+  const container = document.getElementById('legend-items');
+  container.innerHTML = html;
+
+  container.addEventListener('click', e => {
+    const item = e.target.closest('.legend-item');
+    if (!item) return;
+    const sid = item.dataset.sid;
+    focusSector = focusSector === sid ? null : sid;
+    container.querySelectorAll('.legend-item').forEach(el => {
+      el.classList.remove('active', 'dimmed');
+      if (focusSector) {
+        if (el.dataset.sid === focusSector) el.classList.add('active');
+        else el.classList.add('dimmed');
+      }
+    });
+    if (Graph) Graph.refresh();
+  });
 }
 
 // ── 필터 적용 (슬라이더 변경 시) ───────────────────────
@@ -350,10 +423,11 @@ fetch('graph_data.json')
   .then(data => {
     progFill.style.width = '85%';
 
-    allNodes   = data.nodes;
-    allLinks   = data.links;
-    sectorMeta = data.sectors;
-    storeMinR  = data.meta.store_min_r;
+    allNodes        = data.nodes;
+    allLinks        = data.links;
+    sectorMeta      = data.sectors;
+    superSectorMeta = data.super_sectors || {};
+    storeMinR       = data.meta.store_min_r;
 
     // 레거시 카운트 표시
     const legacyCount = allNodes.filter(n => n.l).length;
@@ -455,7 +529,13 @@ fetch('graph_data.json')
         Graph.zoom(5, 500);
       })
       .onBackgroundClick(() => {
-        Graph.zoomToFit(400, 40);
+        if (focusSector) {
+          focusSector = null;
+          document.querySelectorAll('.legend-item').forEach(el => el.classList.remove('active', 'dimmed'));
+          Graph.refresh();
+        } else {
+          Graph.zoomToFit(400, 40);
+        }
       });
 
     progFill.style.width = '100%';
@@ -490,6 +570,16 @@ document.getElementById('r-slider').addEventListener('input', e => {
 document.getElementById('hide-legacy').addEventListener('change', e => {
   hideLegacy = e.target.checked;
   if (Graph) applyFilter(currentR);
+});
+
+// ── 슈퍼섹터 토글 ────────────────────────────────────
+document.getElementById('super-sector-toggle').addEventListener('change', e => {
+  superSectorMode = e.target.checked;
+  focusSector = null;  // 포커스 초기화
+  if (Graph) {
+    renderLegend();  // 레전드 재렌더 (슈퍼섹터/서브섹터 항목 전환)
+    Graph.refresh();
+  }
 });
 
 // ── 검색 ─────────────────────────────────────────────

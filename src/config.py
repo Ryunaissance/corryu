@@ -35,22 +35,36 @@ ASSET_CLASSES = {
     'THEMATIC':    {'name': '테마',     'name_en': 'Thematic',     'icon': '🧩', 'order': 5},
 }
 
+# ── 슈퍼섹터 정의 ────────────────────────────────────
+# 그래프상 한 덩어리로 뭉치는 섹터들을 상위 그룹으로 묶음
+SUPER_SECTOR_DEFS = {
+    'EQUITY_MARKET': {
+        'name':        '주식 시장',
+        'name_en':     'Equity Market',
+        'anchor':      'QQQ',
+        'icon':        '🌐',
+        'color':       '#3b82f6',   # blue-500 (슈퍼섹터 통합 색상)
+        'sub_sectors': ['S01', 'S02', 'S04', 'S07', 'S09', 'S11', 'S13'],
+    },
+}
+
 # ── 섹터 정의 (24개) ─────────────────────────────────
 SECTOR_DEFS = {
     # --- EQUITY (13개) ---
-    'S01': {'name': 'US 대형주 종합',   'name_en': 'US Large Cap',           'anchor': 'VOO',  'asset_class': 'EQUITY',       'icon': '🇺🇸'},
-    'S02': {'name': '테크놀로지',       'name_en': 'Technology',             'anchor': 'XLK',  'asset_class': 'EQUITY',       'icon': '💻'},
+    # super_sector 있는 7개: 그래프상 한 클러스터 → 주식 시장 슈퍼섹터
+    'S01': {'name': 'US 대형주 종합',   'name_en': 'US Large Cap',           'anchor': 'VOO',  'asset_class': 'EQUITY',       'icon': '🇺🇸', 'super_sector': 'EQUITY_MARKET'},
+    'S02': {'name': '테크놀로지',       'name_en': 'Technology',             'anchor': 'XLK',  'asset_class': 'EQUITY',       'icon': '💻',  'super_sector': 'EQUITY_MARKET'},
     'S03': {'name': '헬스케어',         'name_en': 'Healthcare',             'anchor': 'XLV',  'asset_class': 'EQUITY',       'icon': '🏥'},
-    'S04': {'name': '금융',             'name_en': 'Financials',             'anchor': 'XLF',  'asset_class': 'EQUITY',       'icon': '🏦'},
+    'S04': {'name': '금융',             'name_en': 'Financials',             'anchor': 'XLF',  'asset_class': 'EQUITY',       'icon': '🏦',  'super_sector': 'EQUITY_MARKET'},
     'S05': {'name': '경기소비재',       'name_en': 'Consumer Discretionary', 'anchor': 'XLY',  'asset_class': 'EQUITY',       'icon': '🛍️'},
     'S06': {'name': '필수소비재',       'name_en': 'Consumer Staples',       'anchor': 'XLP',  'asset_class': 'EQUITY',       'icon': '🛒'},
-    'S07': {'name': '산업재',           'name_en': 'Industrials',            'anchor': 'XLI',  'asset_class': 'EQUITY',       'icon': '🏭'},
+    'S07': {'name': '산업재',           'name_en': 'Industrials',            'anchor': 'XLI',  'asset_class': 'EQUITY',       'icon': '🏭',  'super_sector': 'EQUITY_MARKET'},
     'S08': {'name': '유틸리티',         'name_en': 'Utilities',              'anchor': 'XLU',  'asset_class': 'EQUITY',       'icon': '⚡'},
-    'S09': {'name': '커뮤니케이션',     'name_en': 'Communication',          'anchor': 'XLC',  'asset_class': 'EQUITY',       'icon': '📡'},
+    'S09': {'name': '커뮤니케이션',     'name_en': 'Communication',          'anchor': 'XLC',  'asset_class': 'EQUITY',       'icon': '📡',  'super_sector': 'EQUITY_MARKET'},
     'S10': {'name': '소재',             'name_en': 'Materials',              'anchor': 'XLB',  'asset_class': 'EQUITY',       'icon': '⛏️'},
-    'S11': {'name': '국제선진국',       'name_en': 'Intl Developed',         'anchor': 'VEA',  'asset_class': 'EQUITY',       'icon': '🌍'},
+    'S11': {'name': '국제선진국',       'name_en': 'Intl Developed',         'anchor': 'VEA',  'asset_class': 'EQUITY',       'icon': '🌍',  'super_sector': 'EQUITY_MARKET'},
     'S12': {'name': '신흥국',           'name_en': 'Emerging Markets',       'anchor': 'VWO',  'asset_class': 'EQUITY',       'icon': '🌏'},
-    'S13': {'name': '중소형주',         'name_en': 'Small/Mid Cap',          'anchor': 'IWM',  'asset_class': 'EQUITY',       'icon': '📊'},
+    'S13': {'name': '중소형주',         'name_en': 'Small/Mid Cap',          'anchor': 'IWM',  'asset_class': 'EQUITY',       'icon': '📊',  'super_sector': 'EQUITY_MARKET'},
     # --- FIXED INCOME (4개) ---
     'S14': {'name': '투자등급 채권',    'name_en': 'Investment Grade',       'anchor': 'BND',  'asset_class': 'FIXED_INCOME', 'icon': '🏛️'},
     'S15': {'name': '단기채/현금성',    'name_en': 'Short-Term/Cash',        'anchor': 'SHV',  'asset_class': 'FIXED_INCOME', 'icon': '💵'},
@@ -267,9 +281,11 @@ MANUAL_LEGACY_OVERRIDES = {
     'IYC':  'XLY와 상관계수 매우 높음',
 }
 
-# 자동 레거시에서 면제할 ETF (예: 앵커 ETF는 자동 면제)
+# 자동 레거시에서 면제할 ETF (앵커 ETF 자동 면제)
 LEGACY_EXEMPTIONS = set()
-# 앵커 ETF 자동 면제
 for s_def in SECTOR_DEFS.values():
-    if s_def['anchor']:
+    if s_def.get('anchor'):
         LEGACY_EXEMPTIONS.add(s_def['anchor'])
+for ss_def in SUPER_SECTOR_DEFS.values():
+    if ss_def.get('anchor'):
+        LEGACY_EXEMPTIONS.add(ss_def['anchor'])
