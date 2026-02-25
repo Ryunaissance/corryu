@@ -3698,8 +3698,8 @@
     "legacy_reasons": []
   },
   "ESMV": {
-    "sector_id": "S20",
-    "sector_name": "부동산/REITs",
+    "sector_id": "S01",
+    "sector_name": "US 대형주 종합",
     "asset_class": "REAL_ASSETS",
     "method": "correlation",
     "r_anchor": 0.8822,
@@ -8308,8 +8308,8 @@
     "legacy_reasons": []
   },
   "JMBS": {
-    "sector_id": "S20",
-    "sector_name": "부동산/REITs",
+    "sector_id": "S14",
+    "sector_name": "투자등급 채권",
     "asset_class": "REAL_ASSETS",
     "method": "keyword",
     "r_anchor": 0.6081,
@@ -8944,8 +8944,8 @@
     "legacy_reasons": []
   },
   "LVHD": {
-    "sector_id": "S20",
-    "sector_name": "부동산/REITs",
+    "sector_id": "S13",
+    "sector_name": "중소형주",
     "asset_class": "REAL_ASSETS",
     "method": "correlation",
     "r_anchor": 0.8683,
@@ -9328,8 +9328,8 @@
     ]
   },
   "MTGP": {
-    "sector_id": "S20",
-    "sector_name": "부동산/REITs",
+    "sector_id": "S14",
+    "sector_name": "투자등급 채권",
     "asset_class": "REAL_ASSETS",
     "method": "keyword",
     "r_anchor": 0.6341,
@@ -12025,13 +12025,14 @@
     "legacy_reasons": []
   },
   "SMBS": {
-    "sector_id": "S20",
-    "sector_name": "부동산/REITs",
+    "sector_id": "S14",
+    "sector_name": "투자등급 채권",
     "asset_class": "REAL_ASSETS",
     "method": "keyword",
     "r_anchor": 0.2822,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [],
+    "legacy_reason": "상장기간 너무 짧음"
   },
   "SMDV": {
     "sector_id": "S13",
@@ -12297,8 +12298,8 @@
     "legacy_reasons": []
   },
   "SPHD": {
-    "sector_id": "S20",
-    "sector_name": "부동산/REITs",
+    "sector_id": "S01",
+    "sector_name": "US 대형주 종합",
     "asset_class": "REAL_ASSETS",
     "method": "correlation",
     "r_anchor": 0.8083,
@@ -12360,8 +12361,8 @@
     "legacy_reasons": []
   },
   "SPMB": {
-    "sector_id": "S20",
-    "sector_name": "부동산/REITs",
+    "sector_id": "S14",
+    "sector_name": "투자등급 채권",
     "asset_class": "REAL_ASSETS",
     "method": "keyword",
     "r_anchor": 0.3676,
@@ -13947,8 +13948,8 @@
     "legacy_reasons": []
   },
   "VMBS": {
-    "sector_id": "S20",
-    "sector_name": "부동산/REITs",
+    "sector_id": "S14",
+    "sector_name": "투자등급 채권",
     "asset_class": "REAL_ASSETS",
     "method": "keyword",
     "r_anchor": 0.4433,
@@ -14843,8 +14844,8 @@
     "legacy_reasons": []
   },
   "XMLV": {
-    "sector_id": "S20",
-    "sector_name": "부동산/REITs",
+    "sector_id": "S13",
+    "sector_name": "중소형주",
     "asset_class": "REAL_ASSETS",
     "method": "correlation",
     "r_anchor": 0.8552,
