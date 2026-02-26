@@ -20,7 +20,7 @@ import requests
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(ROOT, 'src'))
-from config import SUPER_SECTOR_DEFS
+from config import SUPER_SECTOR_DEFS, SECTOR_DEFS, MANUAL_SECTOR_OVERRIDES
 
 # ── 설정 ──────────────────────────────────────────────
 YEARS        = 5          # 최근 N년 월간 데이터
@@ -106,19 +106,29 @@ def main():
     with open(ETF_DATA_JSON, encoding='utf-8') as f:
         db = json.load(f)
 
-    # 2. 슈퍼섹터 소속 섹터 및 ETF 티커 수집
-    sub_sectors = set()
+    # 2. 슈퍼섹터 소속 섹터 및 ETF 티커 수집 (QQQ 기준)
+    ss_sub_sectors = set()
     for ss_def in SUPER_SECTOR_DEFS.values():
-        sub_sectors.update(ss_def['sub_sectors'])
+        ss_sub_sectors.update(ss_def['sub_sectors'])
 
     ss_tickers = []
-    for sid in sorted(sub_sectors):
-        etfs = db['allData'].get(sid, [])
-        for etf in etfs:
+    for sid in sorted(ss_sub_sectors):
+        for etf in db['allData'].get(sid, []):
             ss_tickers.append(etf['ticker'])
 
-    all_fetch = list(set(['QQQ'] + ss_tickers))
-    print(f'   슈퍼섹터 ETF: {len(ss_tickers)}개 + QQQ → 총 {len(all_fetch)}개 다운로드 예정')
+    # 2b. MANUAL_SECTOR_OVERRIDES 소속 ETF 티커 + 해당 섹터 앵커 수집
+    #     (섹터별 앵커 기준으로 별도 계산)
+    override_anchors = {}   # anchor_ticker → [etf_tickers]
+    for tk, sid in MANUAL_SECTOR_OVERRIDES.items():
+        anchor = SECTOR_DEFS.get(sid, {}).get('anchor')
+        if anchor:
+            override_anchors.setdefault(anchor, []).append(tk)
+
+    override_tickers = [tk for tks in override_anchors.values() for tk in tks]
+    override_anchor_list = list(override_anchors.keys())
+
+    all_fetch = list(set(['QQQ'] + ss_tickers + override_tickers + override_anchor_list))
+    print(f'   슈퍼섹터 ETF: {len(ss_tickers)}개 + QQQ + 수동오버라이드 {len(override_tickers)}개 → 총 {len(all_fetch)}개 다운로드 예정')
 
     # 3. 월간 데이터 다운로드
     print(f'\n📡 Yahoo Finance 월간 데이터 다운로드 ({MAX_WORKERS}스레드)...')
@@ -129,7 +139,7 @@ def main():
         print('❌ QQQ 데이터 다운로드 실패. 네트워크 연결을 확인하세요.')
         sys.exit(1)
 
-    # 4. 월간 수익률 → QQQ와의 상관계수 계산
+    # 4. 월간 수익률 → QQQ와의 상관계수 계산 (슈퍼섹터)
     print('\n📊 QQQ 상관계수 계산 중...')
     df     = pd.DataFrame(price_data)
     df_ret = df.pct_change(fill_method=None)
@@ -137,11 +147,27 @@ def main():
     valid  = corr.dropna()
     print(f'   유효 티커: {len(valid)}개')
 
+    # 4b. 수동 오버라이드 ETF → 섹터 앵커 기준 상관계수 계산
+    override_corr = {}   # ticker → r_anchor (vs 섹터 앵커)
+    for anchor, tickers in override_anchors.items():
+        if anchor not in price_data:
+            print(f'   ⚠️  앵커 {anchor} 데이터 없음 → 스킵')
+            continue
+        anchor_ret = df_ret.get(anchor)
+        if anchor_ret is None:
+            continue
+        for tk in tickers:
+            if tk in df_ret.columns:
+                r = float(df_ret[tk].corr(anchor_ret, min_periods=MIN_MONTHS))
+                if not np.isnan(r):
+                    override_corr[tk] = round(r, 4)
+                    print(f'   {tk} vs {anchor}: r={r:.4f}')
+
     # 5. etf_data.json r_anchor 패치
     print('\n✏️  r_anchor 패치 중...')
     updated = 0
     skipped = 0
-    for sid in sorted(sub_sectors):
+    for sid in sorted(ss_sub_sectors):
         for etf in db['allData'].get(sid, []):
             tk = etf['ticker']
             if tk in corr and not pd.isna(corr[tk]):
@@ -149,6 +175,17 @@ def main():
                 updated += 1
             else:
                 skipped += 1
+
+    # 5b. 수동 오버라이드 ETF r_anchor 패치 (섹터 앵커 기준)
+    for tk, r_val in override_corr.items():
+        sid = MANUAL_SECTOR_OVERRIDES.get(tk)
+        if not sid:
+            continue
+        for etf in db['allData'].get(sid, []):
+            if etf['ticker'] == tk:
+                etf['r_anchor'] = r_val
+                updated += 1
+                break
 
     print(f'   업데이트: {updated}개 | 스킵(데이터 없음): {skipped}개')
 

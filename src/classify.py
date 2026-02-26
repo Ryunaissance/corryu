@@ -8,6 +8,7 @@ from collections import defaultdict
 from config import (
     SECTOR_DEFS, SUPER_SECTOR_DEFS, KEYWORD_RULES, CORR_THRESHOLD,
     PROTECT_EQUITIES, SHORT_TERM_BOND_WORDS, ANCHOR_TO_SECTOR,
+    MANUAL_SECTOR_OVERRIDES,
 )
 from data_loader import get_fullname, get_corr_value
 
@@ -115,6 +116,7 @@ def classify_all(all_tickers, scraped, df_corr_monthly, df_corr_daily):
         fullname = get_fullname(ticker, scraped)
 
         # Pass 0: 앵커 ETF는 자기 섹터에 무조건 배정
+        # (수동 오버라이드보다 앵커 배정이 우선)
         if ticker in ANCHOR_TO_SECTOR:
             sector = ANCHOR_TO_SECTOR[ticker]
             classification[ticker] = {
@@ -123,6 +125,17 @@ def classify_all(all_tickers, scraped, df_corr_monthly, df_corr_daily):
                 'r_anchor': 1.0,
             }
             method_counts['anchor'] += 1
+            continue
+
+        # Pass 0.5: 수동 섹터 오버라이드 (키워드/상관계수보다 우선)
+        if ticker in MANUAL_SECTOR_OVERRIDES:
+            sector = MANUAL_SECTOR_OVERRIDES[ticker]
+            classification[ticker] = {
+                'sector': sector,
+                'method': 'manual_override',
+                'r_anchor': 0.0,  # 나중에 fill_anchor_correlations에서 채움
+            }
+            method_counts['manual_override'] += 1
             continue
 
         # Pass 1: 키워드 룰

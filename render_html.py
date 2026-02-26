@@ -125,6 +125,12 @@ table.dataTable thead th.text-left, table.dataTable tbody td.text-left {{ text-a
     <!-- Header -->
     <div class="glass p-5 mb-5 text-center relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-0.5" style="background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);"></div>
+        <div class="absolute top-4 right-4">
+            <a href="graph.html" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:10px;background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.35);font-size:0.82rem;font-weight:600;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.28)'" onmouseout="this.style.background='rgba(139,92,246,0.15)'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><line x1="7" y1="11.5" x2="17" y2="6.5"/><line x1="7" y1="12.5" x2="17" y2="17.5"/></svg>
+                그래프 보기
+            </a>
+        </div>
         <h1 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight">
             <span class="text-gradient">CORRYU</span> Master Valuation Dashboard
         </h1>
