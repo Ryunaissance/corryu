@@ -99,6 +99,13 @@ table.dataTable tbody tr.row-selected { background: rgba(59,130,246,0.08) !impor
 #btn-reset { color: #fbbf24; border-color: rgba(251,191,36,0.2); background: rgba(251,191,36,0.05); }
 #btn-reset:hover { background: rgba(251,191,36,0.12) !important; color: #fde68a !important; }
 
+/* GitHub 동기화 */
+.sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #475569; display: inline-block; flex-shrink: 0; }
+.sync-dot.ok { background: #4ade80; }
+.sync-dot.err { background: #f87171; }
+.sync-dot.busy { background: #fbbf24; animation: syncPulse 1s ease-in-out infinite; }
+@keyframes syncPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
 /* Filter controls */
 .filter-input { background: rgba(20,24,38,0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e2e8f0; padding: 6px 10px; font-size: 0.82rem; width: 90px; }
 .filter-input:focus { outline: none; border-color: var(--accent); }
@@ -173,6 +180,7 @@ table.dataTable tbody tr.row-selected { background: rgba(59,130,246,0.08) !impor
                 <div style="border-left:1px solid rgba(255,255,255,0.1);padding-left:12px;display:flex;gap:6px;align-items:center">
                     <button id="btn-undo" class="btn-history" disabled title="Ctrl+Z">↩ 실행취소</button>
                     <button id="btn-reset" class="btn-history" title="모든 사용자 오버라이드를 빌드 기본값으로 초기화">⟳ 초기화</button>
+                    <button id="sync-status" class="btn-history" title="GitHub 다기기 동기화 설정"><span class="sync-dot" id="sync-dot"></span>&nbsp;<span id="sync-label">동기화</span></button>
                 </div>
             </div>
         </div>
@@ -235,6 +243,7 @@ table.dataTable tbody tr.row-selected { background: rgba(59,130,246,0.08) !impor
     </div>
 </div>
 
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
@@ -255,6 +264,8 @@ function getUserOverrides() {
 }
 function saveUserOverrides(ov) {
     localStorage.setItem(USER_OVERRIDES_KEY, JSON.stringify(ov));
+    localStorage.setItem('corryu_overrides_ts', String(Date.now()));
+    pushRemoteOverrides(ov);  // async, non-blocking
 }
 
 function applyUserOverrides() {
@@ -588,6 +599,67 @@ function loadSuperSector(ssId) {
     let ss = superSectorDefs[ssId];
     let data = ss ? ss.sub_sectors.flatMap(sid => allData[sid] || []) : [];
     table.clear().rows.add(data).draw();
+}
+
+// ── 토스트 알림 (전역) ────────────────────────────────────
+let _toastTimer = null;
+function showToast(msg, durationMs) {
+    let el = document.getElementById('r-toast');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'r-toast';
+        el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1e293b;color:#e2e8f0;padding:9px 18px;border-radius:10px;font-size:0.85rem;border:1px solid rgba(255,255,255,0.12);box-shadow:0 4px 20px rgba(0,0,0,0.5);z-index:9999;pointer-events:none;transition:opacity 0.3s;opacity:0;white-space:nowrap;';
+        document.body.appendChild(el);
+    }
+    if (_toastTimer) clearTimeout(_toastTimer);
+    el.textContent = msg;
+    el.style.opacity = '1';
+    _toastTimer = setTimeout(function() { el.style.opacity = '0'; }, durationMs || 3000);
+}
+
+// ── GitHub 다기기 동기화 (서버사이드 PAT, /api/sync 사용) ────
+function setSyncStatus(s) {
+    const dot = document.getElementById('sync-dot');
+    const lbl = document.getElementById('sync-label');
+    if (!dot || !lbl) return;
+    dot.className = 'sync-dot' + (s && s !== 'off' ? ' ' + s : '');
+    const labels = { ok: '동기화됨', err: '동기화 실패', busy: '동기화 중…' };
+    lbl.textContent = labels[s] || '동기화';
+}
+
+async function fetchRemoteOverrides() {
+    try {
+        const r = await fetch('/api/sync?t=' + Date.now());
+        if (!r.ok) return null;
+        const d = await r.json();
+        _ghSha = d.sha;
+        return d.content;  // { _meta: {ts}, ...overrides }
+    } catch(e) { return null; }
+}
+
+let _ghSha = null;
+async function pushRemoteOverrides(ov) {
+    setSyncStatus('busy');
+    try {
+        const body = { overrides: ov };
+        if (_ghSha) body.sha = _ghSha;
+        const r = await fetch('/api/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        if (r.ok) {
+            const d = await r.json();
+            _ghSha = d.sha;
+            setSyncStatus('ok');
+        } else if (r.status === 409) {
+            _ghSha = null;
+            setSyncStatus('err');
+            showToast('동기화 충돌 — 페이지를 새로고침하세요', 4000);
+        } else {
+            setSyncStatus('err');
+        }
+    } catch(e) { setSyncStatus('err'); }
 }
 
 function initDashboard() {
@@ -1008,24 +1080,6 @@ function initDashboard() {
         return null;
     }
 
-    let _toastTimer = null;
-    function showToast(msg, durationMs) {
-        let el = document.getElementById('r-toast');
-        if (!el) {
-            el = document.createElement('div');
-            el.id = 'r-toast';
-            el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);' +
-                'background:#1e293b;color:#e2e8f0;padding:9px 18px;border-radius:10px;font-size:0.85rem;' +
-                'border:1px solid rgba(255,255,255,0.12);box-shadow:0 4px 20px rgba(0,0,0,0.5);' +
-                'z-index:9999;pointer-events:none;transition:opacity 0.3s;opacity:0;white-space:nowrap;';
-            document.body.appendChild(el);
-        }
-        if (_toastTimer) clearTimeout(_toastTimer);
-        el.textContent = msg;
-        el.style.opacity = '1';
-        _toastTimer = setTimeout(function() { el.style.opacity = '0'; }, durationMs || 3000);
-    }
-
     async function recomputeRanchorsAsync(tickers, newSectorId) {
         const anchor = (sectorDefs[newSectorId] || {}).anchor;
         if (!anchor || anchor === '—') return;
@@ -1085,17 +1139,55 @@ function initDashboard() {
             undoLegacyAction();
         }
     });
+    // ── GitHub 동기화 버튼: 클릭 시 수동 동기화 체크 ──────────
+    $('#sync-status').on('click', async function() {
+        setSyncStatus('busy');
+        const remoteOv = await fetchRemoteOverrides();
+        if (!remoteOv) { setSyncStatus('err'); showToast('동기화 서버에 연결할 수 없습니다', 3000); return; }
+        if (remoteOv._meta) {
+            const localTs = parseInt(localStorage.getItem('corryu_overrides_ts') || '0');
+            if (remoteOv._meta.ts > localTs) {
+                showToast('다른 기기의 최신 설정이 있습니다 — 페이지를 새로고침하세요', 4000);
+                setSyncStatus('ok');
+            } else {
+                setSyncStatus('ok');
+                showToast('이미 최신 상태입니다', 2000);
+            }
+        } else {
+            setSyncStatus('ok');
+        }
+    });
+
     updateUndoBtn();
 }
 
 $(document).ready(function() {
     fetch('etf_data.json')
         .then(function(r) { return r.json(); })
-        .then(function(d) {
+        .then(async function(d) {
             sectorMeta = d.sectorMeta;
             allData = d.allData;
             snapshotOriginalLegacy(); // 빌드 기본값 스냅샷 (undo 기준점)
-            applyUserOverrides();     // localStorage 레거시 오버라이드 적용
+            // 다기기 동기화: 원격 오버라이드 로드 시도 (서버사이드 PAT)
+            let ov = getUserOverrides();
+            setSyncStatus('busy');
+            const remoteOv = await fetchRemoteOverrides();
+            if (remoteOv && remoteOv._meta) {
+                const localTs = parseInt(localStorage.getItem('corryu_overrides_ts') || '0');
+                if (remoteOv._meta.ts > localTs) {
+                    const { _meta, ...cleanOv } = remoteOv;
+                    ov = cleanOv;
+                    localStorage.setItem(USER_OVERRIDES_KEY, JSON.stringify(ov));
+                    localStorage.setItem('corryu_overrides_ts', String(remoteOv._meta.ts));
+                    setSyncStatus('ok');
+                    showToast('다른 기기의 설정을 불러왔습니다 (' + Object.keys(ov).length + '종목)', 3500);
+                } else {
+                    setSyncStatus('ok');
+                }
+            } else {
+                setSyncStatus('ok');
+            }
+            if (Object.keys(ov).length) applyOverridesToData(ov);
             applySmhCorr();           // localStorage SMH 상관계수 적용
             recalcSectorMeta();       // 오버라이드 반영해 카운트 갱신
             initDashboard();
