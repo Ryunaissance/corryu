@@ -353,7 +353,8 @@ function snapshotOriginalLegacy() {
             originalLegacyState[etf.ticker] = {
                 is_legacy:      etf.is_legacy,
                 legacy_detail:  (etf.legacy_detail  || []).slice(),
-                legacy_reasons: (etf.legacy_reasons || []).slice()
+                legacy_reasons: (etf.legacy_reasons || []).slice(),
+                r_anchor:       etf.r_anchor
             };
             originalSectorState[etf.ticker] = sid;  // 빌드 기본 섹터 저장
         }
@@ -386,6 +387,7 @@ function applyOverridesToData(ov) {
             etf._user_override = false;
             etf.legacy_detail  = orig.legacy_detail.slice();
             etf.legacy_reasons = orig.legacy_reasons.slice();
+            if (orig.r_anchor !== undefined) etf.r_anchor = orig.r_anchor;
         }
         delete etf._user_sector;
         delete etf._original_sector;
@@ -413,6 +415,13 @@ function applyOverridesToData(ov) {
         etf._user_sector    = newSid;
         etf._original_sector = origSid;
         allData[newSid].push(etf);
+    }
+    // ⑤ r_anchor 오버라이드 적용
+    for (const [ticker, o] of Object.entries(ov)) {
+        if (o.r_anchor === undefined) continue;
+        const found = findETFAnywhere(ticker);
+        if (!found) continue;
+        found.etf.r_anchor = o.r_anchor;
     }
 }
 
@@ -879,6 +888,7 @@ function initDashboard() {
 
     function applySectorMove(newSectorId) {
         if (!newSectorId || selectedTickers.size === 0) return;
+        const tickersToRecompute = [];
         pushUndo();
         let ov = getUserOverrides();
         selectedTickers.forEach(function(ticker) {
@@ -889,11 +899,13 @@ function initDashboard() {
             if (oldSid === newSectorId) {
                 // 이미 이 섹터 → 섹터 오버라이드 해제
                 delete ov[ticker].sector;
+                delete ov[ticker].r_anchor;
                 delete etf._user_sector;
                 delete etf._original_sector;
                 if (!Object.keys(ov[ticker]).length) delete ov[ticker];
                 return;
             }
+            tickersToRecompute.push(ticker);
             // allData에서 이동
             allData[oldSid] = allData[oldSid].filter(e => e.ticker !== ticker);
             etf._user_sector     = newSectorId;
@@ -911,6 +923,138 @@ function initDashboard() {
         $('#sector-modal').removeClass('show');
         loadSector(state.activeSector);
         updateFAB();
+        if (tickersToRecompute.length) recomputeRanchorsAsync(tickersToRecompute, newSectorId);
+    }
+
+    // ── 브라우저-사이드 r_anchor 재계산 유틸 ─────────────────────────────
+    function _sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    function _pearson(xs, ys) {
+        const n = xs.length;
+        if (n < 2) return NaN;
+        let mx = 0, my = 0;
+        for (let i = 0; i < n; i++) { mx += xs[i]; my += ys[i]; }
+        mx /= n; my /= n;
+        let num = 0, dx2 = 0, dy2 = 0;
+        for (let i = 0; i < n; i++) {
+            const dx = xs[i] - mx, dy = ys[i] - my;
+            num += dx * dy; dx2 += dx * dx; dy2 += dy * dy;
+        }
+        return (dx2 && dy2) ? num / Math.sqrt(dx2 * dy2) : NaN;
+    }
+
+    function _pairwiseReturns(pA, pB) {
+        const dates = Object.keys(pA).filter(d => d in pB).sort();
+        const rA = [], rB = [];
+        for (let i = 1; i < dates.length; i++) {
+            const a0 = pA[dates[i-1]], a1 = pA[dates[i]];
+            const b0 = pB[dates[i-1]], b1 = pB[dates[i]];
+            if (a0 && a1 && b0 && b1) {
+                rA.push((a1 - a0) / a0);
+                rB.push((b1 - b0) / b0);
+            }
+        }
+        return [rA, rB];
+    }
+
+    function _calcCorr(pA, pB) {
+        const [rA, rB] = _pairwiseReturns(pA, pB);
+        if (rA.length < 24) return null;
+        const c = _pearson(rA, rB);
+        return isFinite(c) ? Math.round(c * 10000) / 10000 : null;
+    }
+
+    function _makeYfUrls(ticker) {
+        const tk = encodeURIComponent(ticker);
+        const yf1 = 'https://query1.finance.yahoo.com/v8/finance/chart/' + tk + '?range=max&interval=1mo&includeAdjustedClose=true';
+        return [
+            '/api/yf?ticker=' + tk + '&range=max&interval=1mo',
+            yf1,
+            'https://query2.finance.yahoo.com/v8/finance/chart/' + tk + '?range=max&interval=1mo&includeAdjustedClose=true',
+            'https://corsproxy.io/?' + encodeURIComponent(yf1),
+        ];
+    }
+
+    function _parseYfMonthly(data) {
+        const result = data && data.chart && data.chart.result && data.chart.result[0];
+        if (!result) return null;
+        const ts  = result.timestamp;
+        const adj = (result.indicators && result.indicators.adjclose && result.indicators.adjclose[0] && result.indicators.adjclose[0].adjclose)
+                 || (result.indicators && result.indicators.quote && result.indicators.quote[0] && result.indicators.quote[0].close);
+        if (!ts || !adj) return null;
+        const prices = {};
+        for (let i = 0; i < ts.length; i++) {
+            if (adj[i] != null) {
+                const d = new Date(ts[i] * 1000);
+                prices[d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0')] = adj[i];
+            }
+        }
+        return Object.keys(prices).length >= 3 ? prices : null;
+    }
+
+    async function _fetchYfMonthly(ticker) {
+        for (const url of _makeYfUrls(ticker)) {
+            for (let attempt = 0; attempt < 2; attempt++) {
+                try {
+                    const r = await fetch(url);
+                    if (r.status === 429) { await _sleep(3000 * (attempt + 1)); continue; }
+                    if (!r.ok) break;
+                    const prices = _parseYfMonthly(await r.json());
+                    if (prices) return prices;
+                    break;
+                } catch(e) { await _sleep(500); }
+            }
+        }
+        return null;
+    }
+
+    let _toastTimer = null;
+    function showToast(msg, durationMs) {
+        let el = document.getElementById('r-toast');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'r-toast';
+            el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);' +
+                'background:#1e293b;color:#e2e8f0;padding:9px 18px;border-radius:10px;font-size:0.85rem;' +
+                'border:1px solid rgba(255,255,255,0.12);box-shadow:0 4px 20px rgba(0,0,0,0.5);' +
+                'z-index:9999;pointer-events:none;transition:opacity 0.3s;opacity:0;white-space:nowrap;';
+            document.body.appendChild(el);
+        }
+        if (_toastTimer) clearTimeout(_toastTimer);
+        el.textContent = msg;
+        el.style.opacity = '1';
+        _toastTimer = setTimeout(function() { el.style.opacity = '0'; }, durationMs || 3000);
+    }
+
+    async function recomputeRanchorsAsync(tickers, newSectorId) {
+        const anchor = (sectorDefs[newSectorId] || {}).anchor;
+        if (!anchor || anchor === '—') return;
+        const tickerList = Array.isArray(tickers) ? tickers : Array.from(tickers);
+        if (!tickerList.length) return;
+        showToast('r_anchor 재계산 중… 앵커: ' + anchor + ' / ' + tickerList.length + '종목', 60000);
+        const anchorPrices = await _fetchYfMonthly(anchor);
+        if (!anchorPrices) {
+            showToast('앵커(' + anchor + ') 가격 조회 실패', 4000);
+            return;
+        }
+        let ok = 0;
+        const ov = getUserOverrides();
+        for (const ticker of tickerList) {
+            const found = findETFAnywhere(ticker);
+            if (!found) continue;
+            const prices = await _fetchYfMonthly(ticker);
+            if (!prices) continue;
+            const corr = _calcCorr(anchorPrices, prices);
+            if (corr === null) continue;
+            found.etf.r_anchor = corr;
+            if (!ov[ticker]) ov[ticker] = {};
+            ov[ticker].r_anchor = corr;
+            ok++;
+            await _sleep(150);
+        }
+        saveUserOverrides(ov);
+        if (ok > 0 && typeof table !== 'undefined') table.rows().invalidate('data').draw(false);
+        showToast('r_anchor 재계산 완료 (' + ok + '/' + tickerList.length + '종목)', 4000);
     }
 
     $('#fab-btn-legacy').on('click', function() { applyLegacyAction(true); });
