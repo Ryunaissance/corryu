@@ -101,32 +101,53 @@ function pairwiseReturns(pricesA, pricesB) {
   return [retA, retB];
 }
 
+// CORS proxy 목록: 직접 접근 실패 시 순서대로 시도
+function makeUrls(ticker) {
+  const q = `range=${YEARS}y&interval=1mo&includeAdjustedClose=true`;
+  const tk = encodeURIComponent(ticker);
+  const yf1 = `https://query1.finance.yahoo.com/v8/finance/chart/${tk}?${q}`;
+  const yf2 = `https://query2.finance.yahoo.com/v8/finance/chart/${tk}?${q}`;
+  return [
+    yf1,
+    yf2,
+    `https://corsproxy.io/?${encodeURIComponent(yf1)}`,
+    `https://corsproxy.io/?${encodeURIComponent(yf2)}`,
+  ];
+}
+
+function parseYfChart(data) {
+  const result = data?.chart?.result?.[0];
+  if (!result) return null;
+  const ts  = result.timestamp;
+  const adj = result.indicators?.adjclose?.[0]?.adjclose
+           || result.indicators?.quote?.[0]?.close;
+  if (!ts || !adj) return null;
+  const prices = {};
+  for (let i = 0; i < ts.length; i++) {
+    if (adj[i] != null) {
+      const d = new Date(ts[i] * 1000);
+      prices[d.getUTCFullYear() + '-' + String(d.getUTCMonth()+1).padStart(2,'0')] = adj[i];
+    }
+  }
+  return Object.keys(prices).length >= MIN_MONTHS ? prices : null;
+}
+
 async function fetchMonthly(ticker) {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}` +
-              `?range=${YEARS}y&interval=1mo&includeAdjustedClose=true`;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      const r = await fetch(url, { headers: { 'Accept': 'application/json' } });
-      if (r.status === 429) { await sleep(3000 * (attempt + 1)); continue; }
-      if (!r.ok) return null;
-      const data = await r.json();
-      const result = data?.chart?.result?.[0];
-      if (!result) return null;
-      const ts  = result.timestamp;
-      const adj = result.indicators?.adjclose?.[0]?.adjclose
-               || result.indicators?.quote?.[0]?.close;
-      if (!ts || !adj) return null;
-      const prices = {};
-      for (let i = 0; i < ts.length; i++) {
-        if (adj[i] != null) {
-          const d = new Date(ts[i] * 1000);
-          const key = d.getUTCFullYear() + '-' + String(d.getUTCMonth()+1).padStart(2,'0');
-          prices[key] = adj[i];
-        }
+  const urls = makeUrls(ticker);
+  for (const url of urls) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        // 헤더 없이 simple request → CORS preflight 없음
+        const r = await fetch(url);
+        if (r.status === 429) { await sleep(3000 * (attempt + 1)); continue; }
+        if (!r.ok) break;  // 이 URL은 포기, 다음 URL 시도
+        const data = await r.json();
+        const prices = parseYfChart(data);
+        if (prices) return prices;
+        break;
+      } catch(e) {
+        await sleep(500);
       }
-      return Object.keys(prices).length >= MIN_MONTHS ? prices : null;
-    } catch(e) {
-      await sleep(1000);
     }
   }
   return null;
@@ -182,11 +203,14 @@ async function startFetch() {
   document.getElementById('progress-wrap').style.display = 'block';
   document.getElementById('log').innerHTML = '';
 
-  // 1. SMH 먼저
+  // 1. SMH 먼저 (연결 테스트 겸)
   setStatus('SMH 데이터 다운로드 중...');
+  log('Yahoo Finance 직접 접근 → CORS proxy 순으로 시도합니다.');
   const smhPrices = await fetchMonthly('SMH');
   if (!smhPrices) {
-    setStatus('❌ SMH 데이터 다운로드 실패. 네트워크를 확인하세요.');
+    setStatus('❌ SMH 데이터 다운로드 실패.');
+    log('<span class="tag tag-err">실패</span> Yahoo Finance 직접 + corsproxy.io 모두 실패.<br>'
+      + '→ Safari로 전환하거나, PC에서 <code>python patch_r_anchor_qqq.py</code> 실행을 권장합니다.');
     document.getElementById('btn-start').disabled = false;
     running = false;
     return;
