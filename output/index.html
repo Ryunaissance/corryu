@@ -1170,20 +1170,27 @@ $(document).ready(function() {
             snapshotOriginalLegacy(); // 빌드 기본값 스냅샷 (undo 기준점)
             // 다기기 동기화: 원격 오버라이드 로드 시도 (서버사이드 PAT)
             let ov = getUserOverrides();
+            const localTs = parseInt(localStorage.getItem('corryu_overrides_ts') || '0');
             setSyncStatus('busy');
             const remoteOv = await fetchRemoteOverrides();
             if (remoteOv && remoteOv._meta) {
-                const localTs = parseInt(localStorage.getItem('corryu_overrides_ts') || '0');
                 if (remoteOv._meta.ts > localTs) {
+                    // 원격이 더 최신 → 로컬에 적용
                     const { _meta, ...cleanOv } = remoteOv;
                     ov = cleanOv;
                     localStorage.setItem(USER_OVERRIDES_KEY, JSON.stringify(ov));
                     localStorage.setItem('corryu_overrides_ts', String(remoteOv._meta.ts));
                     setSyncStatus('ok');
                     showToast('다른 기기의 설정을 불러왔습니다 (' + Object.keys(ov).length + '종목)', 3500);
+                } else if (localTs > remoteOv._meta.ts && Object.keys(ov).length) {
+                    // 로컬이 더 최신 → 원격에 푸시
+                    pushRemoteOverrides(ov);
                 } else {
                     setSyncStatus('ok');
                 }
+            } else if (!remoteOv && Object.keys(ov).length) {
+                // 원격 파일 없음 + 로컬 데이터 있음 → 원격에 업로드
+                pushRemoteOverrides(ov);
             } else {
                 setSyncStatus('ok');
             }
