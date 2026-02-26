@@ -662,6 +662,25 @@ async function pushRemoteOverrides(ov) {
     } catch(e) { setSyncStatus('err'); }
 }
 
+// 30초마다 원격 변경사항 자동 반영
+async function pollRemoteSync() {
+    const remoteOv = await fetchRemoteOverrides();
+    if (!remoteOv || !remoteOv._meta) return;
+    const localTs = parseInt(localStorage.getItem('corryu_overrides_ts') || '0');
+    if (remoteOv._meta.ts > localTs) {
+        const { _meta, ...cleanOv } = remoteOv;
+        localStorage.setItem(USER_OVERRIDES_KEY, JSON.stringify(cleanOv));
+        localStorage.setItem('corryu_overrides_ts', String(remoteOv._meta.ts));
+        applyOverridesToData(cleanOv);
+        recalcSectorMeta();
+        renderSectorTabs();
+        renderSummary();
+        if (typeof table !== 'undefined') loadSector(state.activeSector);
+        setSyncStatus('ok');
+        showToast('다른 기기의 변경사항을 반영했습니다', 3000);
+    }
+}
+
 function initDashboard() {
     renderACTabs();
     renderSectorTabs();
@@ -1198,6 +1217,7 @@ $(document).ready(function() {
             applySmhCorr();           // localStorage SMH 상관계수 적용
             recalcSectorMeta();       // 오버라이드 반영해 카운트 갱신
             initDashboard();
+            setInterval(pollRemoteSync, 30000); // 30초마다 원격 변경사항 자동 체크
         });
 });
 </script>
