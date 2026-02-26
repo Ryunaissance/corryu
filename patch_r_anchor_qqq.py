@@ -141,7 +141,12 @@ def main():
 
     # 4. 월간 수익률 → QQQ/SMH 상관계수 계산 (슈퍼섹터)
     print('\n📊 QQQ/SMH 상관계수 계산 중...')
-    df     = pd.DataFrame(price_data)
+    df = pd.DataFrame(price_data)
+    # ETF마다 Yahoo Finance 월간 bar의 시작 날짜가 다를 수 있음(IPO일 등).
+    # 날짜가 다르면 DataFrame을 outer-join할 때 중간에 NaN 행이 생겨
+    # pct_change()가 QQQ 수익률을 잘못 NaN으로 만드는 버그가 발생.
+    # resample('ME').last()로 월말 기준 통일 → 모든 ETF 동일 날짜 격자 사용.
+    df = df.resample('ME').last()
     df_ret = df.pct_change(fill_method=None)
     corr   = df_ret.corrwith(df_ret['QQQ'], min_periods=MIN_MONTHS)
     corr['QQQ'] = 1.0   # QQQ는 자기 자신이 기준 → 항상 1.0
