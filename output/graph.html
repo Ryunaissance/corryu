@@ -434,7 +434,8 @@ fetch('graph_data.json')
       const ov = JSON.parse(localStorage.getItem('corryu_user_overrides') || '{}');
       if (Object.keys(ov).length) {
         allNodes.forEach(node => {
-          if (node.id in ov) node.l = ov[node.id].is_legacy ? 1 : 0;
+          if (node.id in ov && 'is_legacy' in ov[node.id])
+            node.l = ov[node.id].is_legacy ? 1 : 0;
         });
       }
     } catch(e) {}
