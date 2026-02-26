@@ -155,8 +155,8 @@ table.dataTable tbody tr.row-selected {{ background: rgba(59,130,246,0.08) !impo
             <span class="text-gradient">CORRYU</span> Master Valuation Dashboard
         </h1>
         <p class="text-sm text-gray-500">
-            Total <span class="text-white font-bold">{total_etfs:,}</span> ETFs
-            <span class="text-gray-600">(레거시 <span class="text-yellow-400 font-bold">{total_legacy:,}</span>개 제외 시 <span class="text-green-400 font-bold">{total_active:,}</span> active)</span> |
+            Total <span class="text-white font-bold" id="hdr-total">{total_etfs:,}</span> ETFs
+            <span class="text-gray-600">(레거시 <span class="text-yellow-400 font-bold" id="hdr-legacy">{total_legacy:,}</span>개 제외 시 <span class="text-green-400 font-bold" id="hdr-active">{total_active:,}</span> active)</span> |
             <span class="text-white font-bold">{total_sectors}</span> Sectors |
             Updated: <span class="text-gray-400">{today}</span>
         </p>
@@ -337,6 +337,21 @@ function getSuperSectorMeta(ssId) {{
         active: metas.reduce((s,m) => s+(m.active||0), 0),
         legacy: metas.reduce((s,m) => s+(m.legacy||0), 0),
     }};
+}}
+
+function recalcSectorMeta() {{
+    for (const sid of Object.keys(sectorMeta)) {{
+        const etfs = allData[sid] || [];
+        sectorMeta[sid].count  = etfs.length;
+        sectorMeta[sid].active = etfs.filter(e => !e.is_legacy).length;
+        sectorMeta[sid].legacy = etfs.filter(e =>  e.is_legacy).length;
+    }}
+    let totalETFs   = Object.values(sectorMeta).reduce((s,m) => s+(m.count||0),  0);
+    let totalActive = Object.values(sectorMeta).reduce((s,m) => s+(m.active||0), 0);
+    let totalLegacy = Object.values(sectorMeta).reduce((s,m) => s+(m.legacy||0), 0);
+    $('#hdr-total').text(totalETFs.toLocaleString());
+    $('#hdr-active').text(totalActive.toLocaleString());
+    $('#hdr-legacy').text(totalLegacy.toLocaleString());
 }}
 
 function renderSectorTabs() {{
@@ -708,6 +723,9 @@ function initDashboard() {{
             }}
         }});
         saveUserOverrides(ov);
+        recalcSectorMeta();
+        renderSectorTabs();
+        renderSummary();
         selectedTickers.clear();
         table.rows().invalidate('data').draw(false);
         $('#select-all-cb').prop('checked', false);
@@ -731,6 +749,7 @@ $(document).ready(function() {{
             sectorMeta = d.sectorMeta;
             allData = d.allData;
             applyUserOverrides();   // localStorage 오버라이드 적용
+            recalcSectorMeta();     // 오버라이드 반영해 카운트 갱신
             initDashboard();
         }});
 }});
