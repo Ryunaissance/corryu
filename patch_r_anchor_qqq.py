@@ -144,6 +144,7 @@ def main():
     df     = pd.DataFrame(price_data)
     df_ret = df.pct_change(fill_method=None)
     corr   = df_ret.corrwith(df_ret['QQQ'], min_periods=MIN_MONTHS)
+    corr['QQQ'] = 1.0   # QQQ는 자기 자신이 기준 → 항상 1.0
     valid  = corr.dropna()
     print(f'   유효 티커: {len(valid)}개')
 
