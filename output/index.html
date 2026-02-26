@@ -140,6 +140,7 @@ table.dataTable thead th.text-left, table.dataTable tbody td.text-left { text-al
         <table id="masterTable" class="display nowrap" style="width:100%">
             <thead>
                 <tr>
+                    <th title="연번" style="width:36px;min-width:36px">#</th>
                     <th class="text-left">Ticker</th>
                     <th class="text-left" style="min-width:220px">ETF 명칭</th>
                     <th title="시가총액 순위">Rank</th>
@@ -359,6 +360,14 @@ function initDashboard() {
         lengthMenu: [[25, 50, 100, 200, -1], [25, 50, 100, 200, "All"]],
         order: [],
         columns: [
+            {
+                data: null, orderable: false, searchable: false,
+                className: 'text-right text-gray-600',
+                render: function(d, type, row, meta) {
+                    if (type !== 'display') return meta.row + meta.settings._iDisplayStart;
+                    return '<span style="font-size:0.75rem">' + (meta.row + meta.settings._iDisplayStart + 1) + '</span>';
+                }
+            },
             {
                 data: 'ticker', className: 'text-left font-semibold',
                 render: function(d, type, row) {
