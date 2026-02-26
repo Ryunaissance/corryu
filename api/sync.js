@@ -1,67 +1,49 @@
 /**
- * Vercel Serverless Function — 사용자 오버라이드 GitHub 동기화 프록시
- * 클라이언트에 PAT 노출 없이 서버 측 GITHUB_PAT 환경변수 사용
+ * Vercel Serverless Function — 사용자 오버라이드 Blob 저장소
+ * GitHub 커밋 대신 Vercel Blob에 직접 저장 → sha 충돌 없음
  *
- * GET  /api/sync  → output/user_overrides.json 읽기
- * POST /api/sync  → output/user_overrides.json 쓰기 (body: { overrides, sha? })
+ * GET  /api/sync  → 오버라이드 JSON 읽기
+ * POST /api/sync  → 오버라이드 JSON 쓰기 (body: { overrides })
+ *
+ * 환경변수: BLOB_READ_WRITE_TOKEN (Vercel Blob Store)
  */
+import { put, list } from '@vercel/blob';
+
+const BLOB_PATH = 'corryu/user_overrides.json';
+
 export default async function handler(req, res) {
-  const pat = process.env.GITHUB_PAT;
-  if (!pat) return res.status(500).json({ error: 'GITHUB_PAT env not configured' });
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  if (!token) return res.status(500).json({ error: 'BLOB_READ_WRITE_TOKEN not configured' });
 
-  const REPO   = 'Ryunaissance/corryu';
-  const BRANCH = 'main';
-  const PATH   = 'output/user_overrides.json';
-  const apiUrl = `https://api.github.com/repos/${REPO}/contents/${PATH}`;
-  const ghHeaders = {
-    Authorization: `Bearer ${pat}`,
-    Accept: 'application/vnd.github+json',
-  };
-
+  // ── GET: 읽기 ─────────────────────────────────────
   if (req.method === 'GET') {
     try {
-      const r = await fetch(`${apiUrl}?ref=${BRANCH}`, {
-        headers: ghHeaders,
-        signal: AbortSignal.timeout(8000),
-      });
-      if (r.status === 404) return res.status(404).json({ error: 'not found' });
-      if (!r.ok) return res.status(r.status).json({ error: `GitHub ${r.status}` });
-      const d = await r.json();
-      const content = JSON.parse(
-        Buffer.from(d.content.replace(/\n/g, ''), 'base64').toString('utf8')
-      );
+      const { blobs } = await list({ prefix: BLOB_PATH, limit: 1, token });
+      if (!blobs.length) return res.status(404).json({ error: 'not found' });
+      const r = await fetch(blobs[0].downloadUrl, { signal: AbortSignal.timeout(5000) });
+      if (!r.ok) return res.status(502).json({ error: `blob fetch ${r.status}` });
+      const content = await r.json();
       res.setHeader('Cache-Control', 'no-store');
-      return res.json({ content, sha: d.sha });
+      return res.json({ content });
     } catch (e) {
       return res.status(502).json({ error: e.message });
     }
   }
 
+  // ── POST: 쓰기 ────────────────────────────────────
   if (req.method === 'POST') {
     try {
-      const { overrides, sha } = req.body || {};
+      const { overrides } = req.body || {};
       if (!overrides) return res.status(400).json({ error: 'overrides required' });
       const ts = Date.now();
-      const payload = Object.assign({ _meta: { ts } }, overrides);
-      const encoded = Buffer.from(JSON.stringify(payload, null, 2)).toString('base64');
-      const body = {
-        message: 'sync: corryu user overrides',
-        content: encoded,
-        branch: BRANCH,
-      };
-      if (sha) body.sha = sha;
-      const r = await fetch(apiUrl, {
-        method: 'PUT',
-        headers: { ...ghHeaders, 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-        signal: AbortSignal.timeout(10000),
+      const payload = { _meta: { ts }, ...overrides };
+      await put(BLOB_PATH, JSON.stringify(payload), {
+        access: 'public',
+        addRandomSuffix: false,
+        contentType: 'application/json',
+        token,
       });
-      if (!r.ok) {
-        const errBody = await r.json().catch(() => ({}));
-        return res.status(r.status).json({ error: `GitHub ${r.status}`, detail: errBody.message });
-      }
-      const d = await r.json();
-      return res.json({ sha: d.content && d.content.sha, ts });
+      return res.json({ ts });
     } catch (e) {
       return res.status(502).json({ error: e.message });
     }
