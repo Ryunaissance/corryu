@@ -226,7 +226,8 @@ table.dataTable tbody tr.row-selected {{ background: rgba(59,130,246,0.08) !impo
                     <th class="text-left" style="min-width:220px">ETF 명칭</th>
                     <th title="시가총액 순위">Rank</th>
                     <th title="시가총액 ($M)">AUM</th>
-                    <th title="섹터 앵커 대비 상관계수">r_Anchor</th>
+                    <th title="섹터 앵커(QQQ) 대비 상관계수">r_Anchor</th>
+                    <th title="반도체 ETF(SMH) 대비 상관계수 — 주식시장 섹터만 표시">SMH Corr</th>
                     <th title="Z-Score (200일 이평 기준)">Z-Score</th>
                     <th title="200일 이동평균 이격도">200MA</th>
                     <th title="RSI (14일, Wilder)">RSI</th>
@@ -628,6 +629,12 @@ function initDashboard() {{
             {{ data: 'r_anchor', render: function(d,t) {{
                 if(t!=='display') return d;
                 let c = d >= 0.70 ? 'text-pink-400 font-bold' : (d <= -0.3 ? 'text-green-400 font-bold' : 'text-gray-400');
+                return '<span class="'+c+'">'+d.toFixed(2)+'</span>';
+            }} }},
+            {{ data: 'smh_corr', defaultContent: null, render: function(d,t) {{
+                if(t!=='display') return (d===null||d===undefined) ? -9999 : d;
+                if(d===null||d===undefined) return '<span class="text-gray-700">–</span>';
+                let c = d >= 0.70 ? 'text-violet-400 font-bold' : (d <= -0.3 ? 'text-green-400 font-bold' : 'text-gray-400');
                 return '<span class="'+c+'">'+d.toFixed(2)+'</span>';
             }} }},
             {{ data: 'z_score', render: function(d,t,row) {{

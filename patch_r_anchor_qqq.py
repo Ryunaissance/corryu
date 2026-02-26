@@ -1,7 +1,7 @@
-"""patch_r_anchor_qqq.py — 주식 시장 슈퍼섹터 r_anchor를 QQQ 기준으로 패치
+"""patch_r_anchor_qqq.py — 주식 시장 슈퍼섹터 r_anchor(QQQ) + smh_corr(SMH) 패치
 
-Yahoo Finance 월간 데이터로 QQQ 상관계수를 계산해
-output/etf_data.json 의 r_anchor 컬럼만 업데이트합니다.
+Yahoo Finance 월간 데이터로 QQQ/SMH 상관계수를 계산해
+output/etf_data.json 의 r_anchor, smh_corr 컬럼을 업데이트합니다.
 전체 build 파이프라인 없이 단독 실행 가능.
 
 Usage:
@@ -127,8 +127,8 @@ def main():
     override_tickers = [tk for tks in override_anchors.values() for tk in tks]
     override_anchor_list = list(override_anchors.keys())
 
-    all_fetch = list(set(['QQQ'] + ss_tickers + override_tickers + override_anchor_list))
-    print(f'   슈퍼섹터 ETF: {len(ss_tickers)}개 + QQQ + 수동오버라이드 {len(override_tickers)}개 → 총 {len(all_fetch)}개 다운로드 예정')
+    all_fetch = list(set(['QQQ', 'SMH'] + ss_tickers + override_tickers + override_anchor_list))
+    print(f'   슈퍼섹터 ETF: {len(ss_tickers)}개 + QQQ/SMH + 수동오버라이드 {len(override_tickers)}개 → 총 {len(all_fetch)}개 다운로드 예정')
 
     # 3. 월간 데이터 다운로드
     print(f'\n📡 Yahoo Finance 월간 데이터 다운로드 ({MAX_WORKERS}스레드)...')
@@ -139,14 +139,24 @@ def main():
         print('❌ QQQ 데이터 다운로드 실패. 네트워크 연결을 확인하세요.')
         sys.exit(1)
 
-    # 4. 월간 수익률 → QQQ와의 상관계수 계산 (슈퍼섹터)
-    print('\n📊 QQQ 상관계수 계산 중...')
+    # 4. 월간 수익률 → QQQ/SMH 상관계수 계산 (슈퍼섹터)
+    print('\n📊 QQQ/SMH 상관계수 계산 중...')
     df     = pd.DataFrame(price_data)
     df_ret = df.pct_change(fill_method=None)
     corr   = df_ret.corrwith(df_ret['QQQ'], min_periods=MIN_MONTHS)
     corr['QQQ'] = 1.0   # QQQ는 자기 자신이 기준 → 항상 1.0
     valid  = corr.dropna()
-    print(f'   유효 티커: {len(valid)}개')
+    print(f'   QQQ 기준 유효 티커: {len(valid)}개')
+
+    # SMH 상관계수 (EQUITY_MARKET 더블 앵커)
+    if 'SMH' in df_ret.columns:
+        corr_smh = df_ret.corrwith(df_ret['SMH'], min_periods=MIN_MONTHS)
+        corr_smh['SMH'] = 1.0   # SMH는 자기 자신 → 항상 1.0
+        valid_smh = corr_smh.dropna()
+        print(f'   SMH 기준 유효 티커: {len(valid_smh)}개')
+    else:
+        corr_smh = pd.Series(dtype=float)
+        print('   ⚠️  SMH 데이터 없음 → smh_corr 스킵')
 
     # 4b. 수동 오버라이드 ETF → 섹터 앵커 기준 상관계수 계산
     override_corr = {}   # ticker → r_anchor (vs 섹터 앵커)
@@ -164,18 +174,22 @@ def main():
                     override_corr[tk] = round(r, 4)
                     print(f'   {tk} vs {anchor}: r={r:.4f}')
 
-    # 5. etf_data.json r_anchor 패치
-    print('\n✏️  r_anchor 패치 중...')
-    updated = 0
-    skipped = 0
+    # 5. etf_data.json r_anchor + smh_corr 패치
+    print('\n✏️  r_anchor / smh_corr 패치 중...')
+    updated_r = 0
+    updated_s = 0
+    skipped   = 0
     for sid in sorted(ss_sub_sectors):
         for etf in db['allData'].get(sid, []):
             tk = etf['ticker']
             if tk in corr and not pd.isna(corr[tk]):
                 etf['r_anchor'] = round(float(corr[tk]), 4)
-                updated += 1
+                updated_r += 1
             else:
                 skipped += 1
+            if tk in corr_smh and not pd.isna(corr_smh[tk]):
+                etf['smh_corr'] = round(float(corr_smh[tk]), 4)
+                updated_s += 1
 
     # 5b. 수동 오버라이드 ETF r_anchor 패치 (섹터 앵커 기준)
     for tk, r_val in override_corr.items():
@@ -185,10 +199,10 @@ def main():
         for etf in db['allData'].get(sid, []):
             if etf['ticker'] == tk:
                 etf['r_anchor'] = r_val
-                updated += 1
+                updated_r += 1
                 break
 
-    print(f'   업데이트: {updated}개 | 스킵(데이터 없음): {skipped}개')
+    print(f'   r_anchor 업데이트: {updated_r}개 | smh_corr 업데이트: {updated_s}개 | 스킵: {skipped}개')
 
     # 6. 저장
     with open(ETF_DATA_JSON, 'w', encoding='utf-8') as f:
@@ -205,7 +219,7 @@ def main():
     print(f'\n✅ 완료! ({elapsed:.0f}초)')
     print('\n다음 단계:')
     print('  git add output/etf_data.json output/index.html')
-    print("  git commit -m 'feat: r_anchor QQQ 기준으로 업데이트'")
+    print("  git commit -m 'feat: r_anchor QQQ + smh_corr 업데이트'")
     print('  git push')
 
 
