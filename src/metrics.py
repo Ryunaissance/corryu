@@ -41,6 +41,44 @@ def compute_52w_mdd(prices):
     return (prices.iloc[-1] / high_52 - 1) * 100
 
 
+def compute_rsi(prices, period=14):
+    """RSI (Wilder 방식, 기본 14일)
+
+    Returns:
+        float: RSI 값 (0~100), 데이터 부족 시 None
+    """
+    if len(prices) < period + 1:
+        return None
+    delta = prices.diff()
+    gain = delta.clip(lower=0)
+    loss = -delta.clip(upper=0)
+    avg_gain = gain.ewm(alpha=1 / period, min_periods=period, adjust=False).mean()
+    avg_loss = loss.ewm(alpha=1 / period, min_periods=period, adjust=False).mean()
+    rs = avg_gain / avg_loss.replace(0, np.nan)
+    rsi = 100 - (100 / (1 + rs))
+    val = rsi.iloc[-1]
+    return round(float(val), 1) if not pd.isna(val) else None
+
+
+def compute_52w_range_pct(prices):
+    """52주 레인지 내 위치 (%)
+
+    0% = 52주 최저, 100% = 52주 최고
+
+    Returns:
+        float: 0~100, 데이터 부족 시 None
+    """
+    if len(prices) < 10:
+        return None
+    recent = prices.tail(252)
+    high = recent.max()
+    low = recent.min()
+    current = prices.iloc[-1]
+    if pd.isna(high) or pd.isna(low) or high == low:
+        return None
+    return round(float((current - low) / (high - low) * 100), 1)
+
+
 def compute_etf_metrics(ticker, df_price, perf_stats, scraped, classification,
                         df_corr_monthly, df_corr_daily, legacy_info):
     """단일 ETF의 모든 대시보드 지표를 계산
@@ -75,6 +113,8 @@ def compute_etf_metrics(ticker, df_price, perf_stats, scraped, classification,
     z_score = 0.0
     ma200_pct = 0.0
     mdd_52w = 0.0
+    rsi = None
+    range_52w = None
 
     if ticker in df_price.columns:
         ts = df_price[ticker].dropna()
@@ -82,6 +122,9 @@ def compute_etf_metrics(ticker, df_price, perf_stats, scraped, classification,
             z_score = compute_z_score(ts)
             ma200_pct = compute_200dma_divergence(ts)
             mdd_52w = compute_52w_mdd(ts)
+        if len(ts) >= 15:
+            rsi = compute_rsi(ts)
+            range_52w = compute_52w_range_pct(ts)
 
     # r_spy (글로벌 참조 상관계수)
     r_spy = get_corr_value('SPY', ticker, df_corr_monthly, df_corr_daily)
@@ -96,6 +139,8 @@ def compute_etf_metrics(ticker, df_price, perf_stats, scraped, classification,
         'z_score': round(float(z_score), 2),
         'ma200_pct': round(float(ma200_pct), 1),
         'mdd_52w': round(float(mdd_52w), 1),
+        'rsi': rsi,
+        'range_52w': range_52w,
         'cagr': round(float(p.get('CAGR', 0)), 1),
         'vol': round(float(p.get('Vol', 0)), 1),
         'sortino': round(float(p.get('Sortino', 0)), 2),

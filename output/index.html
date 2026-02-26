@@ -148,6 +148,8 @@ table.dataTable thead th.text-left, table.dataTable tbody td.text-left { text-al
                     <th title="섹터 앵커 대비 상관계수">r_Anchor</th>
                     <th title="Z-Score (200일 이평 기준)">Z-Score</th>
                     <th title="200일 이동평균 이격도">200MA</th>
+                    <th title="RSI (14일, Wilder)">RSI</th>
+                    <th title="52주 레인지 내 위치 (0%=52주 최저 / 100%=52주 최고)">52W Rng</th>
                     <th title="52주 최고가 대비 하락폭">52W MDD</th>
                     <th title="연평균 복리 수익률">CAGR</th>
                     <th title="연환산 변동성">Vol</th>
@@ -408,6 +410,18 @@ function initDashboard() {
                 if(t!=='display') return row.short_history ? -999999 : d;
                 let c = d <= -10 ? 'value-down font-bold' : (d >= 15 ? 'value-up font-bold' : 'text-gray-500');
                 return '<span class="'+c+'">'+(d>0?'+':'')+d.toFixed(1)+'%</span>';
+            } },
+            { data: 'rsi', defaultContent: null, render: function(d,t,row) {
+                if(d === null || d === undefined) return t==='display' ? '<span class="text-gray-600">-</span>' : -1;
+                if(t!=='display') return d;
+                let c = d <= 30 ? 'value-down font-bold' : (d >= 70 ? 'value-up font-bold' : 'text-gray-500');
+                return '<span class="'+c+'">'+d.toFixed(0)+'</span>';
+            } },
+            { data: 'range_52w', defaultContent: null, render: function(d,t,row) {
+                if(d === null || d === undefined) return t==='display' ? '<span class="text-gray-600">-</span>' : -1;
+                if(t!=='display') return d;
+                let c = d <= 20 ? 'value-down font-bold' : (d >= 80 ? 'value-up font-bold' : 'text-gray-500');
+                return '<span class="'+c+'">'+d.toFixed(0)+'%</span>';
             } },
             { data: 'mdd_52w', render: function(d,t,row) {
                 if(row.short_history && t==='display') return '<span class="text-gray-600">-</span>';
