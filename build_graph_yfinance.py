@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.join(ROOT, 'src'))
 from config import SECTOR_DEFS
 
 # ── 설정 ──────────────────────────────────────────────
-YEARS         = 10           # 최근 N년
+RANGE         = 'max'        # 상장일부터 최신 데이터까지 전체 이력 사용
 MIN_MONTHS    = 24           # 상관계수 최소 유효 기간
 STORE_MIN_R   = 0.85         # JSON 저장 최소 r
 MAX_WORKERS   = 12           # 병렬 다운로드 스레드 수
@@ -59,7 +59,7 @@ def fetch_ticker(session, ticker):
     """Yahoo Finance chart API로 월간 종가 Series 반환. 실패 시 None."""
     url = (
         f'https://query2.finance.yahoo.com/v8/finance/chart/{ticker}'
-        f'?range={YEARS}y&interval=1mo&includeAdjustedClose=true'
+        f'?range={RANGE}&interval=1mo&includeAdjustedClose=true'
     )
     for attempt in range(RETRY_MAX):
         try:
