@@ -42,17 +42,20 @@ jobs:
       - name: Run patch_technicals.py (RSI · 52W Range)
         run: python patch_technicals.py
 
+      - name: Run build_graph_yfinance.py (상관 그래프 재빌드, range=max)
+        run: python build_graph_yfinance.py
+
       - name: Commit and push updated files
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add output/etf_data.json output/index.html
+          git add output/etf_data.json output/index.html output/graph_data.json
 
           # 변경사항 없으면 커밋 생략
           if git diff --cached --quiet; then
             echo "변경사항 없음 — 커밋 생략"
           else
-            git commit -m "feat: r_anchor·RSI·52W Range 업데이트 [automated]"
+            git commit -m "feat: r_anchor·RSI·52W Range·graph_data 업데이트 (range=max) [automated]"
             git push
           fi
