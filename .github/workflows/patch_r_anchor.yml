@@ -1,4 +1,4 @@
-name: Patch r_anchor (QQQ 기준)
+name: Patch 기술지표 (r_anchor · RSI · 52W Range)
 
 on:
   # 수동 트리거 — Actions 탭에서 "Run workflow" 버튼
@@ -39,6 +39,9 @@ jobs:
       - name: Run patch_r_anchor_qqq.py
         run: python patch_r_anchor_qqq.py
 
+      - name: Run patch_technicals.py (RSI · 52W Range)
+        run: python patch_technicals.py
+
       - name: Commit and push updated files
         run: |
           git config user.name  "github-actions[bot]"
@@ -50,6 +53,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "변경사항 없음 — 커밋 생략"
           else
-            git commit -m "feat: r_anchor QQQ 기준으로 업데이트 [automated]"
+            git commit -m "feat: r_anchor·RSI·52W Range 업데이트 [automated]"
             git push
           fi

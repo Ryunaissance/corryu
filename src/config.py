@@ -175,6 +175,18 @@ LEGACY_TRACKING_ERROR_THRESHOLD = 0.50 # 앵커 대비 r
 LEGACY_NEAR_DUPLICATE_CORR = 0.95      # 같은 섹터 내 중복 기준
 LEGACY_NEAR_DUPLICATE_TOP_N = 20       # 중복 체크 대상 (섹터 내 AUM 상위 N개)
 
+# ── 수동 섹터 오버라이드 ────────────────────────────────
+# 키워드/상관계수 자동 분류 결과를 무시하고 강제로 특정 섹터에 배정
+# 형식: 'TICKER': 'S##'
+MANUAL_SECTOR_OVERRIDES = {
+    'NLR': 'S19',   # VanEck Uranium & Nuclear ETF → 에너지/원자재 (XLE 앵커)
+    'URA': 'S19',   # Global X Uranium ETF → 에너지/원자재
+    'URNM': 'S19',  # Sprott Uranium Miners ETF → 에너지/원자재
+    'URAN': 'S19',  # Global X Uranium ETF (alt ticker) → 에너지/원자재
+    'HURA': 'S19',  # Horizons Global Uranium Index → 에너지/원자재
+    'URNJ': 'S19',  # Sprott Junior Uranium Miners → 에너지/원자재
+}
+
 # ── 수동 레거시 오버라이드 (기존 LEGACY_TICKERS 이관) ─
 MANUAL_LEGACY_OVERRIDES = {
     # -- 금/귀금속 섹터 (GLD 중복) --

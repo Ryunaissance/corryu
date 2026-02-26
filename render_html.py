@@ -108,6 +108,26 @@ table.dataTable thead th.text-left, table.dataTable tbody td.text-left {{ text-a
 .value-up {{ color: #f87171; }} .value-down {{ color: #60a5fa; }}
 .row-legacy td {{ opacity: 0.45; text-decoration: line-through; }}
 .mine-badge {{ background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 0.68rem; font-weight: 800; box-shadow: 0 0 10px rgba(251,191,36,0.4); }}
+.badge-user-legacy {{ display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; background: rgba(249,115,22,0.12); color: #fb923c; border: 1px solid rgba(249,115,22,0.3); }}
+
+/* Checkbox column */
+input.row-cb {{ width: 15px; height: 15px; cursor: pointer; accent-color: #3b82f6; vertical-align: middle; }}
+input#select-all-cb {{ width: 15px; height: 15px; cursor: pointer; accent-color: #3b82f6; }}
+table.dataTable tbody tr.row-selected {{ background: rgba(59,130,246,0.08) !important; outline: 1px solid rgba(59,130,246,0.2); }}
+
+/* FAB */
+#fab {{ position: fixed; bottom: 28px; right: 28px; z-index: 9999; display: none; animation: fabIn 0.18s ease; }}
+@keyframes fabIn {{ from {{ opacity:0; transform: translateY(10px); }} to {{ opacity:1; transform: translateY(0); }} }}
+#fab-card {{ background: rgba(20,24,38,0.97); border: 1px solid rgba(59,130,246,0.4); border-radius: 14px; padding: 12px 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(59,130,246,0.1); backdrop-filter: blur(16px); min-width: 260px; }}
+#fab-label {{ font-size: 0.78rem; color: #64748b; margin-bottom: 10px; }}
+#fab-count {{ color: #93c5fd; font-weight: 700; }}
+.fab-btn {{ display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; border: none; cursor: pointer; transition: all 0.15s; }}
+#fab-btn-legacy {{ background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }}
+#fab-btn-legacy:hover {{ background: rgba(239,68,68,0.28); }}
+#fab-btn-unlegacy {{ background: rgba(34,197,94,0.12); color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }}
+#fab-btn-unlegacy:hover {{ background: rgba(34,197,94,0.22); }}
+#fab-btn-clear {{ background: rgba(255,255,255,0.05); color: #64748b; border: 1px solid rgba(255,255,255,0.08); padding: 7px 10px; }}
+#fab-btn-clear:hover {{ background: rgba(255,255,255,0.1); color: #94a3b8; }}
 
 /* Filter controls */
 .filter-input {{ background: rgba(20,24,38,0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e2e8f0; padding: 6px 10px; font-size: 0.82rem; width: 90px; }}
@@ -125,6 +145,12 @@ table.dataTable thead th.text-left, table.dataTable tbody td.text-left {{ text-a
     <!-- Header -->
     <div class="glass p-5 mb-5 text-center relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-0.5" style="background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);"></div>
+        <div class="absolute top-4 right-4">
+            <a href="graph.html" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:10px;background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.35);font-size:0.82rem;font-weight:600;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.28)'" onmouseout="this.style.background='rgba(139,92,246,0.15)'">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><line x1="7" y1="11.5" x2="17" y2="6.5"/><line x1="7" y1="12.5" x2="17" y2="17.5"/></svg>
+                그래프 보기
+            </a>
+        </div>
         <h1 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight">
             <span class="text-gradient">CORRYU</span> Master Valuation Dashboard
         </h1>
@@ -179,10 +205,12 @@ table.dataTable thead th.text-left, table.dataTable tbody td.text-left {{ text-a
     </div>
 
     <!-- Data Table -->
-    <div class="glass p-4">
+    <div class="glass p-4" style="position:relative">
         <table id="masterTable" class="display nowrap" style="width:100%">
             <thead>
                 <tr>
+                    <th style="width:28px;min-width:28px;text-align:center !important"><input type="checkbox" id="select-all-cb" title="전체 선택/해제"></th>
+                    <th title="연번" style="width:36px;min-width:36px">#</th>
                     <th class="text-left">Ticker</th>
                     <th class="text-left" style="min-width:220px">ETF 명칭</th>
                     <th title="시가총액 순위">Rank</th>
@@ -190,6 +218,8 @@ table.dataTable thead th.text-left, table.dataTable tbody td.text-left {{ text-a
                     <th title="섹터 앵커 대비 상관계수">r_Anchor</th>
                     <th title="Z-Score (200일 이평 기준)">Z-Score</th>
                     <th title="200일 이동평균 이격도">200MA</th>
+                    <th title="RSI (14일, Wilder)">RSI</th>
+                    <th title="52주 레인지 내 위치 (0%=52주 최저 / 100%=52주 최고)">52W Rng</th>
                     <th title="52주 최고가 대비 하락폭">52W MDD</th>
                     <th title="연평균 복리 수익률">CAGR</th>
                     <th title="연환산 변동성">Vol</th>
@@ -203,6 +233,18 @@ table.dataTable thead th.text-left, table.dataTable tbody td.text-left {{ text-a
     </div>
 </div>
 
+<!-- FAB: 레거시 처리/해제 -->
+<div id="fab">
+    <div id="fab-card">
+        <div id="fab-label"><span id="fab-count">0</span>개 선택됨</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button class="fab-btn" id="fab-btn-legacy">레거시 처리</button>
+            <button class="fab-btn" id="fab-btn-unlegacy">레거시 해제</button>
+            <button class="fab-btn" id="fab-btn-clear">×</button>
+        </div>
+    </div>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
@@ -210,6 +252,41 @@ table.dataTable thead th.text-left, table.dataTable tbody td.text-left {{ text-a
 let sectorMeta = {{}};
 let allData = {{}};
 const acSectors = {json_ac_sectors};
+
+// ── 체크박스 선택 상태 ─────────────────────────────────
+const selectedTickers = new Set();
+
+// ── localStorage 레거시 오버라이드 ───────────────────
+const USER_OVERRIDES_KEY = 'corryu_user_overrides';
+
+function getUserOverrides() {{
+    try {{ return JSON.parse(localStorage.getItem(USER_OVERRIDES_KEY) || '{{}}'); }}
+    catch(e) {{ return {{}}; }}
+}}
+function saveUserOverrides(ov) {{
+    localStorage.setItem(USER_OVERRIDES_KEY, JSON.stringify(ov));
+}}
+
+function applyUserOverrides() {{
+    const ov = getUserOverrides();
+    if (!Object.keys(ov).length) return;
+    for (const sid of Object.keys(allData)) {{
+        for (const etf of allData[sid]) {{
+            if (etf.ticker in ov) {{
+                const o = ov[etf.ticker];
+                etf.is_legacy = o.is_legacy;
+                etf._user_override = true;
+                if (o.is_legacy) {{
+                    etf.legacy_detail = ['사용자 직접 지정'];
+                    etf.legacy_reasons = ['user_override'];
+                }} else {{
+                    etf.legacy_detail = [];
+                    etf.legacy_reasons = [];
+                }}
+            }}
+        }}
+    }}
+}}
 const acDefs = {json_ac_defs};
 const sectorDefs = {json_sector_defs};
 const superSectorDefs = {json_super_sector_defs};
@@ -403,6 +480,23 @@ function initDashboard() {{
         order: [],
         columns: [
             {{
+                data: null, orderable: false, searchable: false,
+                className: 'text-center',
+                render: function(d, type, row) {{
+                    if (type !== 'display') return '';
+                    let checked = selectedTickers.has(row.ticker) ? ' checked' : '';
+                    return '<input type="checkbox" class="row-cb"' + checked + ' data-ticker="' + row.ticker + '">';
+                }}
+            }},
+            {{
+                data: null, orderable: false, searchable: false,
+                className: 'text-right text-gray-600',
+                render: function(d, type, row, meta) {{
+                    if (type !== 'display') return meta.row + meta.settings._iDisplayStart;
+                    return '<span style="font-size:0.75rem">' + (meta.row + meta.settings._iDisplayStart + 1) + '</span>';
+                }}
+            }},
+            {{
                 data: 'ticker', className: 'text-left font-semibold',
                 render: function(d, type, row) {{
                     if (type !== 'display') return d;
@@ -443,6 +537,18 @@ function initDashboard() {{
                 let c = d <= -10 ? 'value-down font-bold' : (d >= 15 ? 'value-up font-bold' : 'text-gray-500');
                 return '<span class="'+c+'">'+(d>0?'+':'')+d.toFixed(1)+'%</span>';
             }} }},
+            {{ data: 'rsi', defaultContent: null, render: function(d,t,row) {{
+                if(d === null || d === undefined) return t==='display' ? '<span class="text-gray-600">-</span>' : -1;
+                if(t!=='display') return d;
+                let c = d <= 30 ? 'value-down font-bold' : (d >= 70 ? 'value-up font-bold' : 'text-gray-500');
+                return '<span class="'+c+'">'+d.toFixed(0)+'</span>';
+            }} }},
+            {{ data: 'range_52w', defaultContent: null, render: function(d,t,row) {{
+                if(d === null || d === undefined) return t==='display' ? '<span class="text-gray-600">-</span>' : -1;
+                if(t!=='display') return d;
+                let c = d <= 20 ? 'value-down font-bold' : (d >= 80 ? 'value-up font-bold' : 'text-gray-500');
+                return '<span class="'+c+'">'+d.toFixed(0)+'%</span>';
+            }} }},
             {{ data: 'mdd_52w', render: function(d,t,row) {{
                 if(row.short_history && t==='display') return '<span class="text-gray-600">-</span>';
                 if(t!=='display') return row.short_history ? -999999 : d;
@@ -474,12 +580,17 @@ function initDashboard() {{
                 if(t!=='display') return d ? 1 : 0;
                 if(!d) return '<span class="badge-active">Active</span>';
                 let detail = (row.legacy_detail||[]).join(' / ');
-                return '<span class="badge-legacy">Legacy</span>'
-                    + (detail ? '<div class="text-xs text-red-400 mt-0.5 opacity-80">'+detail+'</div>' : '');
+                let badge = row._user_override
+                    ? '<span class="badge-user-legacy">User Legacy</span>'
+                    : '<span class="badge-legacy">Legacy</span>';
+                return badge + (detail ? '<div class="text-xs text-orange-400 mt-0.5 opacity-80">'+detail+'</div>' : '');
             }} }}
         ],
-        createdRow: function(row, data) {{
+        rowCallback: function(row, data) {{
             if (data.is_legacy) $(row).addClass('row-legacy');
+            else $(row).removeClass('row-legacy');
+            if (selectedTickers.has(data.ticker)) $(row).addClass('row-selected');
+            else $(row).removeClass('row-selected');
         }}
     }});
 
@@ -536,6 +647,81 @@ function initDashboard() {{
         state.minSortino = isNaN(v) ? -999 : v;
         table.draw();
     }});
+
+    // ── 체크박스 이벤트 ───────────────────────────────
+    function updateFAB() {{
+        let n = selectedTickers.size;
+        $('#fab-count').text(n);
+        n > 0 ? $('#fab').show() : $('#fab').hide();
+        // 전체선택 체크박스 상태 동기화
+        let visibleTickers = [];
+        table.rows({{ filter: 'applied', page: 'current' }}).every(function() {{
+            visibleTickers.push(this.data().ticker);
+        }});
+        let allChecked = visibleTickers.length > 0 && visibleTickers.every(t => selectedTickers.has(t));
+        $('#select-all-cb').prop('checked', allChecked);
+    }}
+
+    // 개별 체크박스
+    $('#masterTable').on('change', 'input.row-cb', function() {{
+        let ticker = $(this).data('ticker');
+        if (this.checked) selectedTickers.add(ticker);
+        else selectedTickers.delete(ticker);
+        let row = table.row($(this).closest('tr'));
+        if (this.checked) $(row.node()).addClass('row-selected');
+        else $(row.node()).removeClass('row-selected');
+        updateFAB();
+    }});
+
+    // 전체 선택/해제
+    $('#select-all-cb').on('change', function() {{
+        let checked = this.checked;
+        table.rows({{ filter: 'applied', page: 'current' }}).every(function() {{
+            let d = this.data();
+            if (checked) selectedTickers.add(d.ticker);
+            else selectedTickers.delete(d.ticker);
+            if (checked) $(this.node()).addClass('row-selected');
+            else $(this.node()).removeClass('row-selected');
+        }});
+        $('input.row-cb').prop('checked', checked);
+        updateFAB();
+    }});
+
+    // 페이지/정렬/필터 변경 후 전체선택 체크박스 상태 갱신
+    table.on('draw', function() {{ updateFAB(); }});
+
+    // ── FAB 액션 ─────────────────────────────────────
+    function applyLegacyAction(setLegacy) {{
+        if (selectedTickers.size === 0) return;
+        let ov = getUserOverrides();
+        selectedTickers.forEach(function(ticker) {{
+            ov[ticker] = {{ is_legacy: setLegacy }};
+            for (let sid of Object.keys(allData)) {{
+                let etf = allData[sid].find(e => e.ticker === ticker);
+                if (etf) {{
+                    etf.is_legacy = setLegacy;
+                    etf._user_override = true;
+                    etf.legacy_detail = setLegacy ? ['사용자 직접 지정'] : [];
+                    etf.legacy_reasons = setLegacy ? ['user_override'] : [];
+                    break;
+                }}
+            }}
+        }});
+        saveUserOverrides(ov);
+        selectedTickers.clear();
+        table.rows().invalidate('data').draw(false);
+        $('#select-all-cb').prop('checked', false);
+        updateFAB();
+    }}
+
+    $('#fab-btn-legacy').on('click', function() {{ applyLegacyAction(true); }});
+    $('#fab-btn-unlegacy').on('click', function() {{ applyLegacyAction(false); }});
+    $('#fab-btn-clear').on('click', function() {{
+        selectedTickers.clear();
+        $('input.row-cb').prop('checked', false);
+        table.rows().every(function() {{ $(this.node()).removeClass('row-selected'); }});
+        updateFAB();
+    }});
 }}
 
 $(document).ready(function() {{
@@ -544,6 +730,7 @@ $(document).ready(function() {{
         .then(function(d) {{
             sectorMeta = d.sectorMeta;
             allData = d.allData;
+            applyUserOverrides();   // localStorage 오버라이드 적용
             initDashboard();
         }});
 }});
