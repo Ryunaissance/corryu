@@ -122,7 +122,10 @@ def build_graph_data(corr, meta):
     nodes = []
     for tk in tickers:
         m = meta.get(tk, {})
-        nodes.append({'id': tk, 'n': m.get('n', tk), 's': m.get('s', 'S24'), 'a': m.get('a', 0.0)})
+        node = {'id': tk, 'n': m.get('n', tk), 's': m.get('s', 'S24'), 'a': m.get('a', 0.0)}
+        if m.get('l'):
+            node['l'] = 1
+        nodes.append(node)
 
     print(f'   엣지 계산 중 (r ≥ {STORE_MIN_R})...')
     arr = corr.values.astype(np.float32)
@@ -161,7 +164,7 @@ def main():
     for sid, etfs in db['allData'].items():
         for e in etfs:
             tk = e['ticker']
-            meta[tk] = {'n': e['name'], 's': sid, 'a': round(e.get('aum', 0) / 1e9, 2)}
+            meta[tk] = {'n': e['name'], 's': sid, 'a': round(e.get('aum', 0) / 1e9, 2), 'l': e.get('is_legacy', False)}
             tickers.append(tk)
     print(f'   {len(tickers)}개 티커')
 
