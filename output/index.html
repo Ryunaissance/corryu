@@ -99,12 +99,22 @@ table.dataTable tbody tr.row-selected { background: rgba(59,130,246,0.08) !impor
 #btn-reset { color: #fbbf24; border-color: rgba(251,191,36,0.2); background: rgba(251,191,36,0.05); }
 #btn-reset:hover { background: rgba(251,191,36,0.12) !important; color: #fde68a !important; }
 
-/* GitHub 동기화 */
+/* 동기화 상태 dot */
 .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #475569; display: inline-block; flex-shrink: 0; }
 .sync-dot.ok { background: #4ade80; }
 .sync-dot.err { background: #f87171; }
 .sync-dot.busy { background: #fbbf24; animation: syncPulse 1s ease-in-out infinite; }
 @keyframes syncPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+/* 플로팅 저장 버튼 */
+#save-float { position: fixed; bottom: 28px; left: 28px; z-index: 9998; display: none; animation: fabIn 0.18s ease; }
+#save-float.visible { display: block; }
+#save-float-btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: background 0.2s, color 0.2s, border-color 0.2s; backdrop-filter: blur(14px); box-shadow: 0 4px 24px rgba(0,0,0,0.45); border: 1px solid rgba(59,130,246,0.45); background: rgba(59,130,246,0.18); color: #93c5fd; }
+#save-float-btn:hover:not(:disabled) { background: rgba(59,130,246,0.32); }
+#save-float-btn:disabled { cursor: not-allowed; }
+#save-float-btn.state-saving { color: #fbbf24; border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.1); }
+#save-float-btn.state-saved  { color: #4ade80; border-color: rgba(74,222,128,0.4);  background: rgba(74,222,128,0.1); }
+#save-float-btn.state-error  { color: #f87171; border-color: rgba(248,113,113,0.4); background: rgba(248,113,113,0.1); }
 
 /* Filter controls */
 .filter-input { background: rgba(20,24,38,0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e2e8f0; padding: 6px 10px; font-size: 0.82rem; width: 90px; }
@@ -216,6 +226,14 @@ table.dataTable tbody tr.row-selected { background: rgba(59,130,246,0.08) !impor
     </div>
 </div>
 
+<!-- 플로팅 저장 버튼 -->
+<div id="save-float">
+    <button id="save-float-btn" onclick="manualSyncSave()">
+        <span id="save-float-icon">☁</span>
+        <span id="save-float-label">저장</span>
+    </button>
+</div>
+
 <!-- FAB: 레거시 처리/해제/카테고리 이동 -->
 <div id="fab">
     <div id="fab-card">
@@ -265,6 +283,8 @@ function getUserOverrides() {
 function saveUserOverrides(ov) {
     localStorage.setItem(USER_OVERRIDES_KEY, JSON.stringify(ov));
     localStorage.setItem('corryu_overrides_ts', String(Date.now()));
+    _syncDirty = true;
+    setSaveFloat('dirty');
     pushRemoteOverrides(ov);  // async, non-blocking
 }
 
@@ -618,6 +638,9 @@ function showToast(msg, durationMs) {
 }
 
 // ── 다기기 동기화 (Vercel Blob, /api/sync) ───────────
+let _syncDirty = false;
+let _saveHideTimer = null;
+
 function setSyncStatus(s) {
     const dot = document.getElementById('sync-dot');
     const lbl = document.getElementById('sync-label');
@@ -625,6 +648,32 @@ function setSyncStatus(s) {
     dot.className = 'sync-dot' + (s && s !== 'off' ? ' ' + s : '');
     const labels = { ok: '동기화됨', err: '동기화 실패', busy: '동기화 중…' };
     lbl.textContent = labels[s] || '동기화';
+}
+
+function setSaveFloat(state) {
+    const wrap = document.getElementById('save-float');
+    const btn  = document.getElementById('save-float-btn');
+    const icon = document.getElementById('save-float-icon');
+    const lbl  = document.getElementById('save-float-label');
+    if (!wrap) return;
+    clearTimeout(_saveHideTimer);
+    const map = {
+        hidden:  null,
+        dirty:   { icon: '☁', label: '저장', cls: '' },
+        saving:  { icon: '…', label: '저장 중', cls: 'state-saving' },
+        saved:   { icon: '✓', label: '저장됨', cls: 'state-saved' },
+        error:   { icon: '✕', label: '실패 — 재시도', cls: 'state-error' },
+    };
+    const s = map[state];
+    if (!s) { wrap.classList.remove('visible'); return; }
+    wrap.classList.add('visible');
+    btn.className = s.cls;
+    btn.disabled = (state === 'saving');
+    icon.textContent = s.icon;
+    lbl.textContent  = s.label;
+    if (state === 'saved') {
+        _saveHideTimer = setTimeout(() => { if (!_syncDirty) setSaveFloat('hidden'); }, 2500);
+    }
 }
 
 async function fetchRemoteOverrides() {
@@ -638,6 +687,7 @@ async function fetchRemoteOverrides() {
 
 async function pushRemoteOverrides(ov) {
     setSyncStatus('busy');
+    setSaveFloat('saving');
     try {
         const r = await fetch('/api/sync', {
             method: 'POST',
@@ -645,11 +695,22 @@ async function pushRemoteOverrides(ov) {
             body: JSON.stringify({ overrides: ov }),
         });
         if (r.ok) {
+            _syncDirty = false;
             setSyncStatus('ok');
+            setSaveFloat('saved');
         } else {
             setSyncStatus('err');
+            setSaveFloat('error');
         }
-    } catch(e) { setSyncStatus('err'); }
+    } catch(e) {
+        setSyncStatus('err');
+        setSaveFloat('error');
+    }
+}
+
+async function manualSyncSave() {
+    if (document.getElementById('save-float-btn')?.disabled) return;
+    await pushRemoteOverrides(getUserOverrides());
 }
 
 // 30초마다 원격 변경사항 자동 반영
@@ -1149,22 +1210,30 @@ function initDashboard() {
             undoLegacyAction();
         }
     });
-    // ── GitHub 동기화 버튼: 클릭 시 수동 동기화 체크 ──────────
+    // ── 동기화 버튼: 클릭 시 원격 → 로컬 즉시 적용 ──────────
     $('#sync-status').on('click', async function() {
         setSyncStatus('busy');
         const remoteOv = await fetchRemoteOverrides();
         if (!remoteOv) { setSyncStatus('err'); showToast('동기화 서버에 연결할 수 없습니다', 3000); return; }
-        if (remoteOv._meta) {
-            const localTs = parseInt(localStorage.getItem('corryu_overrides_ts') || '0');
-            if (remoteOv._meta.ts > localTs) {
-                showToast('다른 기기의 최신 설정이 있습니다 — 페이지를 새로고침하세요', 4000);
-                setSyncStatus('ok');
-            } else {
-                setSyncStatus('ok');
-                showToast('이미 최신 상태입니다', 2000);
-            }
-        } else {
+        const localTs = parseInt(localStorage.getItem('corryu_overrides_ts') || '0');
+        const remoteTs = remoteOv._meta ? remoteOv._meta.ts : 0;
+        if (remoteTs > localTs) {
+            const { _meta, ...cleanOv } = remoteOv;
+            localStorage.setItem(USER_OVERRIDES_KEY, JSON.stringify(cleanOv));
+            localStorage.setItem('corryu_overrides_ts', String(remoteTs));
+            applyOverridesToData(cleanOv);
+            recalcSectorMeta();
+            renderSectorTabs();
+            renderSummary();
+            if (typeof table !== 'undefined') loadSector(state.activeSector);
             setSyncStatus('ok');
+            showToast('다른 기기의 최신 설정을 적용했습니다 (' + Object.keys(cleanOv).length + '종목)', 3000);
+        } else if (!_syncDirty) {
+            setSyncStatus('ok');
+            showToast('이미 최신 상태입니다', 2000);
+        } else {
+            // 로컬이 더 최신 → 업로드
+            pushRemoteOverrides(getUserOverrides());
         }
     });
 
