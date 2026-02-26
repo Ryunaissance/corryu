@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>레거시 복구</title>
+<style>
+  body { margin: 0; display: flex; align-items: center; justify-content: center;
+         min-height: 100vh; background: #0f172a; font-family: sans-serif; color: #e2e8f0; }
+  .box { text-align: center; padding: 40px; }
+  h2 { font-size: 1.4rem; margin-bottom: 8px; }
+  p  { color: #94a3b8; font-size: 0.9rem; margin-bottom: 24px; }
+  button { padding: 12px 28px; border-radius: 10px; border: none; cursor: pointer;
+           font-size: 1rem; font-weight: 700; background: #3b82f6; color: #fff; }
+  button:hover { background: #2563eb; }
+  #msg { margin-top: 16px; font-size: 0.85rem; color: #4ade80; display: none; }
+</style>
+</head>
+<body>
+<div class="box">
+  <h2>레거시 설정 초기화</h2>
+  <p>모든 사용자 레거시 오버라이드를 삭제하고<br>빌드 기본값으로 복구합니다.</p>
+  <button onclick="doRestore()">복구 후 메인으로 이동</button>
+  <div id="msg">복구 완료! 이동 중...</div>
+</div>
+<script>
+function doRestore() {
+  localStorage.removeItem('corryu_user_overrides');
+  document.getElementById('msg').style.display = 'block';
+  setTimeout(function() { location.replace('index.html'); }, 800);
+}
+</script>
+</body>
+</html>
