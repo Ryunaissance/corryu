@@ -99,6 +99,18 @@ table.dataTable tbody tr.row-selected { background: rgba(59,130,246,0.08) !impor
 #btn-reset { color: #fbbf24; border-color: rgba(251,191,36,0.2); background: rgba(251,191,36,0.05); }
 #btn-reset:hover { background: rgba(251,191,36,0.12) !important; color: #fde68a !important; }
 
+/* GitHub 동기화 */
+.sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #475569; display: inline-block; flex-shrink: 0; }
+.sync-dot.ok { background: #4ade80; }
+.sync-dot.err { background: #f87171; }
+.sync-dot.busy { background: #fbbf24; animation: syncPulse 1s ease-in-out infinite; }
+@keyframes syncPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+#gh-modal { display:none; position:fixed; inset:0; z-index:10001; background:rgba(0,0,0,0.72); backdrop-filter:blur(4px); align-items:center; justify-content:center; }
+#gh-modal.show { display:flex; }
+#gh-modal-card { background:#0f1623; border:1px solid rgba(59,130,246,0.4); border-radius:16px; padding:24px; width:min(480px,95vw); box-shadow:0 24px 64px rgba(0,0,0,0.7); }
+.gh-input { background:rgba(20,24,38,0.95); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#e2e8f0; padding:8px 12px; font-size:0.85rem; width:100%; font-family:monospace; box-sizing:border-box; }
+.gh-input:focus { outline:none; border-color:var(--accent); }
+
 /* Filter controls */
 .filter-input { background: rgba(20,24,38,0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e2e8f0; padding: 6px 10px; font-size: 0.82rem; width: 90px; }
 .filter-input:focus { outline: none; border-color: var(--accent); }
@@ -173,6 +185,7 @@ table.dataTable tbody tr.row-selected { background: rgba(59,130,246,0.08) !impor
                 <div style="border-left:1px solid rgba(255,255,255,0.1);padding-left:12px;display:flex;gap:6px;align-items:center">
                     <button id="btn-undo" class="btn-history" disabled title="Ctrl+Z">↩ 실행취소</button>
                     <button id="btn-reset" class="btn-history" title="모든 사용자 오버라이드를 빌드 기본값으로 초기화">⟳ 초기화</button>
+                    <button id="sync-status" class="btn-history" title="GitHub 다기기 동기화 설정"><span class="sync-dot" id="sync-dot"></span>&nbsp;<span id="sync-label">동기화</span></button>
                 </div>
             </div>
         </div>
@@ -235,6 +248,29 @@ table.dataTable tbody tr.row-selected { background: rgba(59,130,246,0.08) !impor
     </div>
 </div>
 
+<!-- GitHub 동기화 설정 모달 -->
+<div id="gh-modal">
+    <div id="gh-modal-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+            <div>
+                <div style="font-weight:700;font-size:1rem;color:#e2e8f0">⚙ GitHub 동기화 설정</div>
+                <div style="font-size:0.78rem;color:#64748b;margin-top:3px">PAT을 저장하면 레거시·카테고리 설정이 모든 기기에 자동 동기화됩니다</div>
+            </div>
+            <button id="gh-modal-close" style="background:transparent;border:none;color:#475569;font-size:1.3rem;cursor:pointer;line-height:1;padding:2px 6px">×</button>
+        </div>
+        <div style="margin-bottom:14px">
+            <label style="font-size:0.8rem;color:#94a3b8;display:block;margin-bottom:5px">GitHub Personal Access Token (repo 권한 필요)</label>
+            <input type="password" id="gh-pat-input" class="gh-input" placeholder="github_pat_... 또는 ghp_...">
+            <div style="font-size:0.72rem;color:#475569;margin-top:6px">Settings → Developer settings → Personal access tokens → <b style="color:#94a3b8">Contents: Read &amp; write</b> 권한 필요</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button id="gh-pat-save" style="padding:8px 18px;border-radius:8px;background:rgba(59,130,246,0.2);color:#93c5fd;border:1px solid rgba(59,130,246,0.4);font-size:0.82rem;font-weight:600;cursor:pointer">저장 &amp; 연결</button>
+            <button id="gh-pat-clear" style="padding:8px 14px;border-radius:8px;background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.2);font-size:0.82rem;font-weight:600;cursor:pointer">연결 해제</button>
+            <span id="gh-test-result" style="font-size:0.78rem;color:#64748b"></span>
+        </div>
+    </div>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
@@ -255,6 +291,8 @@ function getUserOverrides() {
 }
 function saveUserOverrides(ov) {
     localStorage.setItem(USER_OVERRIDES_KEY, JSON.stringify(ov));
+    localStorage.setItem('corryu_overrides_ts', String(Date.now()));
+    pushRemoteOverrides(ov);  // async, non-blocking
 }
 
 function applyUserOverrides() {
@@ -588,6 +626,89 @@ function loadSuperSector(ssId) {
     let ss = superSectorDefs[ssId];
     let data = ss ? ss.sub_sectors.flatMap(sid => allData[sid] || []) : [];
     table.clear().rows.add(data).draw();
+}
+
+// ── 토스트 알림 (전역) ────────────────────────────────────
+let _toastTimer = null;
+function showToast(msg, durationMs) {
+    let el = document.getElementById('r-toast');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'r-toast';
+        el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1e293b;color:#e2e8f0;padding:9px 18px;border-radius:10px;font-size:0.85rem;border:1px solid rgba(255,255,255,0.12);box-shadow:0 4px 20px rgba(0,0,0,0.5);z-index:9999;pointer-events:none;transition:opacity 0.3s;opacity:0;white-space:nowrap;';
+        document.body.appendChild(el);
+    }
+    if (_toastTimer) clearTimeout(_toastTimer);
+    el.textContent = msg;
+    el.style.opacity = '1';
+    _toastTimer = setTimeout(function() { el.style.opacity = '0'; }, durationMs || 3000);
+}
+
+// ── GitHub 다기기 동기화 ──────────────────────────────────
+const GH_REPO   = 'Ryunaissance/corryu';
+const GH_BRANCH = 'main';
+const GH_PATH   = 'output/user_overrides.json';
+const GH_PAT_KEY = 'corryu_gh_pat';
+
+function getGhPat() { return localStorage.getItem(GH_PAT_KEY) || ''; }
+function saveGhPat(pat) {
+    if (pat) localStorage.setItem(GH_PAT_KEY, pat);
+    else localStorage.removeItem(GH_PAT_KEY);
+}
+
+function setSyncStatus(s) {
+    const dot = document.getElementById('sync-dot');
+    const lbl = document.getElementById('sync-label');
+    if (!dot || !lbl) return;
+    dot.className = 'sync-dot' + (s && s !== 'off' ? ' ' + s : '');
+    const labels = { ok: '동기화됨', err: '동기화 실패', busy: '동기화 중…' };
+    lbl.textContent = labels[s] || '동기화';
+}
+
+async function fetchRemoteOverrides() {
+    try {
+        const url = 'https://raw.githubusercontent.com/' + GH_REPO + '/' + GH_BRANCH + '/' + GH_PATH + '?t=' + Date.now();
+        const r = await fetch(url);
+        if (!r.ok) return null;
+        return await r.json();
+    } catch(e) { return null; }
+}
+
+let _ghSha = null;
+async function pushRemoteOverrides(ov) {
+    const pat = getGhPat();
+    if (!pat) return;
+    setSyncStatus('busy');
+    try {
+        const payload = Object.assign({ _meta: { ts: Date.now() } }, ov);
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+        // SHA 캐시 없으면 조회
+        if (!_ghSha) {
+            const gr = await fetch(
+                'https://api.github.com/repos/' + GH_REPO + '/contents/' + GH_PATH + '?ref=' + GH_BRANCH,
+                { headers: { Authorization: 'Bearer ' + pat, Accept: 'application/vnd.github+json' } }
+            );
+            if (gr.ok) { const gd = await gr.json(); _ghSha = gd.sha; }
+            else if (gr.status !== 404) { setSyncStatus('err'); return; }
+        }
+        const body = { message: 'sync: corryu user overrides', content, branch: GH_BRANCH };
+        if (_ghSha) body.sha = _ghSha;
+        const pr = await fetch(
+            'https://api.github.com/repos/' + GH_REPO + '/contents/' + GH_PATH,
+            { method: 'PUT', headers: { Authorization: 'Bearer ' + pat, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+        );
+        if (pr.ok) {
+            const pd = await pr.json();
+            _ghSha = pd.content && pd.content.sha;
+            setSyncStatus('ok');
+        } else if (pr.status === 409) {
+            _ghSha = null;
+            setSyncStatus('err');
+            showToast('동기화 충돌 — 페이지를 새로고침하세요', 4000);
+        } else {
+            setSyncStatus('err');
+        }
+    } catch(e) { setSyncStatus('err'); }
 }
 
 function initDashboard() {
@@ -1008,24 +1129,6 @@ function initDashboard() {
         return null;
     }
 
-    let _toastTimer = null;
-    function showToast(msg, durationMs) {
-        let el = document.getElementById('r-toast');
-        if (!el) {
-            el = document.createElement('div');
-            el.id = 'r-toast';
-            el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);' +
-                'background:#1e293b;color:#e2e8f0;padding:9px 18px;border-radius:10px;font-size:0.85rem;' +
-                'border:1px solid rgba(255,255,255,0.12);box-shadow:0 4px 20px rgba(0,0,0,0.5);' +
-                'z-index:9999;pointer-events:none;transition:opacity 0.3s;opacity:0;white-space:nowrap;';
-            document.body.appendChild(el);
-        }
-        if (_toastTimer) clearTimeout(_toastTimer);
-        el.textContent = msg;
-        el.style.opacity = '1';
-        _toastTimer = setTimeout(function() { el.style.opacity = '0'; }, durationMs || 3000);
-    }
-
     async function recomputeRanchorsAsync(tickers, newSectorId) {
         const anchor = (sectorDefs[newSectorId] || {}).anchor;
         if (!anchor || anchor === '—') return;
@@ -1085,17 +1188,78 @@ function initDashboard() {
             undoLegacyAction();
         }
     });
+    // ── GitHub 동기화 모달 이벤트 ───────────────────────────
+    $('#sync-status').on('click', function() {
+        const pat = getGhPat();
+        $('#gh-pat-input').val('').attr('placeholder', pat ? '변경하려면 새 PAT를 입력하세요' : 'github_pat_... 또는 ghp_...');
+        $('#gh-test-result').text(pat ? '현재 PAT 설정됨' : '');
+        $('#gh-modal').addClass('show');
+    });
+    $('#gh-modal-close').on('click', function() { $('#gh-modal').removeClass('show'); });
+    $('#gh-modal').on('click', function(e) { if (e.target === this) $(this).removeClass('show'); });
+    $('#gh-pat-save').on('click', async function() {
+        const pat = $('#gh-pat-input').val().trim();
+        if (!pat) { $('#gh-test-result').text('PAT을 입력하세요'); return; }
+        $('#gh-test-result').text('연결 테스트 중…');
+        try {
+            const r = await fetch('https://api.github.com/repos/' + GH_REPO, {
+                headers: { Authorization: 'Bearer ' + pat, Accept: 'application/vnd.github+json' }
+            });
+            if (r.ok) {
+                saveGhPat(pat);
+                _ghSha = null;
+                setSyncStatus('ok');
+                $('#gh-test-result').css('color', '#4ade80').text('✓ 연결 성공! 다음 저장 시 자동 동기화됩니다');
+                pushRemoteOverrides(getUserOverrides());
+            } else {
+                $('#gh-test-result').css('color', '#f87171').text('✗ 연결 실패 (' + r.status + ') — 토큰 권한을 확인하세요');
+                setSyncStatus('err');
+            }
+        } catch(e) {
+            $('#gh-test-result').css('color', '#f87171').text('✗ 네트워크 오류');
+            setSyncStatus('err');
+        }
+    });
+    $('#gh-pat-clear').on('click', function() {
+        saveGhPat('');
+        _ghSha = null;
+        setSyncStatus('off');
+        $('#gh-pat-input').val('').attr('placeholder', 'github_pat_... 또는 ghp_...');
+        $('#gh-test-result').css('color', '#64748b').text('연결 해제됨');
+    });
+
     updateUndoBtn();
 }
 
 $(document).ready(function() {
     fetch('etf_data.json')
         .then(function(r) { return r.json(); })
-        .then(function(d) {
+        .then(async function(d) {
             sectorMeta = d.sectorMeta;
             allData = d.allData;
             snapshotOriginalLegacy(); // 빌드 기본값 스냅샷 (undo 기준점)
-            applyUserOverrides();     // localStorage 레거시 오버라이드 적용
+            // 다기기 동기화: 원격 오버라이드 로드 시도
+            let ov = getUserOverrides();
+            if (getGhPat()) {
+                setSyncStatus('busy');
+                const remoteOv = await fetchRemoteOverrides();
+                if (remoteOv && remoteOv._meta) {
+                    const localTs = parseInt(localStorage.getItem('corryu_overrides_ts') || '0');
+                    if (remoteOv._meta.ts > localTs) {
+                        const { _meta, ...cleanOv } = remoteOv;
+                        ov = cleanOv;
+                        localStorage.setItem(USER_OVERRIDES_KEY, JSON.stringify(ov));
+                        localStorage.setItem('corryu_overrides_ts', String(remoteOv._meta.ts));
+                        setSyncStatus('ok');
+                        showToast('다른 기기의 설정을 불러왔습니다 (' + Object.keys(ov).length + '종목)', 3500);
+                    } else {
+                        setSyncStatus('ok');
+                    }
+                } else {
+                    setSyncStatus('ok');
+                }
+            }
+            if (Object.keys(ov).length) applyOverridesToData(ov);
             applySmhCorr();           // localStorage SMH 상관계수 적용
             recalcSectorMeta();       // 오버라이드 반영해 카운트 갱신
             initDashboard();
