@@ -685,9 +685,9 @@ async function fetchRemoteOverrides() {
     } catch(e) { return null; }
 }
 
-async function pushRemoteOverrides(ov) {
+async function pushRemoteOverrides(ov, manual) {
     setSyncStatus('busy');
-    setSaveFloat('saving');
+    if (manual) setSaveFloat('saving');
     try {
         const r = await fetch('/api/sync', {
             method: 'POST',
@@ -700,17 +700,18 @@ async function pushRemoteOverrides(ov) {
             setSaveFloat('saved');
         } else {
             setSyncStatus('err');
-            setSaveFloat('error');
+            // 자동 저장 실패 → dirty 유지(조용히), 수동 저장 실패 → 에러 표시
+            setSaveFloat(manual ? 'error' : 'dirty');
         }
     } catch(e) {
         setSyncStatus('err');
-        setSaveFloat('error');
+        setSaveFloat(manual ? 'error' : 'dirty');
     }
 }
 
 async function manualSyncSave() {
     if (document.getElementById('save-float-btn')?.disabled) return;
-    await pushRemoteOverrides(getUserOverrides());
+    await pushRemoteOverrides(getUserOverrides(), true);
 }
 
 // 30초마다 원격 변경사항 자동 반영
