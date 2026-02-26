@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.join(ROOT, 'src'))
 from config import SUPER_SECTOR_DEFS, SECTOR_DEFS, MANUAL_SECTOR_OVERRIDES
 
 # ── 설정 ──────────────────────────────────────────────
-YEARS        = 5          # 최근 N년 월간 데이터
+RANGE        = 'max'      # 상장일부터 전체 이력 사용
 MIN_MONTHS   = 24         # 상관계수 최소 유효 기간 (개월)
 MAX_WORKERS  = 16         # 병렬 다운로드 스레드 수
 RETRY_MAX    = 3
@@ -46,7 +46,7 @@ def fetch_ticker(session, ticker):
     """Yahoo Finance chart API로 월간 수정종가 Series 반환. 실패 시 None."""
     url = (
         f'https://query2.finance.yahoo.com/v8/finance/chart/{ticker}'
-        f'?range={YEARS}y&interval=1mo&includeAdjustedClose=true'
+        f'?range={RANGE}&interval=1mo&includeAdjustedClose=true'
     )
     for attempt in range(RETRY_MAX):
         try:
@@ -130,8 +130,8 @@ def main():
     all_fetch = list(set(['QQQ', 'SMH'] + ss_tickers + override_tickers + override_anchor_list))
     print(f'   슈퍼섹터 ETF: {len(ss_tickers)}개 + QQQ/SMH + 수동오버라이드 {len(override_tickers)}개 → 총 {len(all_fetch)}개 다운로드 예정')
 
-    # 3. 월간 데이터 다운로드
-    print(f'\n📡 Yahoo Finance 월간 데이터 다운로드 ({MAX_WORKERS}스레드)...')
+    # 3. 월간 데이터 다운로드 (상장일부터 전체 이력)
+    print(f'\n📡 Yahoo Finance 월간 데이터 다운로드 (range=max, {MAX_WORKERS}스레드)...')
     price_data = download_all(all_fetch)
     print(f'   완료: {len(price_data)}/{len(all_fetch)}개 성공')
 
