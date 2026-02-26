@@ -101,17 +101,17 @@ function pairwiseReturns(pricesA, pricesB) {
   return [retA, retB];
 }
 
-// CORS proxy 목록: 직접 접근 실패 시 순서대로 시도
+// URL 우선순위: Vercel proxy(동일 origin) → 직접 → corsproxy.io
 function makeUrls(ticker) {
   const q = `range=${YEARS}y&interval=1mo&includeAdjustedClose=true`;
   const tk = encodeURIComponent(ticker);
   const yf1 = `https://query1.finance.yahoo.com/v8/finance/chart/${tk}?${q}`;
   const yf2 = `https://query2.finance.yahoo.com/v8/finance/chart/${tk}?${q}`;
   return [
+    `/api/yf?ticker=${tk}&range=${YEARS}y&interval=1mo`,  // Vercel 서버사이드 프록시 (1순위)
     yf1,
     yf2,
     `https://corsproxy.io/?${encodeURIComponent(yf1)}`,
-    `https://corsproxy.io/?${encodeURIComponent(yf2)}`,
   ];
 }
 
@@ -132,18 +132,26 @@ function parseYfChart(data) {
   return Object.keys(prices).length >= MIN_MONTHS ? prices : null;
 }
 
+// 첫 번째 성공한 데이터 소스를 기록 (UI 표시용)
+let _dataSource = null;
+
 async function fetchMonthly(ticker) {
   const urls = makeUrls(ticker);
   for (const url of urls) {
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
-        // 헤더 없이 simple request → CORS preflight 없음
         const r = await fetch(url);
         if (r.status === 429) { await sleep(3000 * (attempt + 1)); continue; }
-        if (!r.ok) break;  // 이 URL은 포기, 다음 URL 시도
+        if (!r.ok) break;
         const data = await r.json();
         const prices = parseYfChart(data);
-        if (prices) return prices;
+        if (prices) {
+          if (!_dataSource) {
+            _dataSource = url.startsWith('/api/') ? 'Vercel 프록시' : url.includes('corsproxy') ? 'corsproxy.io' : 'Yahoo Finance 직접';
+            log(`데이터 소스: <b>${_dataSource}</b>`);
+          }
+          return prices;
+        }
         break;
       } catch(e) {
         await sleep(500);
@@ -209,8 +217,8 @@ async function startFetch() {
   const smhPrices = await fetchMonthly('SMH');
   if (!smhPrices) {
     setStatus('❌ SMH 데이터 다운로드 실패.');
-    log('<span class="tag tag-err">실패</span> Yahoo Finance 직접 + corsproxy.io 모두 실패.<br>'
-      + '→ Safari로 전환하거나, PC에서 <code>python patch_r_anchor_qqq.py</code> 실행을 권장합니다.');
+    log('<span class="tag tag-err">실패</span> /api/yf (Vercel 프록시) + Yahoo Finance 직접 + corsproxy.io 모두 실패.<br>'
+      + '→ Vercel 재배포 후 재시도하거나, PC에서 <code>python patch_r_anchor_qqq.py</code> 실행을 권장합니다.');
     document.getElementById('btn-start').disabled = false;
     running = false;
     return;
