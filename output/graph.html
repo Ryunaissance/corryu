@@ -429,20 +429,36 @@ fetch('graph_data.json')
     superSectorMeta = data.super_sectors || {};
     storeMinR       = data.meta.store_min_r;
 
-    // 대시보드 localStorage 오버라이드 반영
-    try {
-      const ov = JSON.parse(localStorage.getItem('corryu_user_overrides') || '{}');
-      if (Object.keys(ov).length) {
-        allNodes.forEach(node => {
-          if (node.id in ov && 'is_legacy' in ov[node.id])
-            node.l = ov[node.id].is_legacy ? 1 : 0;
-        });
-      }
-    } catch(e) {}
+    // 오버라이드 적용 함수 (localStorage + 서버)
+    function applyOverrides(ov) {
+      if (!ov || !Object.keys(ov).length) return;
+      allNodes.forEach(node => {
+        if (node.id in ov && 'is_legacy' in ov[node.id])
+          node.l = ov[node.id].is_legacy ? 1 : 0;
+      });
+    }
+    function updateLegacyCount() {
+      const c = allNodes.filter(n => n.l).length;
+      document.getElementById('legacy-count').textContent = `(${c}개)`;
+    }
 
-    // 레거시 카운트 표시
-    const legacyCount = allNodes.filter(n => n.l).length;
-    document.getElementById('legacy-count').textContent = `(${legacyCount}개)`;
+    // 1) localStorage 오버라이드 즉시 반영
+    try {
+      applyOverrides(JSON.parse(localStorage.getItem('corryu_user_overrides') || '{}'));
+    } catch(e) {}
+    updateLegacyCount();
+
+    // 2) 서버 오버라이드 비동기 반영 (다기기 동기화)
+    fetch('/api/sync?t=' + Date.now()).then(r => r.ok ? r.json() : null).then(d => {
+      if (!d || !d.content) return;
+      const { _meta, ...cleanOv } = d.content;
+      if (Object.keys(cleanOv).length) {
+        applyOverrides(cleanOv);
+        updateLegacyCount();
+        localStorage.setItem('corryu_user_overrides', JSON.stringify(cleanOv));
+        if (_meta && _meta.ts) localStorage.setItem('corryu_overrides_ts', String(_meta.ts));
+      }
+    }).catch(() => {});
 
     // 슬라이더 최솟값 동기화
     const slider = document.getElementById('r-slider');

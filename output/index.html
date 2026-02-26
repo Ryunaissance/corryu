@@ -617,7 +617,7 @@ function showToast(msg, durationMs) {
     _toastTimer = setTimeout(function() { el.style.opacity = '0'; }, durationMs || 3000);
 }
 
-// ── GitHub 다기기 동기화 (서버사이드 PAT, /api/sync 사용) ────
+// ── 다기기 동기화 (Vercel Blob, /api/sync) ───────────
 function setSyncStatus(s) {
     const dot = document.getElementById('sync-dot');
     const lbl = document.getElementById('sync-label');
@@ -632,30 +632,20 @@ async function fetchRemoteOverrides() {
         const r = await fetch('/api/sync?t=' + Date.now());
         if (!r.ok) return null;
         const d = await r.json();
-        _ghSha = d.sha;
         return d.content;  // { _meta: {ts}, ...overrides }
     } catch(e) { return null; }
 }
 
-let _ghSha = null;
 async function pushRemoteOverrides(ov) {
     setSyncStatus('busy');
     try {
-        const body = { overrides: ov };
-        if (_ghSha) body.sha = _ghSha;
         const r = await fetch('/api/sync', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
+            body: JSON.stringify({ overrides: ov }),
         });
         if (r.ok) {
-            const d = await r.json();
-            _ghSha = d.sha;
             setSyncStatus('ok');
-        } else if (r.status === 409) {
-            _ghSha = null;
-            setSyncStatus('err');
-            showToast('동기화 충돌 — 페이지를 새로고침하세요', 4000);
         } else {
             setSyncStatus('err');
         }
