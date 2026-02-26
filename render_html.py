@@ -109,6 +109,7 @@ table.dataTable thead th.text-left, table.dataTable tbody td.text-left {{ text-a
 .row-legacy td {{ opacity: 0.45; text-decoration: line-through; }}
 .mine-badge {{ background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 0.68rem; font-weight: 800; box-shadow: 0 0 10px rgba(251,191,36,0.4); }}
 .badge-user-legacy {{ display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 600; background: rgba(249,115,22,0.12); color: #fb923c; border: 1px solid rgba(249,115,22,0.3); }}
+.badge-user-sector {{ display: inline-flex; align-items: center; gap: 3px; padding: 2px 7px; border-radius: 5px; font-size: 0.68rem; font-weight: 600; background: rgba(139,92,246,0.12); color: #a78bfa; border: 1px solid rgba(139,92,246,0.25); }}
 
 /* Checkbox column */
 input.row-cb {{ width: 15px; height: 15px; cursor: pointer; accent-color: #3b82f6; vertical-align: middle; }}
@@ -126,8 +127,19 @@ table.dataTable tbody tr.row-selected {{ background: rgba(59,130,246,0.08) !impo
 #fab-btn-legacy:hover {{ background: rgba(239,68,68,0.28); }}
 #fab-btn-unlegacy {{ background: rgba(34,197,94,0.12); color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }}
 #fab-btn-unlegacy:hover {{ background: rgba(34,197,94,0.22); }}
+#fab-btn-move {{ background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }}
+#fab-btn-move:hover {{ background: rgba(139,92,246,0.28); }}
 #fab-btn-clear {{ background: rgba(255,255,255,0.05); color: #64748b; border: 1px solid rgba(255,255,255,0.08); padding: 7px 10px; }}
 #fab-btn-clear:hover {{ background: rgba(255,255,255,0.1); color: #94a3b8; }}
+
+/* 카테고리 이동 모달 */
+#sector-modal {{ display:none; position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.72); backdrop-filter:blur(4px); align-items:center; justify-content:center; }}
+#sector-modal.show {{ display:flex; }}
+#sector-modal-card {{ background:#0f1623; border:1px solid rgba(139,92,246,0.4); border-radius:16px; padding:24px; width:min(580px,95vw); max-height:82vh; overflow-y:auto; box-shadow:0 24px 64px rgba(0,0,0,0.7); }}
+.smb {{ display:flex; align-items:center; gap:8px; padding:9px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.07); background:rgba(255,255,255,0.03); color:#cbd5e1; font-size:0.82rem; cursor:pointer; transition:all 0.15s; width:100%; text-align:left; }}
+.smb:hover {{ background:rgba(139,92,246,0.15); border-color:rgba(139,92,246,0.4); color:#e2e8f0; }}
+.smb.cur {{ border-color:rgba(59,130,246,0.5); background:rgba(59,130,246,0.1); color:#93c5fd; }}
+.smg {{ font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#334155; padding:14px 0 5px 2px; }}
 
 /* History buttons */
 .btn-history {{ display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border-radius: 7px; font-size: 0.78rem; font-weight: 600; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color: #94a3b8; cursor: pointer; transition: all 0.15s; }}
@@ -135,6 +147,13 @@ table.dataTable tbody tr.row-selected {{ background: rgba(59,130,246,0.08) !impo
 .btn-history:disabled {{ opacity: 0.3; cursor: not-allowed; }}
 #btn-reset {{ color: #fbbf24; border-color: rgba(251,191,36,0.2); background: rgba(251,191,36,0.05); }}
 #btn-reset:hover {{ background: rgba(251,191,36,0.12) !important; color: #fde68a !important; }}
+
+/* GitHub 동기화 */
+.sync-dot {{ width: 7px; height: 7px; border-radius: 50%; background: #475569; display: inline-block; flex-shrink: 0; }}
+.sync-dot.ok {{ background: #4ade80; }}
+.sync-dot.err {{ background: #f87171; }}
+.sync-dot.busy {{ background: #fbbf24; animation: syncPulse 1s ease-in-out infinite; }}
+@keyframes syncPulse {{ 0%, 100% {{ opacity: 1; }} 50% {{ opacity: 0.35; }} }}
 
 /* Filter controls */
 .filter-input {{ background: rgba(20,24,38,0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e2e8f0; padding: 6px 10px; font-size: 0.82rem; width: 90px; }}
@@ -210,6 +229,7 @@ table.dataTable tbody tr.row-selected {{ background: rgba(59,130,246,0.08) !impo
                 <div style="border-left:1px solid rgba(255,255,255,0.1);padding-left:12px;display:flex;gap:6px;align-items:center">
                     <button id="btn-undo" class="btn-history" disabled title="Ctrl+Z">↩ 실행취소</button>
                     <button id="btn-reset" class="btn-history" title="모든 사용자 오버라이드를 빌드 기본값으로 초기화">⟳ 초기화</button>
+                    <button id="sync-status" class="btn-history" title="GitHub 다기기 동기화 설정"><span class="sync-dot" id="sync-dot"></span>&nbsp;<span id="sync-label">동기화</span></button>
                 </div>
             </div>
         </div>
@@ -245,17 +265,33 @@ table.dataTable tbody tr.row-selected {{ background: rgba(59,130,246,0.08) !impo
     </div>
 </div>
 
-<!-- FAB: 레거시 처리/해제 -->
+<!-- FAB: 레거시 처리/해제/카테고리 이동 -->
 <div id="fab">
     <div id="fab-card">
         <div id="fab-label"><span id="fab-count">0</span>개 선택됨</div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
             <button class="fab-btn" id="fab-btn-legacy">레거시 처리</button>
             <button class="fab-btn" id="fab-btn-unlegacy">레거시 해제</button>
+            <button class="fab-btn" id="fab-btn-move">↪ 카테고리 이동</button>
             <button class="fab-btn" id="fab-btn-clear">×</button>
         </div>
     </div>
 </div>
+
+<!-- 카테고리 이동 모달 -->
+<div id="sector-modal">
+    <div id="sector-modal-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+            <div>
+                <div style="font-weight:700;font-size:1rem;color:#e2e8f0">↪ 카테고리 이동</div>
+                <div style="font-size:0.78rem;color:#64748b;margin-top:3px" id="modal-sel-info"></div>
+            </div>
+            <button id="sector-modal-close" style="background:transparent;border:none;color:#475569;font-size:1.3rem;cursor:pointer;line-height:1;padding:2px 6px" title="닫기">×</button>
+        </div>
+        <div id="sector-modal-body"></div>
+    </div>
+</div>
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -277,27 +313,14 @@ function getUserOverrides() {{
 }}
 function saveUserOverrides(ov) {{
     localStorage.setItem(USER_OVERRIDES_KEY, JSON.stringify(ov));
+    localStorage.setItem('corryu_overrides_ts', String(Date.now()));
+    pushRemoteOverrides(ov);  // async, non-blocking
 }}
 
 function applyUserOverrides() {{
     const ov = getUserOverrides();
     if (!Object.keys(ov).length) return;
-    for (const sid of Object.keys(allData)) {{
-        for (const etf of allData[sid]) {{
-            if (etf.ticker in ov) {{
-                const o = ov[etf.ticker];
-                etf.is_legacy = o.is_legacy;
-                etf._user_override = true;
-                if (o.is_legacy) {{
-                    etf.legacy_detail = ['사용자 직접 지정'];
-                    etf.legacy_reasons = ['user_override'];
-                }} else {{
-                    etf.legacy_detail = [];
-                    etf.legacy_reasons = [];
-                }}
-            }}
-        }}
-    }}
+    applyOverridesToData(ov);
 }}
 const acDefs = {json_ac_defs};
 const sectorDefs = {json_sector_defs};
@@ -370,6 +393,7 @@ function recalcSectorMeta() {{
 let undoHistory = [];
 const MAX_UNDO_STEPS = 30;
 let originalLegacyState = {{}};
+let originalSectorState = {{}};  // {{ ticker: sid }} — 빌드 기본 섹터 스냅샷
 
 function applySmhCorr() {{
     try {{
@@ -389,34 +413,75 @@ function snapshotOriginalLegacy() {{
             originalLegacyState[etf.ticker] = {{
                 is_legacy:      etf.is_legacy,
                 legacy_detail:  (etf.legacy_detail  || []).slice(),
-                legacy_reasons: (etf.legacy_reasons || []).slice()
+                legacy_reasons: (etf.legacy_reasons || []).slice(),
+                r_anchor:       etf.r_anchor
             }};
+            originalSectorState[etf.ticker] = sid;  // 빌드 기본 섹터 저장
         }}
     }}
 }}
 
-function applyOverridesToData(ov) {{
+// 모든 섹터에서 ticker로 ETF 검색 → {{ etf, sid }} | null
+function findETFAnywhere(ticker) {{
     for (const sid of Object.keys(allData)) {{
-        for (const etf of allData[sid]) {{
-            const orig = originalLegacyState[etf.ticker];
-            if (orig) {{
-                etf.is_legacy      = orig.is_legacy;
-                etf._user_override = false;
-                etf.legacy_detail  = orig.legacy_detail.slice();
-                etf.legacy_reasons = orig.legacy_reasons.slice();
-            }}
-        }}
+        const idx = allData[sid].findIndex(e => e.ticker === ticker);
+        if (idx !== -1) return {{ etf: allData[sid][idx], sid, idx }};
     }}
+    return null;
+}}
+
+function applyOverridesToData(ov) {{
+    // ① 현재 모든 섹터에 있는 ETF 수집 (이동됐을 수도 있음)
+    const etfMap = {{}};
     for (const sid of Object.keys(allData)) {{
-        for (const etf of allData[sid]) {{
-            if (etf.ticker in ov) {{
-                const o = ov[etf.ticker];
-                etf.is_legacy      = o.is_legacy;
-                etf._user_override = true;
-                etf.legacy_detail  = o.is_legacy ? ['사용자 직접 지정'] : [];
-                etf.legacy_reasons = o.is_legacy ? ['user_override'] : [];
-            }}
+        for (const etf of allData[sid]) etfMap[etf.ticker] = etf;
+    }}
+    // ② 모든 섹터 배열 초기화 후 원래 섹터에 재배치 + 레거시 상태 원복
+    for (const sid of Object.keys(allData)) allData[sid] = [];
+    for (const [ticker, etf] of Object.entries(etfMap)) {{
+        const origSid = originalSectorState[ticker];
+        if (!origSid || allData[origSid] === undefined) continue;
+        const orig = originalLegacyState[ticker];
+        if (orig) {{
+            etf.is_legacy      = orig.is_legacy;
+            etf._user_override = false;
+            etf.legacy_detail  = orig.legacy_detail.slice();
+            etf.legacy_reasons = orig.legacy_reasons.slice();
+            if (orig.r_anchor !== undefined) etf.r_anchor = orig.r_anchor;
         }}
+        delete etf._user_sector;
+        delete etf._original_sector;
+        allData[origSid].push(etf);
+    }}
+    // ③ 레거시 오버라이드 적용
+    for (const [ticker, o] of Object.entries(ov)) {{
+        if (!('is_legacy' in o)) continue;
+        const found = findETFAnywhere(ticker);
+        if (!found) continue;
+        found.etf.is_legacy      = o.is_legacy;
+        found.etf._user_override = true;
+        found.etf.legacy_detail  = o.is_legacy ? ['사용자 직접 지정'] : [];
+        found.etf.legacy_reasons = o.is_legacy ? ['user_override'] : [];
+    }}
+    // ④ 섹터 이동 오버라이드 적용
+    for (const [ticker, o] of Object.entries(ov)) {{
+        if (!o.sector || o.sector === originalSectorState[ticker]) continue;
+        const origSid = originalSectorState[ticker];
+        const newSid  = o.sector;
+        if (allData[newSid] === undefined) continue;
+        const idx = origSid && allData[origSid] ? allData[origSid].findIndex(e => e.ticker === ticker) : -1;
+        if (idx === -1) continue;
+        const [etf] = allData[origSid].splice(idx, 1);
+        etf._user_sector    = newSid;
+        etf._original_sector = origSid;
+        allData[newSid].push(etf);
+    }}
+    // ⑤ r_anchor 오버라이드 적용
+    for (const [ticker, o] of Object.entries(ov)) {{
+        if (o.r_anchor === undefined) continue;
+        const found = findETFAnywhere(ticker);
+        if (!found) continue;
+        found.etf.r_anchor = o.r_anchor;
     }}
 }}
 
@@ -441,19 +506,19 @@ function undoLegacyAction() {{
     recalcSectorMeta();
     renderSectorTabs();
     renderSummary();
-    if (typeof table !== 'undefined') table.rows().invalidate('data').draw(false);
+    if (typeof table !== 'undefined') loadSector(state.activeSector);
     updateUndoBtn();
 }}
 
 function resetAllOverrides() {{
-    if (!confirm('모든 사용자 레거시 설정을 빌드 기본값으로 초기화할까요?')) return;
+    if (!confirm('모든 사용자 설정(레거시·카테고리 이동)을 빌드 기본값으로 초기화할까요?')) return;
     undoHistory = [];
     saveUserOverrides({{}});
     applyOverridesToData({{}});
     recalcSectorMeta();
     renderSectorTabs();
     renderSummary();
-    if (typeof table !== 'undefined') table.rows().invalidate('data').draw(false);
+    if (typeof table !== 'undefined') loadSector(state.activeSector);
     updateUndoBtn();
 }}
 
@@ -585,6 +650,67 @@ function loadSuperSector(ssId) {{
     table.clear().rows.add(data).draw();
 }}
 
+// ── 토스트 알림 (전역) ────────────────────────────────────
+let _toastTimer = null;
+function showToast(msg, durationMs) {{
+    let el = document.getElementById('r-toast');
+    if (!el) {{
+        el = document.createElement('div');
+        el.id = 'r-toast';
+        el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1e293b;color:#e2e8f0;padding:9px 18px;border-radius:10px;font-size:0.85rem;border:1px solid rgba(255,255,255,0.12);box-shadow:0 4px 20px rgba(0,0,0,0.5);z-index:9999;pointer-events:none;transition:opacity 0.3s;opacity:0;white-space:nowrap;';
+        document.body.appendChild(el);
+    }}
+    if (_toastTimer) clearTimeout(_toastTimer);
+    el.textContent = msg;
+    el.style.opacity = '1';
+    _toastTimer = setTimeout(function() {{ el.style.opacity = '0'; }}, durationMs || 3000);
+}}
+
+// ── GitHub 다기기 동기화 (서버사이드 PAT, /api/sync 사용) ────
+function setSyncStatus(s) {{
+    const dot = document.getElementById('sync-dot');
+    const lbl = document.getElementById('sync-label');
+    if (!dot || !lbl) return;
+    dot.className = 'sync-dot' + (s && s !== 'off' ? ' ' + s : '');
+    const labels = {{ ok: '동기화됨', err: '동기화 실패', busy: '동기화 중…' }};
+    lbl.textContent = labels[s] || '동기화';
+}}
+
+async function fetchRemoteOverrides() {{
+    try {{
+        const r = await fetch('/api/sync?t=' + Date.now());
+        if (!r.ok) return null;
+        const d = await r.json();
+        _ghSha = d.sha;
+        return d.content;  // {{ _meta: {{ts}}, ...overrides }}
+    }} catch(e) {{ return null; }}
+}}
+
+let _ghSha = null;
+async function pushRemoteOverrides(ov) {{
+    setSyncStatus('busy');
+    try {{
+        const body = {{ overrides: ov }};
+        if (_ghSha) body.sha = _ghSha;
+        const r = await fetch('/api/sync', {{
+            method: 'POST',
+            headers: {{ 'Content-Type': 'application/json' }},
+            body: JSON.stringify(body),
+        }});
+        if (r.ok) {{
+            const d = await r.json();
+            _ghSha = d.sha;
+            setSyncStatus('ok');
+        }} else if (r.status === 409) {{
+            _ghSha = null;
+            setSyncStatus('err');
+            showToast('동기화 충돌 — 페이지를 새로고침하세요', 4000);
+        }} else {{
+            setSyncStatus('err');
+        }}
+    }} catch(e) {{ setSyncStatus('err'); }}
+}}
+
 function initDashboard() {{
     renderACTabs();
     renderSectorTabs();
@@ -702,12 +828,21 @@ function initDashboard() {{
             }} }},
             {{ data: 'is_legacy', render: function(d,t,row) {{
                 if(t!=='display') return d ? 1 : 0;
-                if(!d) return '<span class="badge-active">Active</span>';
-                let detail = (row.legacy_detail||[]).join(' / ');
-                let badge = row._user_override
-                    ? '<span class="badge-user-legacy">User Legacy</span>'
-                    : '<span class="badge-legacy">Legacy</span>';
-                return badge + (detail ? '<div class="text-xs text-orange-400 mt-0.5 opacity-80">'+detail+'</div>' : '');
+                let out = '';
+                if(!d) {{
+                    out = '<span class="badge-active">Active</span>';
+                }} else {{
+                    let detail = (row.legacy_detail||[]).join(' / ');
+                    let badge = row._user_override
+                        ? '<span class="badge-user-legacy">User Legacy</span>'
+                        : '<span class="badge-legacy">Legacy</span>';
+                    out = badge + (detail ? '<div class="text-xs text-orange-400 mt-0.5 opacity-80">'+detail+'</div>' : '');
+                }}
+                if(row._user_sector) {{
+                    let sd = sectorDefs[row._user_sector] || {{}};
+                    out += '<div style="margin-top:2px"><span class="badge-user-sector">'+(sd.icon||'')+'&nbsp;'+(sd.name||row._user_sector)+'</span></div>';
+                }}
+                return out;
             }} }}
         ],
         rowCallback: function(row, data) {{
@@ -820,16 +955,15 @@ function initDashboard() {{
         pushUndo();
         let ov = getUserOverrides();
         selectedTickers.forEach(function(ticker) {{
-            ov[ticker] = {{ is_legacy: setLegacy }};
-            for (let sid of Object.keys(allData)) {{
-                let etf = allData[sid].find(e => e.ticker === ticker);
-                if (etf) {{
-                    etf.is_legacy = setLegacy;
-                    etf._user_override = true;
-                    etf.legacy_detail = setLegacy ? ['사용자 직접 지정'] : [];
-                    etf.legacy_reasons = setLegacy ? ['user_override'] : [];
-                    break;
-                }}
+            // 섹터 오버라이드가 있으면 유지한 채 is_legacy만 업데이트
+            if (!ov[ticker]) ov[ticker] = {{}};
+            ov[ticker].is_legacy = setLegacy;
+            const found = findETFAnywhere(ticker);
+            if (found) {{
+                found.etf.is_legacy      = setLegacy;
+                found.etf._user_override = true;
+                found.etf.legacy_detail  = setLegacy ? ['사용자 직접 지정'] : [];
+                found.etf.legacy_reasons = setLegacy ? ['user_override'] : [];
             }}
         }});
         saveUserOverrides(ov);
@@ -842,8 +976,202 @@ function initDashboard() {{
         updateFAB();
     }}
 
+    // ── 카테고리 이동 ──────────────────────────────────
+    function buildSectorModal() {{
+        // 선택된 ETF들의 현재 섹터 수집 (단일이면 하이라이트)
+        const curSectors = new Set();
+        selectedTickers.forEach(function(tk) {{
+            const found = findETFAnywhere(tk);
+            if (found) curSectors.add(found.sid);
+        }});
+        $('#modal-sel-info').text(selectedTickers.size + '개 종목 → 이동할 카테고리를 선택하세요');
+        const ordered = Object.entries(acDefs).sort((a,b) => a[1].order - b[1].order);
+        let html = '';
+        for (const [ac, acDef] of ordered) {{
+            const sids = (acSectors[ac] || []).sort();
+            if (!sids.length) continue;
+            html += '<div class="smg">' + acDef.icon + ' ' + acDef.name + '</div>';
+            html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:4px">';
+            for (const sid of sids) {{
+                const sd = sectorDefs[sid];
+                if (!sd) continue;
+                const isCur = curSectors.size === 1 && curSectors.has(sid);
+                html += '<button class="smb' + (isCur ? ' cur' : '') + '" data-sid="' + sid + '">';
+                html += '<span style="font-size:1rem">' + (sd.icon||'') + '</span>';
+                html += '<div><div style="font-weight:600;font-size:0.8rem">' + sd.name + '</div>';
+                html += '<div style="font-size:0.68rem;color:#475569">' + (sd.name_en||'') + '</div></div>';
+                html += '</button>';
+            }}
+            html += '</div>';
+        }}
+        $('#sector-modal-body').html(html);
+    }}
+
+    function applySectorMove(newSectorId) {{
+        if (!newSectorId || selectedTickers.size === 0) return;
+        const tickersToRecompute = [];
+        pushUndo();
+        let ov = getUserOverrides();
+        selectedTickers.forEach(function(ticker) {{
+            const found = findETFAnywhere(ticker);
+            if (!found) return;
+            const {{ etf, sid: oldSid }} = found;
+            if (!ov[ticker]) ov[ticker] = {{}};
+            if (oldSid === newSectorId) {{
+                // 이미 이 섹터 → 섹터 오버라이드 해제
+                delete ov[ticker].sector;
+                delete ov[ticker].r_anchor;
+                delete etf._user_sector;
+                delete etf._original_sector;
+                if (!Object.keys(ov[ticker]).length) delete ov[ticker];
+                return;
+            }}
+            tickersToRecompute.push(ticker);
+            // allData에서 이동
+            allData[oldSid] = allData[oldSid].filter(e => e.ticker !== ticker);
+            etf._user_sector     = newSectorId;
+            etf._original_sector = originalSectorState[ticker];
+            if (!allData[newSectorId]) allData[newSectorId] = [];
+            allData[newSectorId].push(etf);
+            // localStorage 저장 (기존 is_legacy 보존)
+            ov[ticker].sector = newSectorId;
+        }});
+        saveUserOverrides(ov);
+        recalcSectorMeta();
+        renderSectorTabs();
+        renderSummary();
+        selectedTickers.clear();
+        $('#sector-modal').removeClass('show');
+        loadSector(state.activeSector);
+        updateFAB();
+        if (tickersToRecompute.length) recomputeRanchorsAsync(tickersToRecompute, newSectorId);
+    }}
+
+    // ── 브라우저-사이드 r_anchor 재계산 유틸 ─────────────────────────────
+    function _sleep(ms) {{ return new Promise(r => setTimeout(r, ms)); }}
+
+    function _pearson(xs, ys) {{
+        const n = xs.length;
+        if (n < 2) return NaN;
+        let mx = 0, my = 0;
+        for (let i = 0; i < n; i++) {{ mx += xs[i]; my += ys[i]; }}
+        mx /= n; my /= n;
+        let num = 0, dx2 = 0, dy2 = 0;
+        for (let i = 0; i < n; i++) {{
+            const dx = xs[i] - mx, dy = ys[i] - my;
+            num += dx * dy; dx2 += dx * dx; dy2 += dy * dy;
+        }}
+        return (dx2 && dy2) ? num / Math.sqrt(dx2 * dy2) : NaN;
+    }}
+
+    function _pairwiseReturns(pA, pB) {{
+        const dates = Object.keys(pA).filter(d => d in pB).sort();
+        const rA = [], rB = [];
+        for (let i = 1; i < dates.length; i++) {{
+            const a0 = pA[dates[i-1]], a1 = pA[dates[i]];
+            const b0 = pB[dates[i-1]], b1 = pB[dates[i]];
+            if (a0 && a1 && b0 && b1) {{
+                rA.push((a1 - a0) / a0);
+                rB.push((b1 - b0) / b0);
+            }}
+        }}
+        return [rA, rB];
+    }}
+
+    function _calcCorr(pA, pB) {{
+        const [rA, rB] = _pairwiseReturns(pA, pB);
+        if (rA.length < 24) return null;
+        const c = _pearson(rA, rB);
+        return isFinite(c) ? Math.round(c * 10000) / 10000 : null;
+    }}
+
+    function _makeYfUrls(ticker) {{
+        const tk = encodeURIComponent(ticker);
+        const yf1 = 'https://query1.finance.yahoo.com/v8/finance/chart/' + tk + '?range=max&interval=1mo&includeAdjustedClose=true';
+        return [
+            '/api/yf?ticker=' + tk + '&range=max&interval=1mo',
+            yf1,
+            'https://query2.finance.yahoo.com/v8/finance/chart/' + tk + '?range=max&interval=1mo&includeAdjustedClose=true',
+            'https://corsproxy.io/?' + encodeURIComponent(yf1),
+        ];
+    }}
+
+    function _parseYfMonthly(data) {{
+        const result = data && data.chart && data.chart.result && data.chart.result[0];
+        if (!result) return null;
+        const ts  = result.timestamp;
+        const adj = (result.indicators && result.indicators.adjclose && result.indicators.adjclose[0] && result.indicators.adjclose[0].adjclose)
+                 || (result.indicators && result.indicators.quote && result.indicators.quote[0] && result.indicators.quote[0].close);
+        if (!ts || !adj) return null;
+        const prices = {{}};
+        for (let i = 0; i < ts.length; i++) {{
+            if (adj[i] != null) {{
+                const d = new Date(ts[i] * 1000);
+                prices[d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0')] = adj[i];
+            }}
+        }}
+        return Object.keys(prices).length >= 3 ? prices : null;
+    }}
+
+    async function _fetchYfMonthly(ticker) {{
+        for (const url of _makeYfUrls(ticker)) {{
+            for (let attempt = 0; attempt < 2; attempt++) {{
+                try {{
+                    const r = await fetch(url);
+                    if (r.status === 429) {{ await _sleep(3000 * (attempt + 1)); continue; }}
+                    if (!r.ok) break;
+                    const prices = _parseYfMonthly(await r.json());
+                    if (prices) return prices;
+                    break;
+                }} catch(e) {{ await _sleep(500); }}
+            }}
+        }}
+        return null;
+    }}
+
+    async function recomputeRanchorsAsync(tickers, newSectorId) {{
+        const anchor = (sectorDefs[newSectorId] || {{}}).anchor;
+        if (!anchor || anchor === '—') return;
+        const tickerList = Array.isArray(tickers) ? tickers : Array.from(tickers);
+        if (!tickerList.length) return;
+        showToast('r_anchor 재계산 중… 앵커: ' + anchor + ' / ' + tickerList.length + '종목', 60000);
+        const anchorPrices = await _fetchYfMonthly(anchor);
+        if (!anchorPrices) {{
+            showToast('앵커(' + anchor + ') 가격 조회 실패', 4000);
+            return;
+        }}
+        let ok = 0;
+        const ov = getUserOverrides();
+        for (const ticker of tickerList) {{
+            const found = findETFAnywhere(ticker);
+            if (!found) continue;
+            const prices = await _fetchYfMonthly(ticker);
+            if (!prices) continue;
+            const corr = _calcCorr(anchorPrices, prices);
+            if (corr === null) continue;
+            found.etf.r_anchor = corr;
+            if (!ov[ticker]) ov[ticker] = {{}};
+            ov[ticker].r_anchor = corr;
+            ok++;
+            await _sleep(150);
+        }}
+        saveUserOverrides(ov);
+        if (ok > 0 && typeof table !== 'undefined') table.rows().invalidate('data').draw(false);
+        showToast('r_anchor 재계산 완료 (' + ok + '/' + tickerList.length + '종목)', 4000);
+    }}
+
     $('#fab-btn-legacy').on('click', function() {{ applyLegacyAction(true); }});
     $('#fab-btn-unlegacy').on('click', function() {{ applyLegacyAction(false); }});
+    $('#fab-btn-move').on('click', function() {{
+        if (selectedTickers.size === 0) return;
+        buildSectorModal();
+        $('#sector-modal').addClass('show');
+    }});
+    $('#sector-modal-close').on('click', function() {{ $('#sector-modal').removeClass('show'); }});
+    $('#sector-modal').on('click', function(e) {{ if (e.target === this) $(this).removeClass('show'); }});
+    $(document).on('click', '#sector-modal-body .smb', function() {{
+        applySectorMove($(this).data('sid'));
+    }});
     $('#fab-btn-clear').on('click', function() {{
         selectedTickers.clear();
         $('input.row-cb').prop('checked', false);
@@ -860,17 +1188,62 @@ function initDashboard() {{
             undoLegacyAction();
         }}
     }});
+    // ── GitHub 동기화 버튼: 클릭 시 수동 동기화 체크 ──────────
+    $('#sync-status').on('click', async function() {{
+        setSyncStatus('busy');
+        const remoteOv = await fetchRemoteOverrides();
+        if (!remoteOv) {{ setSyncStatus('err'); showToast('동기화 서버에 연결할 수 없습니다', 3000); return; }}
+        if (remoteOv._meta) {{
+            const localTs = parseInt(localStorage.getItem('corryu_overrides_ts') || '0');
+            if (remoteOv._meta.ts > localTs) {{
+                showToast('다른 기기의 최신 설정이 있습니다 — 페이지를 새로고침하세요', 4000);
+                setSyncStatus('ok');
+            }} else {{
+                setSyncStatus('ok');
+                showToast('이미 최신 상태입니다', 2000);
+            }}
+        }} else {{
+            setSyncStatus('ok');
+        }}
+    }});
+
     updateUndoBtn();
 }}
 
 $(document).ready(function() {{
     fetch('etf_data.json')
         .then(function(r) {{ return r.json(); }})
-        .then(function(d) {{
+        .then(async function(d) {{
             sectorMeta = d.sectorMeta;
             allData = d.allData;
             snapshotOriginalLegacy(); // 빌드 기본값 스냅샷 (undo 기준점)
-            applyUserOverrides();     // localStorage 레거시 오버라이드 적용
+            // 다기기 동기화: 원격 오버라이드 로드 시도 (서버사이드 PAT)
+            let ov = getUserOverrides();
+            const localTs = parseInt(localStorage.getItem('corryu_overrides_ts') || '0');
+            setSyncStatus('busy');
+            const remoteOv = await fetchRemoteOverrides();
+            if (remoteOv && remoteOv._meta) {{
+                if (remoteOv._meta.ts > localTs) {{
+                    // 원격이 더 최신 → 로컬에 적용
+                    const {{ _meta, ...cleanOv }} = remoteOv;
+                    ov = cleanOv;
+                    localStorage.setItem(USER_OVERRIDES_KEY, JSON.stringify(ov));
+                    localStorage.setItem('corryu_overrides_ts', String(remoteOv._meta.ts));
+                    setSyncStatus('ok');
+                    showToast('다른 기기의 설정을 불러왔습니다 (' + Object.keys(ov).length + '종목)', 3500);
+                }} else if (localTs > remoteOv._meta.ts && Object.keys(ov).length) {{
+                    // 로컬이 더 최신 → 원격에 푸시
+                    pushRemoteOverrides(ov);
+                }} else {{
+                    setSyncStatus('ok');
+                }}
+            }} else if (!remoteOv && Object.keys(ov).length) {{
+                // 원격 파일 없음 + 로컬 데이터 있음 → 원격에 업로드
+                pushRemoteOverrides(ov);
+            }} else {{
+                setSyncStatus('ok');
+            }}
+            if (Object.keys(ov).length) applyOverridesToData(ov);
             applySmhCorr();           // localStorage SMH 상관계수 적용
             recalcSectorMeta();       // 오버라이드 반영해 카운트 갱신
             initDashboard();

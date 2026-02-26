@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.join(ROOT, 'src'))
 from config import SECTOR_DEFS
 
 # ── 설정 ──────────────────────────────────────────────
-YEARS         = 10           # 최근 N년
+RANGE         = 'max'        # 상장일부터 최신 데이터까지 전체 이력 사용
 MIN_MONTHS    = 24           # 상관계수 최소 유효 기간
 STORE_MIN_R   = 0.85         # JSON 저장 최소 r
 MAX_WORKERS   = 12           # 병렬 다운로드 스레드 수
@@ -59,7 +59,7 @@ def fetch_ticker(session, ticker):
     """Yahoo Finance chart API로 월간 종가 Series 반환. 실패 시 None."""
     url = (
         f'https://query2.finance.yahoo.com/v8/finance/chart/{ticker}'
-        f'?range={YEARS}y&interval=1mo&includeAdjustedClose=true'
+        f'?range={RANGE}&interval=1mo&includeAdjustedClose=true'
     )
     for attempt in range(RETRY_MAX):
         try:
@@ -175,6 +175,10 @@ def main():
 
     print('\n📊 상관행렬 계산 중...')
     df = pd.DataFrame(price_data)
+    # ETF마다 Yahoo Finance 월간 bar 시작 날짜가 다를 수 있어(IPO일 등)
+    # outer-join 시 중간에 NaN 행이 생기면 pct_change가 수익률을 잘못 NaN으로 만든다.
+    # resample('ME').last()로 월말 기준 통일 → 모든 ETF 동일 날짜 격자 사용.
+    df = df.resample('ME').last()
     df_ret = df.pct_change(fill_method=None)
     valid = df_ret.columns[df_ret.count() >= MIN_MONTHS]
     df_ret = df_ret[valid]
