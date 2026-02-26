@@ -371,6 +371,18 @@ let undoHistory = [];
 const MAX_UNDO_STEPS = 30;
 let originalLegacyState = {{}};
 
+function applySmhCorr() {{
+    try {{
+        const smhData = JSON.parse(localStorage.getItem('corryu_smh_corr') || 'null');
+        if (!smhData) return;
+        for (const sid of Object.keys(allData)) {{
+            for (const etf of allData[sid]) {{
+                if (etf.ticker in smhData) etf.smh_corr = smhData[etf.ticker];
+            }}
+        }}
+    }} catch(e) {{}}
+}}
+
 function snapshotOriginalLegacy() {{
     for (const sid of Object.keys(allData)) {{
         for (const etf of allData[sid]) {{
@@ -858,7 +870,8 @@ $(document).ready(function() {{
             sectorMeta = d.sectorMeta;
             allData = d.allData;
             snapshotOriginalLegacy(); // 빌드 기본값 스냅샷 (undo 기준점)
-            applyUserOverrides();     // localStorage 오버라이드 적용
+            applyUserOverrides();     // localStorage 레거시 오버라이드 적용
+            applySmhCorr();           // localStorage SMH 상관계수 적용
             recalcSectorMeta();       // 오버라이드 반영해 카운트 갱신
             initDashboard();
         }});
