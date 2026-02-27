@@ -171,10 +171,11 @@ table.dataTable tbody tr.row-selected {{ background: rgba(59,130,246,0.08) !impo
     <!-- Header -->
     <div class="glass p-5 mb-5 text-center relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-0.5" style="background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);"></div>
-        <div class="absolute top-4 right-4">
+        <div class="absolute top-4 right-4" style="display:flex;gap:8px;align-items:center">
+            <button id="lang-switcher" onclick="I18n.setLocale(I18n.locale()==='ko'?'en':'ko')" style="padding:5px 12px;border-radius:8px;background:rgba(255,255,255,0.06);color:#94a3b8;border:1px solid rgba(255,255,255,0.1);font-size:0.78rem;font-weight:700;cursor:pointer;letter-spacing:0.05em;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">EN</button>
             <a href="graph.html" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:10px;background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.35);font-size:0.82rem;font-weight:600;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.28)'" onmouseout="this.style.background='rgba(139,92,246,0.15)'">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><line x1="7" y1="11.5" x2="17" y2="6.5"/><line x1="7" y1="12.5" x2="17" y2="17.5"/></svg>
-                그래프 보기
+                <span data-i18n="btn.viewGraph">그래프 보기</span>
             </a>
         </div>
         <h1 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight">
@@ -182,7 +183,7 @@ table.dataTable tbody tr.row-selected {{ background: rgba(59,130,246,0.08) !impo
         </h1>
         <p class="text-sm text-gray-500">
             Total <span class="text-white font-bold" id="hdr-total">{total_etfs:,}</span> ETFs
-            <span class="text-gray-600">(레거시 <span class="text-yellow-400 font-bold" id="hdr-legacy">{total_legacy:,}</span>개 제외 시 <span class="text-green-400 font-bold" id="hdr-active">{total_active:,}</span> active)</span> |
+            <span class="text-gray-600" id="hdr-legacy-label">(<span id="hdr-legacy">{total_legacy:,}</span> legacy, <span class="text-green-400 font-bold" id="hdr-active">{total_active:,}</span> active)</span> |
             <span class="text-white font-bold">{total_sectors}</span> Sectors |
             Updated: <span class="text-gray-400">{today}</span>
         </p>
@@ -191,7 +192,7 @@ table.dataTable tbody tr.row-selected {{ background: rgba(59,130,246,0.08) !impo
     <!-- Asset Class Tabs (Level 1) -->
     <div class="glass p-4 mb-4">
         <div class="flex items-center gap-2 overflow-x-auto pb-1" id="acTabs">
-            <button class="ac-tab active" data-ac="ALL">전체</button>
+            <button class="ac-tab active" data-ac="ALL" data-i18n="filter.all">전체</button>
         </div>
     </div>
 
@@ -211,11 +212,11 @@ table.dataTable tbody tr.row-selected {{ background: rgba(59,130,246,0.08) !impo
             <div class="flex flex-wrap items-center gap-3 text-sm">
                 <label class="flex items-center gap-1.5 text-gray-400 cursor-pointer">
                     <input type="checkbox" id="filterLegacy" class="filter-check">
-                    <span>Legacy 숨기기</span>
+                    <span data-i18n="filter.hideLegacy">Legacy 숨기기</span>
                 </label>
                 <label class="flex items-center gap-1.5 text-gray-400 cursor-pointer">
                     <input type="checkbox" id="filterShort" class="filter-check">
-                    <span>짧은연혁 숨기기</span>
+                    <span data-i18n="filter.hideShortHistory">짧은연혁 숨기기</span>
                 </label>
                 <div class="flex items-center gap-1.5 text-gray-400">
                     <span>Min AUM</span>
@@ -227,9 +228,9 @@ table.dataTable tbody tr.row-selected {{ background: rgba(59,130,246,0.08) !impo
                     <input type="number" id="filterSortino" class="filter-input" placeholder="0" value="" step="0.1">
                 </div>
                 <div style="border-left:1px solid rgba(255,255,255,0.1);padding-left:12px;display:flex;gap:6px;align-items:center">
-                    <button id="btn-undo" class="btn-history" disabled title="Ctrl+Z">↩ 실행취소</button>
-                    <button id="btn-reset" class="btn-history" title="모든 사용자 오버라이드를 빌드 기본값으로 초기화">⟳ 초기화</button>
-                    <button id="sync-status" class="btn-history" title="GitHub 다기기 동기화 설정"><span class="sync-dot" id="sync-dot"></span>&nbsp;<span id="sync-label">동기화</span></button>
+                    <button id="btn-undo" class="btn-history" disabled title="Ctrl+Z" data-i18n="btn.undo">↩ 실행취소</button>
+                    <button id="btn-reset" class="btn-history" data-i18n="btn.reset" data-i18n-title="btn.reset.title">⟳ 초기화</button>
+                    <button id="sync-status" class="btn-history" data-i18n-title="btn.sync.title"><span class="sync-dot" id="sync-dot"></span>&nbsp;<span id="sync-label" data-i18n="btn.sync">동기화</span></button>
                 </div>
             </div>
         </div>
@@ -240,24 +241,24 @@ table.dataTable tbody tr.row-selected {{ background: rgba(59,130,246,0.08) !impo
         <table id="masterTable" class="display nowrap" style="width:100%">
             <thead>
                 <tr>
-                    <th style="width:28px;min-width:28px;text-align:center !important"><input type="checkbox" id="select-all-cb" title="전체 선택/해제"></th>
-                    <th title="연번" style="width:36px;min-width:36px">#</th>
+                    <th style="width:28px;min-width:28px;text-align:center !important"><input type="checkbox" id="select-all-cb"></th>
+                    <th data-i18n-title="col.no.tip" style="width:36px;min-width:36px">#</th>
                     <th class="text-left">Ticker</th>
-                    <th class="text-left" style="min-width:220px">ETF 명칭</th>
-                    <th title="시가총액 순위">Rank</th>
-                    <th title="시가총액 ($M)">AUM</th>
-                    <th title="섹터 앵커(QQQ) 대비 상관계수">r_Anchor</th>
-                    <th title="반도체 ETF(SMH) 대비 상관계수 — 주식시장 섹터만 표시">SMH Corr</th>
-                    <th title="Z-Score (200일 이평 기준)">Z-Score</th>
-                    <th title="200일 이동평균 이격도">200MA</th>
-                    <th title="RSI (14일, Wilder)">RSI</th>
-                    <th title="52주 레인지 내 위치 (0%=52주 최저 / 100%=52주 최고)">52W Rng</th>
-                    <th title="52주 최고가 대비 하락폭">52W MDD</th>
-                    <th title="연평균 복리 수익률">CAGR</th>
-                    <th title="연환산 변동성">Vol</th>
-                    <th title="소르티노 비율">Sortino</th>
-                    <th title="최초 상장일">Inception</th>
-                    <th title="레거시 상태" style="min-width:80px">Status</th>
+                    <th class="text-left" style="min-width:220px" data-i18n="col.name">ETF 명칭</th>
+                    <th>Rank</th>
+                    <th>AUM</th>
+                    <th data-i18n-title="col.rAnchor.tip">r_Anchor</th>
+                    <th data-i18n-title="col.rSmh.tip">SMH Corr</th>
+                    <th data-i18n-title="col.zScore.tip">Z-Score</th>
+                    <th data-i18n-title="col.ma200.tip">200MA</th>
+                    <th data-i18n-title="col.rsi.tip">RSI</th>
+                    <th data-i18n-title="col.range52w.tip">52W Rng</th>
+                    <th data-i18n-title="col.mdd52w.tip">52W MDD</th>
+                    <th data-i18n-title="col.cagr.tip">CAGR</th>
+                    <th data-i18n-title="col.vol.tip">Vol</th>
+                    <th data-i18n-title="col.sortino.tip">Sortino</th>
+                    <th data-i18n-title="col.inception.tip">Inception</th>
+                    <th data-i18n-title="col.status.tip" style="min-width:80px">Status</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -268,12 +269,12 @@ table.dataTable tbody tr.row-selected {{ background: rgba(59,130,246,0.08) !impo
 <!-- FAB: 레거시 처리/해제/카테고리 이동 -->
 <div id="fab">
     <div id="fab-card">
-        <div id="fab-label"><span id="fab-count">0</span>개 선택됨</div>
+        <div id="fab-label"></div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <button class="fab-btn" id="fab-btn-legacy">레거시 처리</button>
-            <button class="fab-btn" id="fab-btn-unlegacy">레거시 해제</button>
-            <button class="fab-btn" id="fab-btn-move">↪ 카테고리 이동</button>
-            <button class="fab-btn" id="fab-btn-clear">×</button>
+            <button class="fab-btn" id="fab-btn-legacy" data-i18n="btn.legacy.mark">레거시 처리</button>
+            <button class="fab-btn" id="fab-btn-unlegacy" data-i18n="btn.legacy.unmark">레거시 해제</button>
+            <button class="fab-btn" id="fab-btn-move" data-i18n="btn.move">↪ 카테고리 이동</button>
+            <button class="fab-btn" id="fab-btn-clear" data-i18n="btn.clear">×</button>
         </div>
     </div>
 </div>
@@ -283,7 +284,7 @@ table.dataTable tbody tr.row-selected {{ background: rgba(59,130,246,0.08) !impo
     <div id="sector-modal-card">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
             <div>
-                <div style="font-weight:700;font-size:1rem;color:#e2e8f0">↪ 카테고리 이동</div>
+                <div style="font-weight:700;font-size:1rem;color:#e2e8f0" data-i18n="fab.move.title">↪ 카테고리 이동</div>
                 <div style="font-size:0.78rem;color:#64748b;margin-top:3px" id="modal-sel-info"></div>
             </div>
             <button id="sector-modal-close" style="background:transparent;border:none;color:#475569;font-size:1.3rem;cursor:pointer;line-height:1;padding:2px 6px" title="닫기">×</button>
@@ -293,6 +294,7 @@ table.dataTable tbody tr.row-selected {{ background: rgba(59,130,246,0.08) !impo
 </div>
 
 
+<script src="/i18n.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script>
@@ -672,8 +674,8 @@ function setSyncStatus(s) {{
     const lbl = document.getElementById('sync-label');
     if (!dot || !lbl) return;
     dot.className = 'sync-dot' + (s && s !== 'off' ? ' ' + s : '');
-    const labels = {{ ok: '동기화됨', err: '동기화 실패', busy: '동기화 중…' }};
-    lbl.textContent = labels[s] || '동기화';
+    const map = {{ ok: 'sync.ok', err: 'sync.err', busy: 'sync.busy' }};
+    lbl.textContent = map[s] ? I18n.t(map[s]) : I18n.t('btn.sync');
 }}
 
 async function fetchRemoteOverrides() {{
@@ -1246,7 +1248,18 @@ $(document).ready(function() {{
             if (Object.keys(ov).length) applyOverridesToData(ov);
             applySmhCorr();           // localStorage SMH 상관계수 적용
             recalcSectorMeta();       // 오버라이드 반영해 카운트 갱신
+            await I18n.init();        // i18n 초기화 (저장된 언어 로드)
             initDashboard();
+            setInterval(pollRemoteSync, 30000);
+
+            // 언어 전환 시 탭·섹터명 즉시 재렌더링
+            document.addEventListener('i18n:ready', function() {{
+                renderACTabs();
+                renderSectorTabs();
+                renderSummary();
+                updateFAB();
+                if (typeof table !== 'undefined') table.rows().invalidate('data').draw(false);
+            }});
         }});
 }});
 </script>

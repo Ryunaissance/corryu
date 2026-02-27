@@ -1,4 +1,8 @@
 {
   "outputDirectory": "output",
-  "cleanUrls": true
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/", "destination": "/landing" },
+    { "source": "/dashboard", "destination": "/index" }
+  ]
 }

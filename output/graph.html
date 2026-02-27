@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ETF 상관관계 그래프</title>
+  <title data-i18n="graph.title">ETF 상관관계 그래프</title>
+  <script src="/i18n.js"></script>
   <script src="https://unpkg.com/force-graph@1.43.5/dist/force-graph.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -153,11 +154,14 @@
 
 <!-- 컨트롤 패널 -->
 <div id="controls">
-  <h1>ETF 상관관계 그래프</h1>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <h1 data-i18n="graph.title">ETF 상관관계 그래프</h1>
+    <button id="lang-switcher" onclick="I18n.setLocale(I18n.locale()==='ko'?'en':'ko')" style="padding:3px 9px;border-radius:6px;background:rgba(255,255,255,0.06);color:#8b949e;border:1px solid rgba(255,255,255,0.1);font-size:10px;font-weight:700;cursor:pointer;letter-spacing:0.05em">EN</button>
+  </div>
 
   <div class="ctrl-row">
     <div class="ctrl-label">
-      임계값 (r ≥) <span id="r-val">0.95</span>
+      <span data-i18n="graph.threshold">임계값 (r ≥)</span> <span id="r-val">0.95</span>
     </div>
     <input type="range" id="r-slider" min="85" max="99" value="95" step="1">
     <div style="display:flex;justify-content:space-between;font-size:10px;color:#484f58;margin-top:2px">
@@ -166,30 +170,30 @@
   </div>
 
   <div class="ctrl-row">
-    <input type="text" id="search" placeholder="티커 검색 (예: SPY, QQQ, GLD)">
+    <input type="text" id="search" data-i18n-placeholder="filter.search" placeholder="티커 검색 (예: SPY, QQQ, GLD)">
   </div>
 
   <div class="ctrl-row">
     <label class="ctrl-check">
       <input type="checkbox" id="hide-legacy" checked>
-      레거시 숨기기 <span id="legacy-count"></span>
+      <span data-i18n="graph.hideLegacy">레거시 숨기기</span> <span id="legacy-count"></span>
     </label>
   </div>
 
   <div class="ctrl-row">
     <label class="ctrl-check">
       <input type="checkbox" id="super-sector-toggle">
-      🌐 주식 시장 통합 색상
+      <span data-i18n="graph.unifiedColor">🌐 주식 시장 통합 색상</span>
     </label>
   </div>
 
-  <div id="stats">데이터 로딩 중...</div>
+  <div id="stats" data-i18n="graph.loading">데이터 로딩 중...</div>
   <div id="progress-bar"><div id="progress-fill"></div></div>
 </div>
 
 <!-- 레전드 -->
 <div id="legend">
-  <h2>섹터</h2>
+  <h2 data-i18n="col.status">섹터</h2>
   <div id="legend-items"></div>
 </div>
 
@@ -202,19 +206,19 @@
   <div class="tt-name"   id="tt-name"></div>
   <div class="tt-divider"></div>
   <div id="tt-meta"></div>
-  <div class="tt-hint">클릭 → 해당 노드 포커스 | 배경 클릭 → 전체 보기</div>
+  <div class="tt-hint" data-i18n-html="graph.hint.click">클릭 → 해당 노드 포커스 | 배경 클릭 → 전체 보기</div>
 </div>
 
 <!-- 하단 힌트 -->
-<div id="hint">r = 1 이면 가깝게 · r = −1 이면 멀게 &nbsp;|&nbsp; 스크롤로 줌 · 드래그로 이동</div>
+<div id="hint" data-i18n-html="graph.hint.nav">r = 1 이면 가깝게 · r = −1 이면 멀게 &nbsp;|&nbsp; 스크롤로 줌 · 드래그로 이동</div>
 
 <!-- 홈 -->
-<a href="/" id="home-link">← 대시보드</a>
+<a href="/" id="home-link" data-i18n="btn.dashboard">← 대시보드</a>
 
 <!-- 에러 -->
 <div id="error-screen">
-  <h2>graph_data.json 없음</h2>
-  <p>그래프 데이터가 아직 생성되지 않았습니다.<br>로컬에서 아래 명령어를 실행한 후 배포하세요.</p>
+  <h2 data-i18n="graph.nodata">graph_data.json 없음</h2>
+  <p data-i18n="graph.nodata">그래프 데이터가 아직 생성되지 않았습니다.<br>로컬에서 아래 명령어를 실행한 후 배포하세요.</p>
   <code>python build_graph.py</code>
   <p style="font-size:11px;color:#484f58">
     (사전 조건: python build_monthly_corr.py 로<br>correlation_matrix_monthly.csv 생성 필요)
@@ -317,8 +321,8 @@ function getLinkWidth(link) {
 function updateStats(nNodes, nLinks, simRunning) {
   const el = document.getElementById('stats');
   el.innerHTML =
-    `<b>${nNodes.toLocaleString()}</b>개 노드 &nbsp;|&nbsp; <b>${nLinks.toLocaleString()}</b>개 엣지` +
-    (simRunning ? `<br><span class="sim-running">⟳ 레이아웃 계산 중...</span>` : '');
+    `${I18n.t('graph.nodes',{count:'<b>'+nNodes.toLocaleString()+'</b>'})} &nbsp;|&nbsp; ${I18n.t('graph.edges',{count:'<b>'+nLinks.toLocaleString()+'</b>'})}` +
+    (simRunning ? `<br><span class="sim-running">${I18n.t('graph.layout')}</span>` : '');
 }
 
 function fmtAUM(b) {
@@ -532,18 +536,19 @@ fetch('graph_data.json')
           document.getElementById('tt-ticker').style.color = sc.color || '#e6edf3';
           document.getElementById('tt-ticker').textContent = node.id;
           document.getElementById('tt-name').textContent   = node.n;
+          const scName = (I18n.locale()==='ko'||!sc.name_en) ? sc.name : sc.name_en;
           document.getElementById('tt-meta').innerHTML = `
             <div class="tt-row">
-              <span class="tt-key">섹터</span>
-              <span class="tt-val" style="color:${sc.color}">${sc.name || node.s}</span>
+              <span class="tt-key">${I18n.t('graph.tooltip.sector')}</span>
+              <span class="tt-val" style="color:${sc.color}">${scName || node.s}</span>
             </div>
             <div class="tt-row">
               <span class="tt-key">AUM</span>
               <span class="tt-val">${fmtAUM(node.a)}</span>
             </div>
             <div class="tt-row">
-              <span class="tt-key">연결(r≥${currentR.toFixed(2)})</span>
-              <span class="tt-val">${neighborCount}개</span>
+              <span class="tt-key">${I18n.t('graph.tooltip.connections',{r:currentR.toFixed(2)})}</span>
+              <span class="tt-val">${I18n.t('graph.neighbors',{count:neighborCount})}</span>
             </div>`;
           document.getElementById('tooltip').style.display = 'block';
         } else {
@@ -621,6 +626,18 @@ document.getElementById('search').addEventListener('input', e => {
     }
   }
   Graph.refresh();
+});
+
+// ── i18n 초기화 ───────────────────────────────────────
+I18n.init().then(() => {
+  // 언어 전환 시 레전드·툴팁·통계 즉시 갱신
+  document.addEventListener('i18n:ready', () => {
+    renderLegend();
+    if (Graph) {
+      const gd = Graph.graphData();
+      updateStats((gd.nodes||[]).length, (gd.links||[]).length, false);
+    }
+  });
 });
 </script>
 </body>
