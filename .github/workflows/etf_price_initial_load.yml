@@ -1,0 +1,28 @@
+name: ETF 가격 초기 적재 (최초 1회)
+
+# 수동으로만 실행 — Actions 탭 → "Run workflow"
+on:
+  workflow_dispatch:
+
+jobs:
+  initial-load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360   # 최대 6시간 (전체 히스토리 적재 여유)
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install --upgrade yfinance supabase pandas numpy
+
+      - name: Run initial ETF price load
+        run: python scripts/load_etf_prices_initial.py
+        env:
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}

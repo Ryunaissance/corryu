@@ -1,0 +1,32 @@
+name: ETF 가격 일별 업데이트
+
+on:
+  # 평일 오전 6시 UTC (한국시간 15시, 미 동부 전날 23시 — 전일 종가 포함)
+  schedule:
+    - cron: '0 6 * * 1-5'
+
+  # 수동 실행 (테스트 또는 강제 재실행)
+  workflow_dispatch:
+
+jobs:
+  update-prices:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install --upgrade yfinance supabase pandas numpy
+
+      - name: Run daily price update
+        run: python scripts/update_etf_prices_daily.py
+        env:
+          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
