@@ -400,6 +400,12 @@ nav {
             <a href="#" id="compare-hero-link" class="compare-hero-btn" title="ETF 비교 페이지로 이동">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>비교하기
             </a>
+            <!-- 종목 좋아요 버튼 -->
+            <button id="tl-btn" onclick="tickerLikeToggle()" title="이 종목 좋아요"
+              style="display:none;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;border:1px solid rgba(244,114,182,0.25);background:rgba(244,114,182,0.07);color:#94a3b8;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s">
+              <svg id="tl-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+              <span id="tl-count">0</span>
+            </button>
           </div>
           <div class="hero-name" id="h-name">—</div>
           <div class="hero-badges" id="h-badges"></div>
@@ -1538,6 +1544,96 @@ fetch('/etf_data.json')
       () => { loadComments(true); }
     ).subscribe();
 
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ❤️ 종목 좋아요 시스템
+// ═══════════════════════════════════════════════════════════════════════════
+(async function initTickerLike() {
+  if (!CorryuAuth.isConfigured) return;
+
+  const btn   = document.getElementById('tl-btn');
+  const icon  = document.getElementById('tl-icon');
+  const countEl = document.getElementById('tl-count');
+
+  let liked = false;
+  let currentUser = null;
+
+  // ── 좋아요 수 조회 ────────────────────────────────────────────────
+  async function fetchCount() {
+    const { count } = await _sb.from('ticker_likes')
+      .select('id', { count: 'exact', head: true })
+      .eq('ticker', TICKER);
+    return count ?? 0;
+  }
+
+  // ── 본인 좋아요 여부 조회 ─────────────────────────────────────────
+  async function fetchMyLike(userId) {
+    const { data } = await _sb.from('ticker_likes')
+      .select('id').eq('ticker', TICKER).eq('user_id', userId).maybeSingle();
+    return !!data;
+  }
+
+  // ── UI 업데이트 ────────────────────────────────────────────────────
+  function updateUI(count, isLiked) {
+    countEl.textContent = count;
+    if (isLiked) {
+      btn.style.background   = 'rgba(244,114,182,0.18)';
+      btn.style.borderColor  = 'rgba(244,114,182,0.55)';
+      btn.style.color        = '#f472b6';
+      icon.setAttribute('fill', '#f472b6');
+      icon.setAttribute('stroke', '#f472b6');
+    } else {
+      btn.style.background   = 'rgba(244,114,182,0.07)';
+      btn.style.borderColor  = 'rgba(244,114,182,0.25)';
+      btn.style.color        = '#94a3b8';
+      icon.setAttribute('fill', 'none');
+      icon.setAttribute('stroke', 'currentColor');
+    }
+    btn.style.display = 'inline-flex';
+  }
+
+  // ── 최초 로드 ─────────────────────────────────────────────────────
+  currentUser = await CorryuAuth.getUser();
+  const [count, myLike] = await Promise.all([
+    fetchCount(),
+    currentUser ? fetchMyLike(currentUser.id) : Promise.resolve(false),
+  ]);
+  liked = myLike;
+  updateUI(count, liked);
+
+  // ── 좋아요 토글 ───────────────────────────────────────────────────
+  window.tickerLikeToggle = async function() {
+    if (!currentUser) {
+      location.href = '/login?redirect=' + encodeURIComponent(location.href);
+      return;
+    }
+    btn.disabled = true;
+    try {
+      if (liked) {
+        await _sb.from('ticker_likes').delete()
+          .eq('ticker', TICKER).eq('user_id', currentUser.id);
+      } else {
+        await _sb.from('ticker_likes').insert({ ticker: TICKER, user_id: currentUser.id });
+      }
+      liked = !liked;
+      const newCount = await fetchCount();
+      updateUI(newCount, liked);
+    } catch(e) {
+      console.warn('[CORRYU] ticker like error:', e.message);
+    } finally {
+      btn.disabled = false;
+    }
+  };
+
+  // ── Auth 상태 변화 감지 ───────────────────────────────────────────
+  CorryuAuth.onAuthChange(async (_event, session) => {
+    currentUser = session?.user ?? null;
+    const myLike = currentUser ? await fetchMyLike(currentUser.id) : false;
+    liked = myLike;
+    const count = await fetchCount();
+    updateUI(count, liked);
+  });
 })();
 </script>
 </body>

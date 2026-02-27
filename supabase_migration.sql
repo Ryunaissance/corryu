@@ -100,3 +100,53 @@ select table_name, row_security
 from information_schema.tables
 where table_schema = 'public'
   and table_name in ('profiles', 'comments', 'comment_votes');
+
+
+-- ── 6. ticker_likes (종목 좋아요) ────────────────────────────────
+create table if not exists ticker_likes (
+  id         uuid        primary key default gen_random_uuid(),
+  ticker     text        not null,
+  user_id    uuid        not null references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  unique (ticker, user_id)
+);
+
+create index if not exists ticker_likes_ticker_idx   on ticker_likes (ticker);
+create index if not exists ticker_likes_created_idx  on ticker_likes (created_at desc);
+
+alter table ticker_likes enable row level security;
+
+create policy "tl_public_read"  on ticker_likes for select using (true);
+create policy "tl_auth_insert"  on ticker_likes for insert to authenticated
+  with check (auth.uid() = user_id);
+create policy "tl_own_delete"   on ticker_likes for delete to authenticated
+  using (auth.uid() = user_id);
+
+
+-- ── 7. 인기 종목 집계 뷰 ─────────────────────────────────────────
+-- 누적 총 좋아요
+create or replace view ticker_likes_total as
+  select ticker, count(*)::int as total_likes
+  from ticker_likes
+  group by ticker;
+
+-- 이번달 좋아요 (월 첫 날 00:00 UTC 기준)
+create or replace view ticker_likes_monthly as
+  select ticker, count(*)::int as monthly_likes
+  from ticker_likes
+  where created_at >= date_trunc('month', now() at time zone 'UTC')
+  group by ticker;
+
+-- 이번주 좋아요 (월요일 00:00 UTC 기준)
+create or replace view ticker_likes_weekly as
+  select ticker, count(*)::int as weekly_likes
+  from ticker_likes
+  where created_at >= date_trunc('week', now() at time zone 'UTC')
+  group by ticker;
+
+
+-- ── 8. 확인 쿼리 ──────────────────────────────────────────────────
+select table_name, row_security
+from information_schema.tables
+where table_schema = 'public'
+  and table_name in ('profiles', 'comments', 'comment_votes', 'ticker_likes');

@@ -229,6 +229,38 @@ table.dataTable tbody tr.row-watchlist.row-selected { background: rgba(59,130,24
         </div>
     </div>
 
+    <!-- ❤️ 인기 종목 랭킹 (Supabase 연결 시에만 표시) -->
+    <div id="trending-section" style="display:none;margin-bottom:16px">
+      <div class="glass" style="padding:20px 24px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+          <div style="font-size:.95rem;font-weight:900;letter-spacing:-.02em">❤️ 인기 종목 랭킹</div>
+          <div style="font-size:.7rem;color:#334155">CORRYU 사용자 좋아요 기준</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <!-- 이번주 -->
+          <div>
+            <div style="font-size:.73rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#64748b;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+              <span style="padding:2px 7px;border-radius:5px;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.25);color:#fbbf24;font-size:.68rem">이번주</span>
+              인기 급상승 종목
+            </div>
+            <div id="trending-weekly" style="display:flex;flex-direction:column;gap:6px">
+              <div style="color:#334155;font-size:.78rem;text-align:center;padding:16px 0">로딩 중…</div>
+            </div>
+          </div>
+          <!-- 이번달 -->
+          <div>
+            <div style="font-size:.73rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#64748b;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+              <span style="padding:2px 7px;border-radius:5px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);color:#a855f7;font-size:.68rem">이번달</span>
+              인기 급상승 종목
+            </div>
+            <div id="trending-monthly" style="display:flex;flex-direction:column;gap:6px">
+              <div style="color:#334155;font-size:.78rem;text-align:center;padding:16px 0">로딩 중…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Data Table -->
     <div class="glass p-4" style="position:relative;overflow-x:auto">
         <table id="masterTable" class="display nowrap" style="width:100%">
@@ -298,6 +330,8 @@ table.dataTable tbody tr.row-watchlist.row-selected { background: rgba(59,130,24
 </div>
 
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/supabase-client.js"></script>
 <script src="/i18n.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -1452,6 +1486,74 @@ $(document).ready(function() {
             });
         });
 });
+
+// ═══════════════════════════════════════════════════════════════════════
+// ❤️ 인기 종목 랭킹 (ticker_likes)
+// ═══════════════════════════════════════════════════════════════════════
+(async function initTrending() {
+  if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) return;
+
+  const section = document.getElementById('trending-section');
+  section.style.display = 'block';
+
+  const TOP_N = 5;
+
+  // 랭킹 아이템 HTML
+  function rankItemHTML(rank, ticker, count, barPct, period) {
+    const medals = ['🥇','🥈','🥉'];
+    const medal  = medals[rank - 1] || `<span style="font-size:.75rem;color:#475569;font-weight:800">${rank}</span>`;
+    const barColor = period === 'weekly' ? 'rgba(251,191,36,0.6)' : 'rgba(168,85,247,0.6)';
+    return `<a href="/etf-detail?ticker=${encodeURIComponent(ticker)}"
+        style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);text-decoration:none;transition:background .15s"
+        onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
+      <span style="font-size:.9rem;flex-shrink:0;min-width:22px;text-align:center">${medal}</span>
+      <span style="font-weight:800;font-size:.84rem;color:#e2e8f0;min-width:52px">${ticker}</span>
+      <div style="flex:1;height:4px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden">
+        <div style="height:100%;border-radius:2px;background:${barColor};width:${barPct}%"></div>
+      </div>
+      <span style="font-size:.75rem;font-weight:700;color:#64748b;flex-shrink:0">❤️ ${count}</span>
+    </a>`;
+  }
+
+  function emptyHTML() {
+    return `<div style="color:#334155;font-size:.78rem;text-align:center;padding:16px 0">아직 좋아요 데이터가 없습니다</div>`;
+  }
+
+  // ── 주간 랭킹 로드 ──────────────────────────────────────────────────
+  async function loadWeekly() {
+    const el = document.getElementById('trending-weekly');
+    const { data, error } = await _sb.from('ticker_likes_weekly')
+      .select('ticker,weekly_likes')
+      .order('weekly_likes', { ascending: false })
+      .limit(TOP_N);
+    if (error || !data || data.length === 0) { el.innerHTML = emptyHTML(); return; }
+    const maxLikes = data[0].weekly_likes;
+    el.innerHTML = data.map((row, i) => {
+      const pct = maxLikes > 0 ? Math.round((row.weekly_likes / maxLikes) * 100) : 0;
+      return rankItemHTML(i + 1, row.ticker, row.weekly_likes, pct, 'weekly');
+    }).join('');
+  }
+
+  // ── 월간 랭킹 로드 ──────────────────────────────────────────────────
+  async function loadMonthly() {
+    const el = document.getElementById('trending-monthly');
+    const { data, error } = await _sb.from('ticker_likes_monthly')
+      .select('ticker,monthly_likes')
+      .order('monthly_likes', { ascending: false })
+      .limit(TOP_N);
+    if (error || !data || data.length === 0) { el.innerHTML = emptyHTML(); return; }
+    const maxLikes = data[0].monthly_likes;
+    el.innerHTML = data.map((row, i) => {
+      const pct = maxLikes > 0 ? Math.round((row.monthly_likes / maxLikes) * 100) : 0;
+      return rankItemHTML(i + 1, row.ticker, row.monthly_likes, pct, 'monthly');
+    }).join('');
+  }
+
+  await Promise.all([loadWeekly(), loadMonthly()]);
+
+  // 30분마다 자동 새로고침
+  setInterval(() => { loadWeekly(); loadMonthly(); }, 30 * 60 * 1000);
+})();
 </script>
 </body>
 </html>
