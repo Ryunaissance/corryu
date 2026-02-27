@@ -199,8 +199,8 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
           <span class="benefit-text"><strong>클라우드 저장</strong> — 어느 기기에서도 동일한 데이터</span>
         </div>
       </div>
-      <a href="/login" class="btn-primary">로그인하기</a>
-      <a href="/login#signup" class="btn-secondary">무료 계정 만들기</a>
+      <a href="/login?redirect=/portfolio" class="btn-primary">로그인하기</a>
+      <a href="/login?redirect=/portfolio#signup" class="btn-secondary">무료 계정 만들기</a>
       <div class="gate-footnote">로컬 저장(쿠키·localStorage)은 브라우저 초기화 시 데이터가 유실될 수 있습니다.</div>
     </div>
   </div>
@@ -283,27 +283,28 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
 </div><!-- /main-wrap -->
 
 <script>
-// ── 세션 체크 ─────────────────────────────────────────
-// corryu_session = { email, displayName } 가 localStorage에 있으면 로그인 상태
-function getSession() {
-  try { return JSON.parse(localStorage.getItem('corryu_session') || 'null'); }
-  catch { return null; }
+// ── 세션 체크 (Supabase) ──────────────────────────────
+async function getSupabaseUser() {
+  if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) return null;
+  return await CorryuAuth.getUser();
 }
 
-function logout() {
+async function logout() {
   if (!confirm('로그아웃하시겠습니까?')) return;
-  localStorage.removeItem('corryu_session');
+  if (typeof CorryuAuth !== 'undefined' && CorryuAuth.isConfigured) {
+    await CorryuAuth.signOut();
+  }
   location.reload();
 }
 
 // ── ETF 데이터 ────────────────────────────────────────
 let allData = {};
-fetch('/etf_data.json').then(r=>r.json()).then(data => {
+fetch('/etf_data.json').then(r=>r.json()).then(async data => {
   for (const [, etfs] of Object.entries(data.allData || data)) {
     if (!Array.isArray(etfs)) continue;
     for (const etf of etfs) allData[etf.ticker] = etf;
   }
-  loadSavedPortfolio();
+  await loadSavedPortfolio();
   calculatePortfolio();
 }).catch(() => {});
 
@@ -389,18 +390,18 @@ function clearSummary() {
 
 // ── 저장 / 불러오기 (서버 연동 전 임시: localStorage) ──
 // NOTE: 실제 서버 저장은 Supabase 연동 후 구현 예정
-function savePortfolio() {
-  const session = getSession();
-  if (!session) return;
+async function savePortfolio() {
+  const user = await getSupabaseUser();
+  if (!user) return;
   // 서버 저장 예정 — 현재는 localStorage에 임시 저장
-  const key = 'corryu_portfolio_' + (session.email || 'user');
+  const key = 'corryu_portfolio_' + (user.email || 'user');
   localStorage.setItem(key, JSON.stringify(rows));
   showToast('포트폴리오가 저장되었습니다.', 'success');
 }
-function loadSavedPortfolio() {
-  const session = getSession();
-  if (!session) return;
-  const key = 'corryu_portfolio_' + (session.email || 'user');
+async function loadSavedPortfolio() {
+  const user = await getSupabaseUser();
+  if (!user) return;
+  const key = 'corryu_portfolio_' + (user.email || 'user');
   try {
     const saved = JSON.parse(localStorage.getItem(key) || 'null');
     if (saved && Array.isArray(saved) && saved.length) rows = saved;
@@ -419,19 +420,20 @@ function showToast(msg, type='info') {
 }
 
 // ── 초기화 ────────────────────────────────────────────
-const session = getSession();
-if (session) {
-  document.getElementById('gate-view').style.display = 'none';
-  document.getElementById('portfolio-view').style.display = 'block';
-  document.getElementById('user-info-label').textContent =
-    (session.displayName || session.email || '로그인됨') + '의 포트폴리오';
-  renderRows();
-} else {
-  document.getElementById('gate-view').style.display = 'flex';
-  document.getElementById('portfolio-view').style.display = 'none';
-}
-
-I18n.init();
+(async function init() {
+  const user = await getSupabaseUser();
+  if (user) {
+    document.getElementById('gate-view').style.display = 'none';
+    document.getElementById('portfolio-view').style.display = 'block';
+    document.getElementById('user-info-label').textContent =
+      (user.user_metadata?.nickname || user.email || '로그인됨') + '의 포트폴리오';
+    renderRows();
+  } else {
+    document.getElementById('gate-view').style.display = 'flex';
+    document.getElementById('portfolio-view').style.display = 'none';
+  }
+  I18n.init();
+})();
 </script>
 </body>
 </html>
