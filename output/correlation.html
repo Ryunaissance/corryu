@@ -610,7 +610,8 @@ lb.style.width = '40%';
 fetch('/etf_data.json')
   .then(r => r.json())
   .then(data => {
-    for (const [sid, etfs] of Object.entries(data)) {
+    for (const [sid, etfs] of Object.entries(data.allData || data)) {
+      if (!Array.isArray(etfs)) continue;
       for (const etf of etfs) allData[etf.ticker] = { ...etf, _sid: sid };
     }
     lb.style.width = '100%';
