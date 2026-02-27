@@ -142,44 +142,92 @@ table.dataTable tbody tr.row-watchlist.row-selected { background: rgba(59,130,24
 .tooltip-container { position: relative; cursor: help; }
 .tooltip-content { display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1e293b; color: #e2e8f0; padding: 8px 12px; border-radius: 8px; font-size: 0.75rem; white-space: nowrap; z-index: 999; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.5); max-width: 350px; white-space: normal; }
 .tooltip-container:hover .tooltip-content { display: block; }
+
+/* ── Fixed Navbar ── */
+.gradient-line { position:fixed; top:0; left:0; right:0; height:3px; z-index:200; background:linear-gradient(90deg,#3b82f6,#8b5cf6,#ec4899,#f59e0b); }
+#main-nav { position:fixed; top:3px; left:0; right:0; z-index:100; background:rgba(10,13,20,0.92); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-bottom:1px solid rgba(255,255,255,0.07); height:54px; display:flex; align-items:center; }
+.nav-inner { max-width:1536px; margin:0 auto; padding:0 20px; width:100%; display:flex; align-items:center; gap:0; }
+.nav-brand { font-size:1rem; font-weight:900; text-decoration:none; background:linear-gradient(135deg,#60a5fa,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; white-space:nowrap; margin-right:24px; flex-shrink:0; }
+.nav-links { display:flex; align-items:center; gap:2px; overflow-x:auto; flex:1; }
+.nav-links::-webkit-scrollbar { display:none; }
+.nav-link { display:inline-flex; align-items:center; gap:5px; padding:5px 11px; border-radius:8px; font-size:0.78rem; font-weight:600; text-decoration:none; color:#64748b; transition:all 0.15s; white-space:nowrap; border:1px solid transparent; }
+.nav-link:hover { color:#e2e8f0; background:rgba(255,255,255,0.06); }
+.nav-link.active { color:#60a5fa; background:rgba(59,130,246,0.1); border-color:rgba(59,130,246,0.25); }
+.nav-right { display:flex; align-items:center; gap:8px; flex-shrink:0; margin-left:16px; }
+#lang-switcher { padding:4px 10px; border-radius:7px; background:rgba(255,255,255,0.05); color:#94a3b8; border:1px solid rgba(255,255,255,0.1); font-size:0.76rem; font-weight:700; cursor:pointer; transition:all 0.15s; font-family:inherit; }
+#lang-switcher:hover { background:rgba(255,255,255,0.1); color:#e2e8f0; }
+#nav-auth { display:flex; align-items:center; gap:6px; }
+#nav-user-nick { font-size:0.78rem; font-weight:700; color:#93c5fd; max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#nav-logout-btn { padding:4px 10px; border-radius:7px; background:rgba(248,113,113,0.08); color:#f87171; border:1px solid rgba(248,113,113,0.2); font-size:0.74rem; font-weight:700; cursor:pointer; transition:all 0.15s; font-family:inherit; }
+#nav-logout-btn:hover { background:rgba(248,113,113,0.18); }
+#nav-login-btn { padding:5px 14px; border-radius:8px; background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.35); font-size:0.78rem; font-weight:700; cursor:pointer; text-decoration:none; transition:all 0.15s; display:inline-flex; align-items:center; gap:5px; }
+#nav-login-btn:hover { background:rgba(59,130,246,0.28); }
 </style>
 </head>
-<body>
-<div class="max-w-screen-2xl mx-auto">
-    <!-- Header -->
-    <div class="glass p-5 mb-5 text-center relative overflow-hidden">
-        <div class="absolute top-0 left-0 w-full h-0.5" style="background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);"></div>
-        <div class="absolute top-4 right-4" style="display:flex;gap:8px;align-items:center">
-            <button id="lang-switcher" onclick="I18n.setLocale(I18n.locale()==='ko'?'en':'ko')" style="padding:5px 12px;border-radius:8px;background:rgba(255,255,255,0.06);color:#94a3b8;border:1px solid rgba(255,255,255,0.1);font-size:0.78rem;font-weight:700;cursor:pointer;letter-spacing:0.05em;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">EN</button>
-            <a href="/screener" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:10px;background:rgba(251,146,60,0.09);color:#fb923c;border:1px solid rgba(251,146,60,0.28);font-size:0.82rem;font-weight:600;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(251,146,60,0.18)'" onmouseout="this.style.background='rgba(251,146,60,0.09)'" title="ETF 스크리너">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>스크리너
-            </a>
-            <a href="/backtest" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:10px;background:rgba(167,139,250,0.09);color:#a78bfa;border:1px solid rgba(167,139,250,0.28);font-size:0.82rem;font-weight:600;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(167,139,250,0.18)'" onmouseout="this.style.background='rgba(167,139,250,0.09)'" title="포트폴리오 백테스트">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>백테스트
-            </a>
-            <a href="/correlation" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:10px;background:rgba(34,211,238,0.09);color:#22d3ee;border:1px solid rgba(34,211,238,0.28);font-size:0.82rem;font-weight:600;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(34,211,238,0.18)'" onmouseout="this.style.background='rgba(34,211,238,0.09)'" title="상관관계 분석">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="12" cy="16" r="2"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="9" y1="10" x2="11" y2="14"/><line x1="15" y1="10" x2="13" y2="14"/></svg>상관관계
-            </a>
-            <a href="/compare" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:10px;background:rgba(59,130,246,0.12);color:#60a5fa;border:1px solid rgba(59,130,246,0.3);font-size:0.82rem;font-weight:600;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(59,130,246,0.24)'" onmouseout="this.style.background='rgba(59,130,246,0.12)'" title="ETF 비교">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>비교
-            </a>
-            <a href="/portfolio" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:10px;background:rgba(74,222,128,0.10);color:#4ade80;border:1px solid rgba(74,222,128,0.28);font-size:0.82rem;font-weight:600;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(74,222,128,0.2)'" onmouseout="this.style.background='rgba(74,222,128,0.10)'" title="포트폴리오 빌더">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>포트폴리오
-            </a>
-            <a href="graph.html" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:10px;background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.35);font-size:0.82rem;font-weight:600;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.28)'" onmouseout="this.style.background='rgba(139,92,246,0.15)'">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><line x1="7" y1="11.5" x2="17" y2="6.5"/><line x1="7" y1="12.5" x2="17" y2="17.5"/></svg>
-                <span data-i18n="btn.viewGraph">그래프 보기</span>
-            </a>
-        </div>
-        <h1 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight">
-            <span class="text-gradient">CORRYU</span> Master Valuation Dashboard
+<body style="padding-top:57px">
+<!-- 상단 그라데이션 라인 -->
+<div class="gradient-line"></div>
+
+<!-- ── Fixed Navbar ─────────────────────────────────────── -->
+<nav id="main-nav">
+  <div class="nav-inner">
+    <!-- 브랜드 -->
+    <a href="/index" class="nav-brand">CORRYU</a>
+
+    <!-- 메뉴 링크 -->
+    <div class="nav-links">
+      <a href="/index"        class="nav-link active">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>대시보드
+      </a>
+      <a href="/screener"     class="nav-link">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>스크리너
+      </a>
+      <a href="/backtest"     class="nav-link">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>백테스트
+      </a>
+      <a href="/correlation"  class="nav-link">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="12" cy="16" r="2"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="9" y1="10" x2="11" y2="14"/><line x1="15" y1="10" x2="13" y2="14"/></svg>상관관계
+      </a>
+      <a href="/compare"      class="nav-link">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>비교
+      </a>
+      <a href="/portfolio"    class="nav-link">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>포트폴리오
+      </a>
+      <a href="/graph"        class="nav-link">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><line x1="7" y1="11.5" x2="17" y2="6.5"/><line x1="7" y1="12.5" x2="17" y2="17.5"/></svg><span data-i18n="btn.viewGraph">그래프</span>
+      </a>
+    </div>
+
+    <!-- 우측: 언어 + 인증 -->
+    <div class="nav-right">
+      <button id="lang-switcher" onclick="I18n.setLocale(I18n.locale()==='ko'?'en':'ko')">EN</button>
+      <div id="nav-auth">
+        <!-- JS로 채워짐: 로그인 시 닉네임+로그아웃, 비로그인 시 로그인 버튼 -->
+        <a href="/login" id="nav-login-btn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>로그인
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ── 대시보드 본문 ─────────────────────────────────────── -->
+<div class="max-w-screen-2xl mx-auto" style="padding:16px">
+
+    <!-- 대시보드 타이틀 카드 -->
+    <div class="glass p-4 mb-4" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div>
+        <h1 style="font-size:1.25rem;font-weight:900;letter-spacing:-.02em;margin:0">
+          <span class="text-gradient">Master Valuation</span> Dashboard
         </h1>
-        <p class="text-sm text-gray-500">
-            Total <span class="text-white font-bold" id="hdr-total">1,651</span> ETFs
-            <span class="text-gray-600" id="hdr-legacy-label">(<span id="hdr-legacy">671</span> legacy, <span class="text-green-400 font-bold" id="hdr-active">980</span> active)</span> |
-            <span class="text-white font-bold">23</span> Sectors |
-            Updated: <span class="text-gray-400">2026-02-26</span>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin:4px 0 0">
+          Total <strong style="color:#e2e8f0" id="hdr-total">—</strong> ETFs
+          <span id="hdr-legacy-label"> · <span id="hdr-legacy">—</span> legacy · <strong style="color:#4ade80" id="hdr-active">—</strong> active</span>
+          &nbsp;·&nbsp; <strong style="color:#e2e8f0">23</strong> Sectors
+          &nbsp;·&nbsp; Updated <span style="color:#94a3b8">2026-02-26</span>
         </p>
+      </div>
     </div>
 
     <!-- Asset Class Tabs (Level 1) -->
@@ -1553,6 +1601,41 @@ $(document).ready(function() {
 
   // 30분마다 자동 새로고침
   setInterval(() => { loadWeekly(); loadMonthly(); }, 30 * 60 * 1000);
+})();
+
+// ═══════════════════════════════════════════════════════════════════════
+// 🔐 Navbar 인증 상태
+// ═══════════════════════════════════════════════════════════════════════
+(async function initNavAuth() {
+  if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) return;
+
+  const authEl    = document.getElementById('nav-auth');
+  const loginBtn  = document.getElementById('nav-login-btn');
+
+  async function renderAuth() {
+    const user = await CorryuAuth.getUser();
+    if (!user) {
+      // 비로그인 — 로그인 버튼 유지
+      return;
+    }
+    // 로그인 상태 — 닉네임 + 로그아웃 버튼
+    const profile = await CorryuAuth.getProfile(user.id);
+    const nick = profile?.nickname || user.email?.split('@')[0] || '사용자';
+    authEl.innerHTML = `
+      <span id="nav-user-nick" title="${nick}">${nick}</span>
+      <button id="nav-logout-btn" onclick="window._navLogout()">로그아웃</button>
+    `;
+  }
+
+  window._navLogout = async function() {
+    await CorryuAuth.signOut();
+    window.location.reload();
+  };
+
+  await renderAuth();
+
+  // 인증 상태 변경 시 자동 갱신
+  CorryuAuth.onAuthChange(() => renderAuth());
 })();
 </script>
 </body>
