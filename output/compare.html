@@ -111,22 +111,22 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
   <div class="nav-inner">
     <a href="/index" class="nav-back">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-      대시보드
+      <span data-i18n="nav.dashboard">대시보드</span>
     </a>
     <span style="color:#1e293b">/</span>
     <a href="/landing" style="font-size:0.95rem;font-weight:900;text-decoration:none"><span class="text-gradient">CORRYU</span></a>
-    <span style="font-size:0.82rem;color:var(--text-muted)">/ ETF 비교</span>
-    <a href="/screener"    style="margin-left:auto;font-size:0.78rem;color:var(--text-muted);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px" title="ETF 스크리너">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>스크리너</a>
-    <a href="/backtest"    style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px" title="백테스트">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>백테스트</a>
-    <a href="/correlation" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px" title="상관관계 분석">
+    <span style="font-size:0.82rem;color:var(--text-muted)" data-i18n="nav.breadcrumb.compare">/ ETF 비교</span>
+    <a href="/screener"    style="margin-left:auto;font-size:0.78rem;color:var(--text-muted);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg><span data-i18n="nav.screener">스크리너</span></a>
+    <a href="/backtest"    style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span data-i18n="nav.backtest">백테스트</span></a>
+    <a href="/correlation" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="12" cy="16" r="2"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="9" y1="10" x2="11" y2="14"/><line x1="15" y1="10" x2="13" y2="14"/></svg>
-      상관관계
+      <span data-i18n="nav.correlation">상관관계</span>
     </a>
-    <a href="/portfolio" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px" title="포트폴리오 빌더">
+    <a href="/portfolio" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
-      포트폴리오
+      <span data-i18n="nav.portfolio">포트폴리오</span>
     </a>
   </div>
 </nav>
@@ -135,36 +135,36 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
 
   <!-- ── Ticker 선택 ── -->
   <div class="glass selector-card">
-    <div class="selector-title">ETF <span class="text-gradient">비교</span></div>
+    <div class="selector-title" data-i18n-html="compare.title">ETF <span class="text-gradient">비교</span></div>
     <div class="selector-row" id="chip-row">
       <!-- chips injected here -->
       <div class="add-input-wrap" id="add-wrap">
-        <input type="text" class="add-input" id="add-input" placeholder="티커 입력 (예: QQQ 또는 QQQ SPY SOXX)" maxlength="20" autocomplete="off">
-        <button class="add-btn" onclick="addTicker()">+ 추가</button>
+        <input type="text" class="add-input" id="add-input" data-i18n-placeholder="compare.add.placeholder" placeholder="티커 입력 (예: QQQ 또는 QQQ SPY SOXX)" maxlength="20" autocomplete="off">
+        <button class="add-btn" onclick="addTicker()" data-i18n="compare.add.btn">+ 추가</button>
       </div>
     </div>
     <div class="error-msg" id="error-msg"></div>
-    <div class="selector-hint">최대 3개 ETF를 선택해 나란히 비교합니다. CORRYU 데이터베이스에 있는 ETF만 추가 가능합니다.</div>
+    <div class="selector-hint" data-i18n="compare.hint">최대 3개 ETF를 선택해 나란히 비교합니다. CORRYU 데이터베이스에 있는 ETF만 추가 가능합니다.</div>
   </div>
 
   <!-- ── 비교 차트 ── -->
   <div class="glass chart-card" id="chart-card">
     <div class="card-header">
-      <div class="card-title">수익률 비교 차트 (시뮬레이션)</div>
+      <div class="card-title" data-i18n="compare.chart.title">수익률 비교 차트 (시뮬레이션)</div>
       <div class="chart-tabs">
-        <button class="chart-tab" onclick="switchPeriod('1M',this)">1개월</button>
-        <button class="chart-tab" onclick="switchPeriod('3M',this)">3개월</button>
-        <button class="chart-tab" onclick="switchPeriod('6M',this)">6개월</button>
-        <button class="chart-tab active" onclick="switchPeriod('1Y',this)">1년</button>
-        <button class="chart-tab" onclick="switchPeriod('3Y',this)">3년</button>
-        <button class="chart-tab" onclick="switchPeriod('5Y',this)">5년</button>
-        <button class="chart-tab" onclick="switchPeriod('10Y',this)">10년</button>
-        <button class="chart-tab" onclick="switchPeriod('15Y',this)">15년</button>
-        <button class="chart-tab" onclick="switchPeriod('20Y',this)">20년</button>
+        <button class="chart-tab" onclick="switchPeriod('1M',this)" data-i18n="period.1M">1개월</button>
+        <button class="chart-tab" onclick="switchPeriod('3M',this)" data-i18n="period.3M">3개월</button>
+        <button class="chart-tab" onclick="switchPeriod('6M',this)" data-i18n="period.6M">6개월</button>
+        <button class="chart-tab active" onclick="switchPeriod('1Y',this)" data-i18n="period.1Y">1년</button>
+        <button class="chart-tab" onclick="switchPeriod('3Y',this)" data-i18n="period.3Y">3년</button>
+        <button class="chart-tab" onclick="switchPeriod('5Y',this)" data-i18n="period.5Y">5년</button>
+        <button class="chart-tab" onclick="switchPeriod('10Y',this)" data-i18n="period.10Y">10년</button>
+        <button class="chart-tab" onclick="switchPeriod('15Y',this)" data-i18n="period.15Y">15년</button>
+        <button class="chart-tab" onclick="switchPeriod('20Y',this)" data-i18n="period.20Y">20년</button>
       </div>
     </div>
     <div class="custom-range-row">
-      <span class="range-label">직접 설정</span>
+      <span class="range-label" data-i18n="compare.custom.range">직접 설정</span>
       <input type="date" id="date-start" class="range-input" onchange="applyCustomRange()">
       <span class="range-sep">~</span>
       <input type="date" id="date-end" class="range-input" onchange="applyCustomRange()">
@@ -173,20 +173,20 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
     <div class="chart-container" id="chart-container">
       <div class="empty-chart">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        <span style="font-size:0.85rem">ETF를 선택하면 차트가 표시됩니다</span>
+        <span style="font-size:0.85rem" data-i18n="compare.empty.chart">ETF를 선택하면 차트가 표시됩니다</span>
       </div>
     </div>
     <div class="chart-legend" id="chart-legend"></div>
-    <div style="font-size:0.68rem;color:#2d3748;margin-top:6px;text-align:right">※ CAGR·변동성 기반 시뮬레이션 차트. 실제 가격 데이터가 아닙니다.</div>
+    <div style="font-size:0.68rem;color:#2d3748;margin-top:6px;text-align:right" data-i18n="compare.disclaimer">※ CAGR·변동성 기반 시뮬레이션 차트. 실제 가격 데이터가 아닙니다.</div>
   </div>
 
   <!-- ── 비교 테이블 ── -->
   <div class="glass table-card" id="table-card">
-    <div class="card-title" style="margin-bottom:16px">상세 지표 비교</div>
+    <div class="card-title" style="margin-bottom:16px" data-i18n="compare.table.title">상세 지표 비교</div>
     <div id="table-container">
       <div class="placeholder-card">
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="3"/></svg>
-        <span style="font-size:0.85rem">2개 이상 ETF를 선택하면 비교 테이블이 표시됩니다</span>
+        <span style="font-size:0.85rem" data-i18n="compare.empty.table">2개 이상 ETF를 선택하면 비교 테이블이 표시됩니다</span>
       </div>
     </div>
   </div>
@@ -305,15 +305,15 @@ function generateMultiChartSVG(etfs, n) {
     const m1 = new Date(s.getTime()+(e-s)/3), m2 = new Date(s.getTime()+(e-s)*2/3);
     xPts = [fmt(s), fmt(m1), fmt(m2), fmt(e)];
   } else {
-    xPts = n<=22  ? ['4주 전','','','현재']
-         : n<=65  ? ['3개월 전','2개월 전','1개월 전','현재']
-         : n<=130 ? ['6개월 전','4개월 전','2개월 전','현재']
-         : n<=252 ? ['1년 전','9개월 전','3개월 전','현재']
-         : n<=756 ? ['3년 전','2년 전','1년 전','현재']
-         : n<=1260? ['5년 전','3년 전','1년 전','현재']
-         : n<=2520? ['10년 전','6년 전','2년 전','현재']
-         : n<=3780? ['15년 전','10년 전','5년 전','현재']
-         :          ['20년 전','10년 전','5년 전','현재'];
+    xPts = n<=22  ? [I18n.t('chart.ago.4w'),'','',I18n.t('chart.ago.now')]
+         : n<=65  ? [I18n.t('chart.ago.3m'),I18n.t('chart.ago.2m'),I18n.t('chart.ago.1m'),I18n.t('chart.ago.now')]
+         : n<=130 ? [I18n.t('chart.ago.6m'),I18n.t('chart.ago.4m'),I18n.t('chart.ago.2m'),I18n.t('chart.ago.now')]
+         : n<=252 ? [I18n.t('chart.ago.1y'),I18n.t('chart.ago.9m'),I18n.t('chart.ago.3m'),I18n.t('chart.ago.now')]
+         : n<=756 ? [I18n.t('chart.ago.3y'),I18n.t('chart.ago.2y'),I18n.t('chart.ago.1y'),I18n.t('chart.ago.now')]
+         : n<=1260? [I18n.t('chart.ago.5y'),I18n.t('chart.ago.3y'),I18n.t('chart.ago.1y'),I18n.t('chart.ago.now')]
+         : n<=2520? [I18n.t('chart.ago.10y'),I18n.t('chart.ago.6y'),I18n.t('chart.ago.2y'),I18n.t('chart.ago.now')]
+         : n<=3780? [I18n.t('chart.ago.15y'),I18n.t('chart.ago.10y'),I18n.t('chart.ago.5y'),I18n.t('chart.ago.now')]
+         :          [I18n.t('chart.ago.20y'),I18n.t('chart.ago.10y'),I18n.t('chart.ago.5y'),I18n.t('chart.ago.now')];
   }
   const xLabels = xPts.map((l,i)=>`<text x="${(P.l+(i/(xPts.length-1))*cw).toFixed(1)}" y="${H-5}" text-anchor="middle" font-size="10" fill="rgba(100,116,139,0.6)" font-family="Inter,sans-serif">${l}</text>`).join('');
 
@@ -333,32 +333,32 @@ function parseExp(str) { if(!str||str==='—') return null; return parseFloat(st
 // ── 비교 지표 정의 ────────────────────────────────────
 // { label, get(etf,supp), best:'max'|'min'|'none', fmtClass(v):'ret-pos'|'ret-neg'|'', note }
 const METRIC_GROUPS = [
-  { group: '📊 기본 정보', metrics: [
-    { label: 'AUM',        get:(e,s)=>fmtAUM(e.aum),      raw:(e)=>e.aum||0,              best:'max',  note:'높을수록 유동성 높음' },
-    { label: '수수료',     get:(e,s)=>s.exp||'—',          raw:(e,s)=>parseExp(s.exp)||999, best:'min',  note:'낮을수록 유리' },
-    { label: '발행사',     get:(e,s)=>s.issuer||'—',        raw:null,                       best:'none' },
-    { label: '벤치마크',   get:(e,s)=>s.bench||'—',         raw:null,                       best:'none' },
-    { label: '상장일',     get:(e,s)=>e.inception&&e.inception!=='1900-01-01'?e.inception:'—', raw:null, best:'none' },
-    { label: '구성종목 수',get:(e,s)=>s.numH!==undefined?s.numH.toLocaleString()+'개':'—',   raw:null,  best:'none' },
-    { label: '배당 방식',  get:(e,s)=>s.div||'—',           raw:null,                       best:'none' },
-    { label: '배당수익률', get:(e,s)=>s.divY||'—',          raw:(e,s)=>parseFloat((s.divY||'0').replace('%',''))||0, best:'max', note:'높을수록 배당 수익' },
+  { group: () => I18n.t('compare.group.info'), metrics: [
+    { label: 'AUM',        get:(e,s)=>fmtAUM(e.aum),      raw:(e)=>e.aum||0,              best:'max',  note:()=>I18n.t('compare.note.aum') },
+    { label: ()=>I18n.t('compare.metric.expense'), get:(e,s)=>s.exp||'—', raw:(e,s)=>parseExp(s.exp)||999, best:'min', note:()=>I18n.t('compare.note.expense') },
+    { label: ()=>I18n.t('compare.metric.issuer'),  get:(e,s)=>s.issuer||'—', raw:null, best:'none' },
+    { label: ()=>I18n.t('compare.metric.benchmark'), get:(e,s)=>s.bench||'—', raw:null, best:'none' },
+    { label: ()=>I18n.t('col.inception'),          get:(e,s)=>e.inception&&e.inception!=='1900-01-01'?e.inception:'—', raw:null, best:'none' },
+    { label: ()=>I18n.t('compare.metric.holdings'), get:(e,s)=>s.numH!==undefined?s.numH.toLocaleString()+I18n.t('compare.holdings.unit',{n:''}).trim():'—', raw:null, best:'none' },
+    { label: ()=>I18n.t('compare.metric.div.freq'),  get:(e,s)=>s.div||'—', raw:null, best:'none' },
+    { label: ()=>I18n.t('compare.metric.div.yield'), get:(e,s)=>s.divY||'—', raw:(e,s)=>parseFloat((s.divY||'0').replace('%',''))||0, best:'max', note:()=>I18n.t('compare.note.div') },
   ]},
-  { group: '📈 수익성', metrics: [
-    { label: 'CAGR (연환산)',  get:(e,s)=>fmtPct(e.cagr),           raw:(e)=>e.cagr??-999,         best:'max', fmtClass:v=>v>=0?'ret-pos':'ret-neg', note:'높을수록 유리' },
-    { label: '1년 수익률',     get:(e,s)=>fmtPct(s.perf?.['1Y']),    raw:(e,s)=>s.perf?.['1Y']??-999, best:'max', fmtClass:v=>v>=0?'ret-pos':'ret-neg' },
-    { label: '3년 수익률(ann.)',get:(e,s)=>fmtPct(s.perf?.['3Y']),   raw:(e,s)=>s.perf?.['3Y']??-999, best:'max', fmtClass:v=>v>=0?'ret-pos':'ret-neg' },
-    { label: '5년 수익률(ann.)',get:(e,s)=>fmtPct(s.perf?.['5Y']),   raw:(e,s)=>s.perf?.['5Y']??-999, best:'max', fmtClass:v=>v>=0?'ret-pos':'ret-neg' },
+  { group: () => I18n.t('compare.group.return'), metrics: [
+    { label: ()=>I18n.t('compare.metric.cagr'),  get:(e,s)=>fmtPct(e.cagr),           raw:(e)=>e.cagr??-999,         best:'max', fmtClass:v=>v>=0?'ret-pos':'ret-neg', note:()=>I18n.t('compare.note.cagr') },
+    { label: ()=>I18n.t('compare.metric.ret1y'), get:(e,s)=>fmtPct(s.perf?.['1Y']),    raw:(e,s)=>s.perf?.['1Y']??-999, best:'max', fmtClass:v=>v>=0?'ret-pos':'ret-neg' },
+    { label: ()=>I18n.t('compare.metric.ret3y'), get:(e,s)=>fmtPct(s.perf?.['3Y']),   raw:(e,s)=>s.perf?.['3Y']??-999, best:'max', fmtClass:v=>v>=0?'ret-pos':'ret-neg' },
+    { label: ()=>I18n.t('compare.metric.ret5y'), get:(e,s)=>fmtPct(s.perf?.['5Y']),   raw:(e,s)=>s.perf?.['5Y']??-999, best:'max', fmtClass:v=>v>=0?'ret-pos':'ret-neg' },
   ]},
-  { group: '⚠️ 리스크', metrics: [
-    { label: '연환산 변동성', get:(e,s)=>fmtPct(e.vol),     raw:(e)=>e.vol??999,         best:'min', fmtClass:v=>v<15?'ret-pos':'', note:'낮을수록 안정적' },
-    { label: '52W MDD',       get:(e,s)=>fmtPct(e.mdd_52w), raw:(e)=>e.mdd_52w??-999,    best:'max', fmtClass:v=>v<-20?'ret-neg':'', note:'0에 가까울수록 안정적' },
-    { label: 'Sortino',       get:(e,s)=>fmtNum(e.sortino,2),raw:(e)=>e.sortino??-999,    best:'max', fmtClass:v=>v>=1.2?'ret-pos':v<0?'ret-neg':'', note:'높을수록 유리' },
+  { group: () => I18n.t('compare.group.risk'), metrics: [
+    { label: ()=>I18n.t('compare.metric.vol'),  get:(e,s)=>fmtPct(e.vol),     raw:(e)=>e.vol??999,         best:'min', fmtClass:v=>v<15?'ret-pos':'', note:()=>I18n.t('compare.note.vol') },
+    { label: '52W MDD',                          get:(e,s)=>fmtPct(e.mdd_52w), raw:(e)=>e.mdd_52w??-999,    best:'max', fmtClass:v=>v<-20?'ret-neg':'', note:()=>I18n.t('compare.note.mdd') },
+    { label: 'Sortino',                          get:(e,s)=>fmtNum(e.sortino,2),raw:(e)=>e.sortino??-999,    best:'max', fmtClass:v=>v>=1.2?'ret-pos':v<0?'ret-neg':'', note:()=>I18n.t('compare.note.sortino') },
   ]},
-  { group: '🔬 CORRYU 지표', metrics: [
-    { label: 'Z-Score',      get:(e,s)=>e.short_history?'—(짧은연혁)':fmtNum(e.z_score,2), raw:(e)=>e.short_history?null:e.z_score, best:'none', fmtClass:v=>v>2?'ret-neg':v<-1.5?'ret-pos':'' },
-    { label: 'RSI (14일)',   get:(e,s)=>fmtNum(e.rsi,0),    raw:(e)=>e.rsi??null,      best:'none', fmtClass:v=>v>70?'ret-neg':v<30?'ret-pos':'' },
+  { group: () => I18n.t('compare.group.corryu'), metrics: [
+    { label: 'Z-Score',      get:(e,s)=>e.short_history?I18n.t('compare.short.history'):fmtNum(e.z_score,2), raw:(e)=>e.short_history?null:e.z_score, best:'none', fmtClass:v=>v>2?'ret-neg':v<-1.5?'ret-pos':'' },
+    { label: ()=>I18n.t('compare.metric.zscore')==='Z-Score'?'RSI (14d)':'RSI (14일)', get:(e,s)=>fmtNum(e.rsi,0), raw:(e)=>e.rsi??null, best:'none', fmtClass:v=>v>70?'ret-neg':v<30?'ret-pos':'' },
     { label: '52W Range',    get:(e,s)=>fmtNum(e.range_52w,0)+'%', raw:(e)=>e.range_52w??null, best:'none' },
-    { label: '200MA 이격',   get:(e,s)=>e.short_history?'—':fmtPct(e.ma200_pct), raw:(e)=>e.short_history?null:e.ma200_pct, best:'none' },
+    { label: ()=>I18n.t('compare.metric.ma200'), get:(e,s)=>e.short_history?'—':fmtPct(e.ma200_pct), raw:(e)=>e.short_history?null:e.ma200_pct, best:'none' },
     { label: 'r_Anchor',     get:(e,s)=>fmtNum(e.r_anchor,2), raw:(e)=>e.r_anchor??null, best:'none' },
     { label: 'SMH Corr',     get:(e,s)=>e.smh_corr!==null&&e.smh_corr!==undefined?fmtNum(e.smh_corr,2):'—', raw:(e)=>e.smh_corr, best:'none' },
   ]},
@@ -403,10 +403,10 @@ function addTicker() {
   // 구분자 없는 단일 문자열(예: QQQQLDSPY)은 분리하지 않음
   const tokens = raw.split(/[,\/;|\s]+/).filter(Boolean);
   for (const t of tokens) {
-    if (selectedETFs.length >= 3) { showError('최대 3개까지 추가할 수 있습니다.'); break; }
-    if (selectedETFs.some(e => e.ticker === t)) { showError(`${t}는 이미 추가되어 있습니다.`); continue; }
+    if (selectedETFs.length >= 3) { showError(I18n.t('compare.error.max')); break; }
+    if (selectedETFs.some(e => e.ticker === t)) { showError(I18n.t('compare.error.dup', {t})); continue; }
     const found = allData[t];
-    if (!found) { showError(`"${t}" ETF를 CORRYU 데이터베이스에서 찾을 수 없습니다.`); continue; }
+    if (!found) { showError(I18n.t('compare.error.notfound', {t})); continue; }
     selectedETFs.push(found);
   }
   updateURL();
@@ -456,11 +456,11 @@ function checkInceptionError() {
     if (etf.inception && etf.inception !== '1900-01-01') {
       const inc = new Date(etf.inception);
       if (startDate < inc) {
-        errors.push(`${etf.ticker} 상장일 ${etf.inception}`);
+        errors.push(I18n.t('compare.inception.error', {ticker: etf.ticker, date: etf.inception}));
       }
     }
   }
-  el.textContent = errors.length ? `⚠️ 설정 기간이 상장일 이전입니다 — ${errors.join(', ')}` : '';
+  el.textContent = errors.length ? I18n.t('compare.error.inception', {errors: errors.join(', ')}) : '';
 }
 
 function switchPeriod(period, el) {
@@ -480,7 +480,7 @@ function applyCustomRange() {
   const errEl = document.getElementById('range-error');
   if (!start || !end) return;
   if (new Date(end) <= new Date(start)) {
-    errEl.textContent = '⚠️ 종료일은 시작일 이후여야 합니다.';
+    errEl.textContent = I18n.t('compare.error.dateorder');
     return;
   }
   document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
@@ -493,7 +493,7 @@ function renderChart() {
   const legend    = document.getElementById('chart-legend');
   checkInceptionError();
   if (selectedETFs.length === 0) {
-    container.innerHTML = `<div class="empty-chart"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span style="font-size:0.85rem">ETF를 선택하면 차트가 표시됩니다</span></div>`;
+    container.innerHTML = `<div class="empty-chart"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span style="font-size:0.85rem">${I18n.t('compare.empty.chart')}</span></div>`;
     legend.innerHTML = '';
     return;
   }
@@ -514,7 +514,7 @@ function renderChart() {
 function renderTable() {
   const container = document.getElementById('table-container');
   if (selectedETFs.length < 2) {
-    container.innerHTML = `<div class="placeholder-card"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="3"/></svg><span style="font-size:0.85rem">2개 이상 ETF를 선택하면 비교 테이블이 표시됩니다</span></div>`;
+    container.innerHTML = `<div class="placeholder-card"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="3"/></svg><span style="font-size:0.85rem">${I18n.t('compare.empty.table')}</span></div>`;
     return;
   }
 
@@ -530,7 +530,7 @@ function renderTable() {
   // Body rows
   let bodyHtml = '';
   METRIC_GROUPS.forEach(grp => {
-    bodyHtml += `<tr class="group-row"><td colspan="${N+1}">${grp.group}</td></tr>`;
+    bodyHtml += `<tr class="group-row"><td colspan="${N+1}">${typeof grp.group === 'function' ? grp.group() : grp.group}</td></tr>`;
     grp.metrics.forEach(m => {
       const displays = selectedETFs.map((e,i) => m.get(e, supps[i]));
       const raws     = m.raw ? selectedETFs.map((e,i) => m.raw(e, supps[i])) : null;
@@ -559,17 +559,18 @@ function renderTable() {
           const extra = m.fmtClass(raws[i]);
           if (extra && !isBest && !isWorst) cls += ' ' + extra;
         }
-        const badge = isBest ? ' <span style="font-size:0.62rem;opacity:0.7">▲우위</span>' : '';
+        const badge = isBest ? ` <span style="font-size:0.62rem;opacity:0.7">${I18n.t('compare.badge.best')}</span>` : '';
         return `<td class="${cls}">${d}${badge}</td>`;
       }).join('');
 
-      const noteHtml = m.note ? `<div class="metric-note">${m.note}</div>` : '';
-      bodyHtml += `<tr class="data-row"><td class="metric-label-cell">${m.label}${noteHtml}</td>${cells}</tr>`;
+      const noteHtml = m.note ? `<div class="metric-note">${typeof m.note === 'function' ? m.note() : m.note}</div>` : '';
+      const labelStr = typeof m.label === 'function' ? m.label() : m.label;
+      bodyHtml += `<tr class="data-row"><td class="metric-label-cell">${labelStr}${noteHtml}</td>${cells}</tr>`;
     });
   });
 
   container.innerHTML = `<table class="compare-table">
-    <thead><tr><th class="th-label">지표</th>${thCells}</tr></thead>
+    <thead><tr><th class="th-label">${I18n.t('compare.table.metric')}</th>${thCells}</tr></thead>
     <tbody>${bodyHtml}</tbody>
   </table>`;
 }
@@ -610,12 +611,15 @@ fetch('/etf_data.json')
     renderAll();
     I18n.init();
   })
-  .catch(() => { showError('데이터를 불러오지 못했습니다. 새로고침 해주세요.'); });
+  .catch(() => { showError(I18n.t('compare.error.load')); });
 
 // ── 입력 이벤트 ───────────────────────────────────────
 document.getElementById('add-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') addTicker();
 });
+
+// 언어 변경 시 동적으로 생성된 텍스트 재렌더링
+document.addEventListener('i18n:ready', () => { renderAll(); });
 </script>
 </body>
 </html>

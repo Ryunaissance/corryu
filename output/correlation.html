@@ -107,14 +107,14 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
 <nav>
   <div class="nav-inner">
     <a href="/index" class="nav-back">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>대시보드
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg><span data-i18n="nav.dashboard">대시보드</span>
     </a>
     <span style="color:#1e293b">/</span>
     <a href="/landing" style="font-size:0.95rem;font-weight:900;text-decoration:none"><span class="text-gradient">CORRYU</span></a>
-    <span style="font-size:0.82rem;color:var(--text-muted)">/ 상관관계</span>
+    <span style="font-size:0.82rem;color:var(--text-muted)" data-i18n="nav.breadcrumb.correlation">/ 상관관계</span>
     <div style="margin-left:auto;display:flex;align-items:center;gap:16px">
-      <a href="/compare"     class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>ETF 비교</a>
-      <a href="/portfolio"   class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>포트폴리오</a>
+      <a href="/compare"     class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span data-i18n="nav.compare">비교</span></a>
+      <a href="/portfolio"   class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg><span data-i18n="nav.portfolio">포트폴리오</span></a>
     </div>
   </div>
 </nav>
@@ -124,28 +124,28 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
   <!-- ── 티커 선택 ── -->
   <div class="glass selector-card">
     <div class="page-header">
-      <div class="page-title">상관관계 <span class="text-gradient">분석기</span></div>
-      <div class="page-sub">Portfolio Visualizer 스타일 · 최대 10개</div>
+      <div class="page-title" data-i18n-html="corr.title">상관관계 <span class="text-gradient">분석기</span></div>
+      <div class="page-sub" data-i18n="corr.sub">Portfolio Visualizer 스타일 · 최대 10개</div>
     </div>
 
     <div class="selector-row" id="chip-row">
       <div class="add-wrap" id="add-wrap">
-        <input type="text" class="add-input" id="add-input" placeholder="티커 입력 (예: GLD)" maxlength="10" autocomplete="off">
-        <button class="add-btn" onclick="addTicker()">+ 추가</button>
+        <input type="text" class="add-input" id="add-input" data-i18n-placeholder="corr.add.placeholder" placeholder="티커 입력 (예: GLD)" maxlength="10" autocomplete="off">
+        <button class="add-btn" onclick="addTicker()" data-i18n="corr.add.btn">+ 추가</button>
       </div>
     </div>
     <div class="error-msg" id="error-msg"></div>
 
-    <div class="preset-label">📦 빠른 추가</div>
+    <div class="preset-label" data-i18n="corr.preset.label">📦 빠른 추가</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <button class="preset-btn" onclick="loadPreset(['SPY','QQQ','GLD','TLT','IWM'])">분산 포트폴리오 (5종)</button>
-      <button class="preset-btn" onclick="loadPreset(['XLK','XLF','XLV','XLE','XLI','XLU'])">섹터 로테이션 (6종)</button>
-      <button class="preset-btn" onclick="loadPreset(['SPY','BND','GLD','VNQ','VWO'])">글로벌 자산배분 (5종)</button>
-      <button class="preset-btn" onclick="loadPreset(['QQQ','SQQQ'])">QQQ + 인버스</button>
-      <button class="preset-btn" onclick="clearAll()">✕ 초기화</button>
+      <button class="preset-btn" onclick="loadPreset(['SPY','QQQ','GLD','TLT','IWM'])" data-i18n="corr.preset.diversified">분산 포트폴리오 (5종)</button>
+      <button class="preset-btn" onclick="loadPreset(['XLK','XLF','XLV','XLE','XLI','XLU'])" data-i18n="corr.preset.sector">섹터 로테이션 (6종)</button>
+      <button class="preset-btn" onclick="loadPreset(['SPY','BND','GLD','VNQ','VWO'])" data-i18n="corr.preset.global">글로벌 자산배분 (5종)</button>
+      <button class="preset-btn" onclick="loadPreset(['QQQ','SQQQ'])" data-i18n="corr.preset.inverse">QQQ + 인버스</button>
+      <button class="preset-btn" onclick="clearAll()" data-i18n="corr.btn.clear">✕ 초기화</button>
       <span style="width:1px;background:rgba(255,255,255,0.07);margin:0 2px;align-self:stretch;display:inline-block"></span>
-      <button class="preset-btn" id="share-corr-btn" onclick="shareCorrURL()" title="현재 티커 목록을 URL로 복사">🔗 링크 복사</button>
-      <a class="preset-btn" id="backtest-link" href="/backtest" target="_blank" style="text-decoration:none">📊 백테스트 →</a>
+      <button class="preset-btn" id="share-corr-btn" onclick="shareCorrURL()" data-i18n="corr.btn.share">🔗 링크 복사</button>
+      <a class="preset-btn" id="backtest-link" href="/backtest" target="_blank" style="text-decoration:none" data-i18n="corr.btn.backtest">📊 백테스트 →</a>
     </div>
   </div>
 <style>
@@ -161,34 +161,34 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
 
       <!-- 자산 통계 -->
       <div class="glass card">
-        <div class="card-title">자산별 통계</div>
+        <div class="card-title" data-i18n="corr.card.stats">자산별 통계</div>
         <div id="stats-table-container">
           <div class="empty-state"><span>—</span></div>
         </div>
-        <div class="chart-disclaimer" style="margin-top:10px">※ CORRYU 산출 지표 기반. 기대수익률은 과거 CAGR입니다.</div>
+        <div class="chart-disclaimer" style="margin-top:10px" data-i18n="corr.disclaimer.stats">※ CORRYU 산출 지표 기반. 기대수익률은 과거 CAGR입니다.</div>
       </div>
 
       <!-- 상관관계 히트맵 -->
       <div class="glass card">
-        <div class="card-title">상관계수 매트릭스</div>
+        <div class="card-title" data-i18n="corr.card.matrix">상관계수 매트릭스</div>
         <div class="heatmap-wrap" id="heatmap-container">
           <div class="empty-state"><span>—</span></div>
         </div>
-        <div class="chart-disclaimer" style="margin-top:10px">※ 섹터 앵커 상관계수 및 팩터 모델 기반 추정값입니다.</div>
+        <div class="chart-disclaimer" style="margin-top:10px" data-i18n="corr.disclaimer.matrix">※ 섹터 앵커 상관계수 및 팩터 모델 기반 추정값입니다.</div>
       </div>
 
     </div>
 
     <!-- 리스크-수익률 산점도 -->
     <div class="glass card scatter-card">
-      <div class="card-title">리스크 — 수익률 산점도</div>
+      <div class="card-title" data-i18n="corr.card.scatter">리스크 — 수익률 산점도</div>
       <div class="scatter-container" id="scatter-container"></div>
-      <div class="chart-disclaimer">※ X축: 연환산 변동성(Vol), Y축: CAGR. 원 크기: AUM 비례.</div>
+      <div class="chart-disclaimer" data-i18n="corr.disclaimer.scatter">※ X축: 연환산 변동성(Vol), Y축: CAGR. 원 크기: AUM 비례.</div>
     </div>
 
     <!-- 인사이트 카드 -->
     <div class="glass insight-card">
-      <div class="card-title">분산 효과 인사이트</div>
+      <div class="card-title" data-i18n="corr.card.insights">분산 효과 인사이트</div>
       <div class="insight-grid" id="insight-grid">
         <div class="empty-state"><span>—</span></div>
       </div>
@@ -198,8 +198,8 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
 
   <div id="empty-area" style="padding:60px;text-align:center;color:var(--text-muted)">
     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.2" style="margin:0 auto 12px"><circle cx="12" cy="12" r="9"/><path d="M9 9h.01M15 9h.01M9 15c.83 1 2.17 1.5 3 1.5s2.17-.5 3-1.5"/></svg>
-    <div style="font-size:0.9rem">ETF를 2개 이상 추가하면 분석이 시작됩니다</div>
-    <div style="font-size:0.78rem;margin-top:6px">위의 빠른 추가 버튼을 눌러보세요</div>
+    <div style="font-size:0.9rem" data-i18n="corr.empty.main">ETF를 2개 이상 추가하면 분석이 시작됩니다</div>
+    <div style="font-size:0.78rem;margin-top:6px" data-i18n="corr.empty.hint">위의 빠른 추가 버튼을 눌러보세요</div>
   </div>
 
 </div><!-- /main-wrap -->
@@ -341,10 +341,10 @@ function addTicker(ticker) {
   const t = (ticker || input.value.trim()).toUpperCase();
   if (!t) return;
   if (!ticker) input.value = '';
-  if (selected.length >= 10) { showError('최대 10개까지 추가 가능합니다.'); return; }
-  if (selected.some(e => e.ticker === t)) { showError(`${t}는 이미 추가되어 있습니다.`); return; }
+  if (selected.length >= 10) { showError(I18n.t('corr.error.max')); return; }
+  if (selected.some(e => e.ticker === t)) { showError(I18n.t('corr.error.dup', {t})); return; }
   const found = allData[t];
-  if (!found) { showError(`"${t}"를 CORRYU 데이터베이스에서 찾을 수 없습니다.`); return; }
+  if (!found) { showError(I18n.t('corr.error.notfound', {t})); return; }
   selected.push(found);
   renderChips();
   renderAll();
@@ -411,7 +411,7 @@ function renderStats() {
       <thead><tr>
         <th>ETF</th>
         <th>CAGR</th>
-        <th>변동성</th>
+        <th data-i18n="corr.th.vol">변동성</th>
         <th>Sortino</th>
         <th>Z-Score</th>
         <th>AUM</th>
@@ -489,12 +489,12 @@ function renderScatter() {
   // 0% CAGR 기준선
   const y0 = toY(0).toFixed(1);
   const refLine = `<line x1="${P.l}" y1="${y0}" x2="${P.l+cw}" y2="${y0}" stroke="rgba(255,255,255,0.10)" stroke-width="1" stroke-dasharray="4,4"/>
-    <text x="${P.l+3}" y="${(+y0-4).toFixed(1)}" font-size="9" fill="rgba(100,116,139,0.5)">0% 수익</text>`;
+    <text x="${P.l+3}" y="${(+y0-4).toFixed(1)}" font-size="9" fill="rgba(100,116,139,0.5)">${I18n.t('corr.scatter.zeroline')}</text>`;
 
   // 축 레이블
   const axisLabels = `
-    <text x="${P.l + cw/2}" y="${H-0}" text-anchor="middle" font-size="11" fill="rgba(100,116,139,0.6)" font-family="Inter,sans-serif">변동성 (Volatility)</text>
-    <text x="12" y="${P.t + ch/2}" text-anchor="middle" font-size="11" fill="rgba(100,116,139,0.6)" font-family="Inter,sans-serif" transform="rotate(-90,12,${P.t+ch/2})">연수익률 (CAGR)</text>`;
+    <text x="${P.l + cw/2}" y="${H-0}" text-anchor="middle" font-size="11" fill="rgba(100,116,139,0.6)" font-family="Inter,sans-serif">${I18n.t('corr.scatter.xaxis')}</text>
+    <text x="12" y="${P.t + ch/2}" text-anchor="middle" font-size="11" fill="rgba(100,116,139,0.6)" font-family="Inter,sans-serif" transform="rotate(-90,12,${P.t+ch/2})">${I18n.t('corr.scatter.yaxis')}</text>`;
 
   // 원 + 레이블
   const circles = selected.map((etf, i) => {
@@ -536,37 +536,35 @@ function renderInsights() {
   // 최저 변동성 ETF
   const lowestVol   = [...selected].sort((a,b) => (a.vol||99)-(b.vol||99))[0];
 
-  const diversLabel = avgCorr < 0.4 ? '우수' : avgCorr < 0.65 ? '보통' : '낮음';
+  const diversLabel = avgCorr < 0.4 ? I18n.t('corr.insight.level.excellent') : avgCorr < 0.65 ? I18n.t('corr.insight.level.moderate') : I18n.t('corr.insight.level.low');
   const diversColor = avgCorr < 0.4 ? '#4ade80' : avgCorr < 0.65 ? '#f59e0b' : '#f87171';
 
   const items = [
     {
-      badge: '🔗 최저 상관',
+      badge: I18n.t('corr.insight.low_corr'),
       badgeBg: 'rgba(74,222,128,0.15)', badgeColor: '#4ade80',
       pair: `${lowest.a.ticker} · ${lowest.b.ticker}`,
       val: (lowest.r >= 0 ? '+' : '') + lowest.r.toFixed(2),
       valColor: corrTextColor(lowest.r),
-      desc: lowest.r < 0.2 ? '낮은 상관관계로 리스크 분산 효과가 큽니다. 함께 보유하면 포트폴리오 변동성을 줄일 수 있습니다.'
-                            : '다소 독립적입니다. 분산 효과가 일부 기대됩니다.',
+      desc: lowest.r < 0.2 ? I18n.t('corr.insight.low.good') : I18n.t('corr.insight.low.ok'),
     },
     {
-      badge: '⛓ 최고 상관',
+      badge: I18n.t('corr.insight.high_corr'),
       badgeBg: 'rgba(248,113,113,0.12)', badgeColor: '#f87171',
       pair: `${highest.a.ticker} · ${highest.b.ticker}`,
       val: (highest.r >= 0 ? '+' : '') + highest.r.toFixed(2),
       valColor: corrTextColor(highest.r),
-      desc: highest.r > 0.8 ? '강한 상관관계입니다. 두 종목을 함께 보유하면 중복 익스포저가 높아 분산 효과가 제한적입니다.'
-                             : '적당한 상관관계입니다.',
+      desc: highest.r > 0.8 ? I18n.t('corr.insight.high.bad') : I18n.t('corr.insight.high.ok'),
     },
     {
-      badge: '📊 분산 효과',
+      badge: I18n.t('corr.insight.effect'),
       badgeBg: `rgba(${avgCorr<0.4?'74,222,128':avgCorr<0.65?'245,158,11':'239,68,68'},0.12)`, badgeColor: diversColor,
-      pair: `평균 상관계수 ${(avgCorr>=0?'+':'')+avgCorr.toFixed(2)}`,
+      pair: I18n.t('corr.insight.avg', { val: (avgCorr>=0?'+':'')+avgCorr.toFixed(2) }),
       val: diversLabel,
       valColor: diversColor,
-      desc: avgCorr < 0.4 ? `포트폴리오 전체의 분산 효과가 우수합니다. ${pairs.length}개 조합 평균 r=${avgCorr.toFixed(2)}.`
-          : avgCorr < 0.65 ? `보통 수준의 분산화입니다. 비상관 자산(채권·금 등) 추가를 고려해보세요.`
-          : `상관관계가 높아 분산 효과가 낮습니다. 채권(BND/TLT), 금(GLD) 등 추가를 권장합니다.`,
+      desc: avgCorr < 0.4 ? I18n.t('corr.insight.effect.excellent', { n: pairs.length, r: avgCorr.toFixed(2) })
+          : avgCorr < 0.65 ? I18n.t('corr.insight.effect.moderate')
+          : I18n.t('corr.insight.effect.low'),
     },
   ];
 
@@ -586,13 +584,13 @@ document.getElementById('add-input').addEventListener('keydown', e => {
 
 // ── 공유 기능 ─────────────────────────────────────────
 function shareCorrURL() {
-  if (selected.length === 0) { showError('먼저 ETF를 추가하세요.'); return; }
+  if (selected.length === 0) { showError(I18n.t('corr.error.empty')); return; }
   const tickers = selected.map(e => e.ticker).join(',');
   const url = `${location.origin}/correlation?tickers=${encodeURIComponent(tickers)}`;
   navigator.clipboard.writeText(url).then(() => {
     const btn = document.getElementById('share-corr-btn');
-    btn.classList.add('copied'); btn.textContent = '✓ 복사됨!';
-    setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '🔗 링크 복사'; }, 2500);
+    btn.classList.add('copied'); btn.textContent = I18n.t('corr.btn.copied');
+    setTimeout(() => { btn.classList.remove('copied'); btn.textContent = I18n.t('corr.btn.share'); }, 2500);
   });
 }
 
@@ -628,7 +626,11 @@ fetch('/etf_data.json')
 
     I18n.init();
   })
-  .catch(() => showError('데이터 로드 실패. 새로고침 해주세요.'));
+  .catch(() => showError(I18n.t('corr.error.load')));
+
+document.addEventListener('i18n:ready', () => {
+  if (selected.length >= 2) renderAll();
+});
 </script>
 </body>
 </html>
