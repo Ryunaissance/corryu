@@ -844,7 +844,7 @@ function initDashboard() {
                     let isWatched = watchlist.has(d);
                     let cls   = isWatched ? 'text-yellow-400 text-base' : 'text-blue-300';
                     let star  = '<button class="star-btn' + (isWatched ? ' starred' : '') + '" data-ticker="' + d + '" title="관심종목 추가/제거" onclick="return false">★</button>';
-                    let h = star + '<span class="' + cls + '">' + d + '</span>';
+                    let h = star + '<a href="/etf-detail?ticker=' + encodeURIComponent(d) + '" class="' + cls + '" style="text-decoration:none;font-weight:700" title="상세보기">' + d + '</a>';
                     if (row.short_history) h += '<span class="badge-short" title="상장 3년 미만">짧은연혁</span>';
                     return h;
                 }

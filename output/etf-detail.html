@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETF 상세 — CORRYU</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+<script src="/i18n.js"></script>
+<style>
+:root {
+  --bg-primary: #0a0d14;
+  --bg-card:    rgba(18,22,36,0.92);
+  --border:     rgba(255,255,255,0.07);
+  --text-primary: #e2e8f0;
+  --text-muted:   #64748b;
+  --accent:     #3b82f6;
+  --accent-glow: rgba(59,130,246,0.25);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── 공통 유틸 ── */
+.glass {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+.text-gradient {
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.gradient-line {
+  position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 200;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);
+}
+
+/* ── Navbar ── */
+nav {
+  position: fixed; top: 3px; left: 0; right: 0; z-index: 100;
+  background: rgba(10,13,20,0.9); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border); height: 56px;
+  display: flex; align-items: center;
+}
+.nav-inner {
+  max-width: 1320px; margin: 0 auto; padding: 0 24px;
+  width: 100%; display: flex; align-items: center; gap: 14px;
+}
+.nav-back {
+  display: flex; align-items: center; gap: 6px;
+  color: var(--text-muted); font-size: 0.82rem; font-weight: 600;
+  text-decoration: none; transition: color 0.15s; white-space: nowrap;
+}
+.nav-back:hover { color: #60a5fa; }
+.nav-sep { color: #1e293b; }
+.nav-brand {
+  font-size: 0.95rem; font-weight: 900; text-decoration: none; white-space: nowrap;
+}
+.nav-search {
+  flex: 1; max-width: 320px; margin-left: auto;
+  display: flex; align-items: center; gap: 0;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden;
+}
+.nav-search input {
+  flex: 1; background: none; border: none; outline: none;
+  color: var(--text-primary); font-size: 0.82rem; font-family: inherit;
+  padding: 7px 10px;
+}
+.nav-search input::placeholder { color: var(--text-muted); }
+.nav-search button {
+  background: none; border: none; color: var(--text-muted);
+  padding: 7px 10px; cursor: pointer; font-size: 0.85rem;
+  transition: color 0.15s;
+}
+.nav-search button:hover { color: var(--text-primary); }
+
+/* ── 메인 레이아웃 ── */
+.main-wrap {
+  max-width: 1320px; margin: 0 auto;
+  padding: 76px 20px 48px;
+}
+
+/* ── 로딩 / 에러 ── */
+#loading-state, #error-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 60vh; gap: 16px; text-align: center;
+}
+.spinner {
+  width: 36px; height: 36px; border: 3px solid rgba(255,255,255,0.1);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Hero 카드 ── */
+.hero-card {
+  padding: 28px 32px;
+  margin-bottom: 14px;
+  position: relative; overflow: hidden;
+}
+.hero-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+}
+.hero-grid {
+  display: grid; grid-template-columns: 1fr auto;
+  gap: 24px; align-items: flex-start;
+}
+.hero-ticker {
+  font-size: 3rem; font-weight: 900; letter-spacing: -0.04em;
+  line-height: 1; margin-bottom: 4px;
+}
+.hero-name {
+  font-size: 0.95rem; color: #94a3b8; margin-bottom: 14px; font-weight: 400;
+}
+.hero-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 6px; font-size: 0.73rem; font-weight: 700;
+}
+.badge-sector  { background: rgba(59,130,246,0.1); color: #60a5fa; border: 1px solid rgba(59,130,246,0.2); }
+.badge-active  { background: rgba(74,222,128,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
+.badge-legacy  { background: rgba(248,113,113,0.1); color: #f87171; border: 1px solid rgba(248,113,113,0.2); }
+.badge-short   { background: rgba(234,179,8,0.1);   color: #facc15; border: 1px solid rgba(234,179,8,0.2); }
+.hero-desc { font-size: 0.84rem; color: var(--text-muted); line-height: 1.7; max-width: 600px; }
+.hero-price-box { text-align: right; }
+.price-label { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px; }
+.price-na { font-size: 1rem; color: #334155; font-weight: 600; }
+.price-note { font-size: 0.7rem; color: #334155; margin-top: 4px; }
+.star-hero-btn {
+  background: none; border: 1px solid rgba(255,255,255,0.1); cursor: pointer;
+  color: #374151; font-size: 1.2rem; padding: 6px 12px; border-radius: 8px;
+  transition: all 0.15s; margin-top: 10px; font-family: inherit;
+}
+.star-hero-btn.starred { color: #fbbf24; border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.08); }
+.star-hero-btn:hover { color: #fbbf24; border-color: rgba(251,191,36,0.3); }
+
+/* ── Quick Stats Bar ── */
+.quick-stats {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 0; margin-bottom: 20px;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden;
+}
+.qs-item {
+  padding: 14px 16px; text-align: center;
+  border-right: 1px solid var(--border);
+}
+.qs-item:last-child { border-right: none; }
+.qs-label { font-size: 0.68rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+.qs-value { font-size: 0.95rem; font-weight: 700; }
+
+/* ── 컨텐츠 그리드 ── */
+.content-grid {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 16px;
+  align-items: start;
+}
+.card { padding: 22px 24px; margin-bottom: 16px; }
+.card-title {
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--text-muted); margin-bottom: 18px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ── 차트 ── */
+.chart-tabs {
+  display: flex; gap: 4px; margin-bottom: 14px;
+}
+.chart-tab {
+  padding: 4px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700;
+  border: none; cursor: pointer; background: rgba(255,255,255,0.04);
+  color: var(--text-muted); transition: all 0.15s; font-family: inherit;
+}
+.chart-tab.active {
+  background: rgba(59,130,246,0.15); color: #60a5fa;
+  border: 1px solid rgba(59,130,246,0.3);
+}
+.chart-tab:hover:not(.active) { color: var(--text-primary); background: rgba(255,255,255,0.07); }
+.chart-stat {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px;
+}
+.chart-pct {
+  font-size: 1.5rem; font-weight: 900; letter-spacing: -0.03em;
+}
+.chart-period-label { font-size: 0.75rem; color: var(--text-muted); }
+.chart-container { width: 100%; height: 220px; overflow: hidden; }
+.chart-disclaimer {
+  font-size: 0.68rem; color: #2d3748; margin-top: 6px; text-align: right;
+}
+
+/* ── 성과 테이블 ── */
+.perf-table { width: 100%; border-collapse: collapse; }
+.perf-table th {
+  font-size: 0.72rem; color: var(--text-muted); font-weight: 600;
+  text-align: left; padding: 6px 0; border-bottom: 1px solid var(--border);
+}
+.perf-table th:not(:first-child) { text-align: right; }
+.perf-table td {
+  font-size: 0.85rem; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.perf-table td:not(:first-child) { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.perf-table tr:last-child td { border-bottom: none; }
+.perf-period { color: var(--text-muted); font-size: 0.8rem; }
+.ret-pos { color: #4ade80; }
+.ret-neg { color: #f87171; }
+.ret-na  { color: #334155; }
+
+/* ── 구성종목 ── */
+.holding-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.holding-rank { font-size: 0.68rem; color: #334155; width: 16px; text-align: right; flex-shrink: 0; }
+.holding-ticker { font-size: 0.8rem; font-weight: 700; color: #60a5fa; width: 60px; flex-shrink: 0; }
+.holding-name { font-size: 0.78rem; color: var(--text-muted); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.holding-weight { font-size: 0.8rem; font-weight: 700; width: 50px; text-align: right; flex-shrink: 0; }
+.holding-bar-wrap { width: 100px; flex-shrink: 0; }
+.holding-bar-bg { height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; }
+.holding-bar { height: 100%; background: linear-gradient(90deg, #3b82f6, #8b5cf6); border-radius: 2px; }
+.holdings-footer {
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);
+  font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between;
+}
+
+/* ── 분석 지표 ── */
+.metric-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.metric-row:last-child { border-bottom: none; }
+.metric-label { font-size: 0.8rem; color: var(--text-muted); }
+.metric-value { font-size: 0.88rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.val-pos { color: #f87171; }   /* 과매수/높음 */
+.val-neg { color: #60a5fa; }   /* 과매도/낮음 */
+.val-good { color: #4ade80; }  /* 좋음 */
+.val-warn { color: #fbbf24; }  /* 주의 */
+.val-purple { color: #a78bfa; }
+.val-neutral { color: #94a3b8; }
+
+/* 게이지 바 */
+.gauge-wrap { display: flex; align-items: center; gap: 6px; }
+.gauge-bar { flex: 1; height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+.gauge-fill { height: 100%; border-radius: 2px; }
+
+/* ── 펀드 정보 ── */
+.info-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+  gap: 8px;
+}
+.info-row:last-child { border-bottom: none; }
+.info-label { font-size: 0.78rem; color: var(--text-muted); flex-shrink: 0; }
+.info-value { font-size: 0.82rem; font-weight: 600; text-align: right; }
+
+/* ── 기준일 노트 ── */
+.data-note {
+  padding: 14px 18px; border-radius: 10px;
+  background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+  font-size: 0.75rem; color: var(--text-muted); line-height: 1.7;
+}
+
+/* ── 반응형 ── */
+@media (max-width: 900px) {
+  .content-grid { grid-template-columns: 1fr; }
+  .quick-stats { grid-template-columns: repeat(3, 1fr); }
+  .quick-stats .qs-item:nth-child(4),
+  .quick-stats .qs-item:nth-child(5) { border-top: 1px solid var(--border); }
+}
+@media (max-width: 600px) {
+  .hero-grid { grid-template-columns: 1fr; }
+  .hero-ticker { font-size: 2rem; }
+  .quick-stats { grid-template-columns: 1fr 1fr; }
+  .card { padding: 16px; }
+  .hero-card { padding: 20px; }
+  .holding-bar-wrap { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="gradient-line"></div>
+
+<!-- ── Navbar ── -->
+<nav>
+  <div class="nav-inner">
+    <a href="/index" class="nav-back">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      대시보드
+    </a>
+    <span class="nav-sep">/</span>
+    <a href="/landing" class="nav-brand"><span class="text-gradient">CORRYU</span></a>
+    <span id="nav-breadcrumb" style="font-size:0.82rem;color:var(--text-muted)"></span>
+    <div class="nav-search" style="margin-left:auto">
+      <input type="text" id="nav-search-input" placeholder="다른 티커 검색 (예: QQQ)" autocomplete="off">
+      <button onclick="goToTicker()">→</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ── 메인 ── -->
+<div class="main-wrap">
+
+  <!-- 로딩 상태 -->
+  <div id="loading-state">
+    <div class="spinner"></div>
+    <p style="color:var(--text-muted);font-size:0.85rem">ETF 데이터 로딩 중…</p>
+  </div>
+
+  <!-- 에러 상태 -->
+  <div id="error-state" style="display:none">
+    <div style="font-size:2rem">🔍</div>
+    <h2 id="error-title" style="font-size:1.1rem;font-weight:700">ETF를 찾을 수 없습니다</h2>
+    <p id="error-msg" style="font-size:0.85rem;color:var(--text-muted)"></p>
+    <a href="/index" style="margin-top:12px;padding:8px 20px;border-radius:8px;background:var(--accent);color:white;text-decoration:none;font-size:0.85rem;font-weight:700">← 대시보드로 돌아가기</a>
+  </div>
+
+  <!-- 실제 콘텐츠 (JS로 표시) -->
+  <div id="page-content" style="display:none">
+
+    <!-- ── Hero ── -->
+    <div class="glass hero-card" id="hero-card">
+      <div class="hero-grid">
+        <div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:2px">
+            <div class="hero-ticker" id="h-ticker">—</div>
+            <button class="star-hero-btn" id="star-hero-btn" onclick="toggleWatchlist()" title="관심종목 추가/제거">★</button>
+          </div>
+          <div class="hero-name" id="h-name">—</div>
+          <div class="hero-badges" id="h-badges"></div>
+          <p class="hero-desc" id="h-desc"></p>
+        </div>
+        <div class="hero-price-box">
+          <div class="price-label">실시간 시세</div>
+          <div class="price-na">— 연동 예정</div>
+          <div style="margin-top:12px;text-align:right">
+            <div style="font-size:0.72rem;color:var(--text-muted)">AUM</div>
+            <div style="font-size:1.1rem;font-weight:800" id="h-aum">—</div>
+          </div>
+          <div class="price-note">데이터 기준일: <span id="h-datadate">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Quick Stats ── -->
+    <div class="quick-stats" id="quick-stats">
+      <div class="qs-item">
+        <div class="qs-label">수수료 (Expense Ratio)</div>
+        <div class="qs-value" id="qs-exp">—</div>
+      </div>
+      <div class="qs-item">
+        <div class="qs-label">최초 상장일</div>
+        <div class="qs-value" id="qs-inception">—</div>
+      </div>
+      <div class="qs-item">
+        <div class="qs-label">발행사</div>
+        <div class="qs-value" id="qs-issuer" style="font-size:0.82rem">—</div>
+      </div>
+      <div class="qs-item">
+        <div class="qs-label">벤치마크</div>
+        <div class="qs-value" id="qs-bench" style="font-size:0.78rem">—</div>
+      </div>
+      <div class="qs-item">
+        <div class="qs-label">구성 종목 수</div>
+        <div class="qs-value" id="qs-numh">—</div>
+      </div>
+    </div>
+
+    <!-- ── 컨텐츠 그리드 ── -->
+    <div class="content-grid">
+
+      <!-- ── 왼쪽 컬럼 ── -->
+      <div>
+
+        <!-- 차트 카드 -->
+        <div class="glass card">
+          <div class="card-title">시뮬레이션 가격 차트</div>
+          <div class="chart-tabs">
+            <button class="chart-tab" onclick="switchPeriod('1M',this)">1개월</button>
+            <button class="chart-tab" onclick="switchPeriod('3M',this)">3개월</button>
+            <button class="chart-tab" onclick="switchPeriod('6M',this)">6개월</button>
+            <button class="chart-tab active" onclick="switchPeriod('1Y',this)">1년</button>
+          </div>
+          <div class="chart-stat">
+            <div>
+              <div class="chart-pct" id="chart-pct">—</div>
+              <div class="chart-period-label" id="chart-period-label">1년 수익률 (시뮬레이션)</div>
+            </div>
+            <div style="text-align:right;font-size:0.75rem;color:var(--text-muted)">
+              CAGR <span id="chart-cagr" style="font-weight:700;color:#94a3b8">—</span>
+              &nbsp;·&nbsp; Vol <span id="chart-vol" style="font-weight:700;color:#94a3b8">—</span>
+            </div>
+          </div>
+          <div class="chart-container" id="chart-container"></div>
+          <div class="chart-disclaimer">
+            ※ CAGR·변동성 기반 시뮬레이션 차트입니다. 실제 가격 데이터가 아닙니다.
+          </div>
+        </div>
+
+        <!-- 기간별 수익률 카드 -->
+        <div class="glass card">
+          <div class="card-title">기간별 수익률</div>
+          <table class="perf-table">
+            <thead>
+              <tr>
+                <th>기간</th>
+                <th>수익률</th>
+                <th>연환산</th>
+                <th>비고</th>
+              </tr>
+            </thead>
+            <tbody id="perf-table-body"></tbody>
+          </table>
+          <div style="margin-top:10px;font-size:0.7rem;color:#334155">
+            ※ 기간별 수익률은 예시 데이터입니다. 실제 수익률은 출처에 따라 다를 수 있습니다.
+          </div>
+        </div>
+
+        <!-- 상위 구성종목 카드 -->
+        <div class="glass card">
+          <div class="card-title">상위 10개 구성종목</div>
+          <div id="holdings-container"></div>
+        </div>
+
+      </div>
+
+      <!-- ── 오른쪽 컬럼 ── -->
+      <div>
+
+        <!-- 분석 지표 카드 -->
+        <div class="glass card">
+          <div class="card-title">CORRYU 분석 지표</div>
+          <div id="metrics-container"></div>
+        </div>
+
+        <!-- 펀드 정보 카드 -->
+        <div class="glass card">
+          <div class="card-title">펀드 기본 정보</div>
+          <div id="fund-info-container"></div>
+        </div>
+
+        <!-- 데이터 기준 안내 -->
+        <div class="data-note">
+          <div style="font-weight:700;color:#475569;margin-bottom:6px;font-size:0.75rem">📋 데이터 안내</div>
+          <div>데이터 기준일: <strong id="note-datadate" style="color:#94a3b8">2026-02-26</strong></div>
+          <div style="margin-top:4px">Z-Score·RSI·52W Range 등 분석 지표는 CORRYU가 직접 산출한 수치입니다.</div>
+          <div style="margin-top:4px">수수료·구성종목 비율은 예시 데이터이며, 실제와 다를 수 있습니다.</div>
+          <div style="margin-top:4px">본 자료는 투자 권유가 아닙니다. 투자 판단은 본인의 책임입니다.</div>
+        </div>
+
+      </div>
+    </div>
+  </div><!-- /page-content -->
+</div><!-- /main-wrap -->
+
+<script>
+// ── 보조 데이터 (수수료·발행사·구성종목 등 etf_data.json에 없는 정보) ─────────
+const SUPP = {
+  'SPY':  { exp:'0.0945%', issuer:'State Street Global Advisors', bench:'S&P 500',           structure:'UIT', div:'분기 배당', divYield:'1.24%', numH:503,
+            desc:'S&P 500 지수를 추종하는 세계 최초·최대 규모의 ETF. 미국 대형주 500개를 시가총액 가중 방식으로 보유합니다.',
+            holdings:[['AAPL','Apple Inc.',7.32],['MSFT','Microsoft Corp.',6.81],['NVDA','NVIDIA Corp.',5.94],['AMZN','Amazon.com Inc.',3.78],['META','Meta Platforms',2.65],['GOOGL','Alphabet Class A',2.10],['GOOG','Alphabet Class C',1.82],['BRK.B','Berkshire Hathaway B',1.63],['LLY','Eli Lilly & Co.',1.52],['JPM','JPMorgan Chase',1.47]],
+            perf:{'1M':2.3,'3M':5.1,'YTD':8.7,'1Y':22.4,'3Y_ann':12.1,'5Y_ann':14.7} },
+  'QQQ':  { exp:'0.20%',  issuer:'Invesco',                       bench:'Nasdaq-100',         structure:'Open-End',  div:'분기 배당', divYield:'0.55%', numH:101,
+            desc:'Nasdaq-100 지수를 추종하며 기술·성장주 중심으로 구성된 ETF. FAANG 및 대형 기술주 비중이 높습니다.',
+            holdings:[['AAPL','Apple Inc.',9.15],['MSFT','Microsoft Corp.',8.44],['NVDA','NVIDIA Corp.',7.92],['AMZN','Amazon.com Inc.',5.02],['META','Meta Platforms',4.81],['GOOGL','Alphabet Class A',2.72],['GOOG','Alphabet Class C',2.58],['TSLA','Tesla Inc.',2.35],['AVGO','Broadcom Inc.',2.21],['COST','Costco Wholesale',1.86]],
+            perf:{'1M':3.1,'3M':7.8,'YTD':12.3,'1Y':28.5,'3Y_ann':15.4,'5Y_ann':19.2} },
+  'IVV':  { exp:'0.03%',  issuer:'BlackRock (iShares)',           bench:'S&P 500',             structure:'Open-End',  div:'분기 배당', divYield:'1.26%', numH:503,
+            desc:'iShares Core S&P 500 ETF. 0.03%의 최저 수수료로 S&P 500 지수를 추종합니다.',
+            holdings:[['AAPL','Apple Inc.',7.32],['MSFT','Microsoft Corp.',6.81],['NVDA','NVIDIA Corp.',5.94],['AMZN','Amazon.com Inc.',3.78],['META','Meta Platforms',2.65],['GOOGL','Alphabet Class A',2.10],['GOOG','Alphabet Class C',1.82],['BRK.B','Berkshire Hathaway B',1.63],['LLY','Eli Lilly & Co.',1.52],['JPM','JPMorgan Chase',1.47]],
+            perf:{'1M':2.3,'3M':5.1,'YTD':8.7,'1Y':22.4,'3Y_ann':12.1,'5Y_ann':14.7} },
+  'VOO':  { exp:'0.03%',  issuer:'Vanguard',                      bench:'S&P 500',             structure:'Open-End',  div:'분기 배당', divYield:'1.25%', numH:503,
+            desc:'Vanguard S&P 500 ETF. 업계 최저 수준의 수수료로 S&P 500 지수를 추종합니다.',
+            holdings:[['AAPL','Apple Inc.',7.31],['MSFT','Microsoft Corp.',6.80],['NVDA','NVIDIA Corp.',5.93],['AMZN','Amazon.com Inc.',3.77],['META','Meta Platforms',2.64],['GOOGL','Alphabet Class A',2.09],['GOOG','Alphabet Class C',1.81],['BRK.B','Berkshire Hathaway B',1.62],['LLY','Eli Lilly & Co.',1.51],['JPM','JPMorgan Chase',1.46]],
+            perf:{'1M':2.3,'3M':5.1,'YTD':8.7,'1Y':22.3,'3Y_ann':12.0,'5Y_ann':14.6} },
+  'VTI':  { exp:'0.03%',  issuer:'Vanguard',                      bench:'CRSP US Total Market',structure:'Open-End',  div:'분기 배당', divYield:'1.35%', numH:3615,
+            desc:'미국 전체 주식 시장(대형·중형·소형주 포함)에 한 번에 투자하는 Total Market ETF.',
+            holdings:[['AAPL','Apple Inc.',6.42],['MSFT','Microsoft Corp.',5.96],['NVDA','NVIDIA Corp.',5.21],['AMZN','Amazon.com Inc.',3.31],['META','Meta Platforms',2.32],['GOOGL','Alphabet Class A',1.84],['BRK.B','Berkshire Hathaway B',1.64],['GOOG','Alphabet Class C',1.59],['LLY','Eli Lilly & Co.',1.33],['JPM','JPMorgan Chase',1.28]],
+            perf:{'1M':2.1,'3M':4.8,'YTD':8.2,'1Y':21.8,'3Y_ann':11.7,'5Y_ann':14.3} },
+  'GLD':  { exp:'0.40%',  issuer:'State Street Global Advisors', bench:'LBMA Gold Price',      structure:'Grantor Trust', div:'무배당', divYield:'0%', numH:1,
+            desc:'실물 금 가격을 추종하는 세계 최대 금 ETF. 주당 약 1/10 트로이온스의 금을 보유합니다.',
+            holdings:[['GOLD','Physical Gold (0.1 oz/share)',100.0]],
+            perf:{'1M':1.8,'3M':9.2,'YTD':11.4,'1Y':18.7,'3Y_ann':8.3,'5Y_ann':11.2} },
+  'TLT':  { exp:'0.15%',  issuer:'BlackRock (iShares)',           bench:'ICE US Treasury 20+Y', structure:'Open-End', div:'월 배당', divYield:'4.12%', numH:26,
+            desc:'만기 20년 이상 미국 장기 국채를 추종하는 ETF. 금리 하락 시 수익, 금리 상승 시 손실이 두드러집니다.',
+            holdings:[['UST1','US Treasury 4.500% 2054',15.2],['UST2','US Treasury 4.125% 2054',9.8],['UST3','US Treasury 3.875% 2053',8.7],['UST4','US Treasury 4.250% 2052',7.3],['UST5','US Treasury 3.000% 2048',6.1],['UST6','US Treasury 2.250% 2052',5.4],['UST7','US Treasury 3.625% 2053',5.2],['UST8','US Treasury 1.875% 2051',4.8],['UST9','US Treasury 2.375% 2049',4.3],['UST10','US Treasury 2.875% 2049',3.9]],
+            perf:{'1M':-1.2,'3M':-3.4,'YTD':-4.1,'1Y':-8.3,'3Y_ann':-12.4,'5Y_ann':-6.8} },
+  'XLK':  { exp:'0.09%',  issuer:'State Street Global Advisors', bench:'S&P Technology Select Sector', structure:'Open-End', div:'분기 배당', divYield:'0.68%', numH:67,
+            desc:'S&P 500 내 기술 섹터 기업을 모두 담은 ETF. 소프트웨어·하드웨어·반도체 기업을 포함합니다.',
+            holdings:[['MSFT','Microsoft Corp.',22.81],['AAPL','Apple Inc.',20.05],['NVDA','NVIDIA Corp.',17.42],['AVGO','Broadcom Inc.',4.62],['ORCL','Oracle Corp.',3.18],['CSCO','Cisco Systems',3.05],['ADBE','Adobe Inc.',2.34],['CRM','Salesforce Inc.',2.21],['ACN','Accenture PLC',2.14],['AMD','Advanced Micro Devices',1.97]],
+            perf:{'1M':4.2,'3M':9.8,'YTD':15.4,'1Y':34.2,'3Y_ann':18.6,'5Y_ann':22.8} },
+  'XLF':  { exp:'0.09%',  issuer:'State Street Global Advisors', bench:'S&P Financials Select Sector', structure:'Open-End', div:'분기 배당', divYield:'1.68%', numH:72,
+            desc:'S&P 500 내 금융 섹터(은행·보험·투자은행·카드)를 추종하는 ETF.',
+            holdings:[['BRK.B','Berkshire Hathaway B',13.24],['JPM','JPMorgan Chase',12.81],['V','Visa Inc.',8.34],['MA','Mastercard Inc.',7.12],['BAC','Bank of America',4.62],['WFC','Wells Fargo',4.21],['GS','Goldman Sachs',3.84],['MS','Morgan Stanley',3.41],['SPGI','S&P Global Inc.',2.95],['BLK','BlackRock Inc.',2.78]],
+            perf:{'1M':1.8,'3M':4.2,'YTD':7.1,'1Y':18.4,'3Y_ann':10.2,'5Y_ann':12.1} },
+  'XLV':  { exp:'0.09%',  issuer:'State Street Global Advisors', bench:'S&P Healthcare Select Sector', structure:'Open-End', div:'분기 배당', divYield:'1.42%', numH:63,
+            desc:'S&P 500 내 헬스케어 섹터(제약·바이오·의료기기·보험)를 추종하는 ETF.',
+            holdings:[['LLY','Eli Lilly & Co.',12.84],['UNH','UnitedHealth Group',11.42],['JNJ','Johnson & Johnson',8.35],['ABBV','AbbVie Inc.',7.23],['MRK','Merck & Co.',6.84],['TMO','Thermo Fisher',4.21],['DHR','Danaher Corp.',3.82],['ABT','Abbott Laboratories',3.41],['PFE','Pfizer Inc.',3.12],['AMGN','Amgen Inc.',2.94]],
+            perf:{'1M':0.8,'3M':2.4,'YTD':4.1,'1Y':10.2,'3Y_ann':8.4,'5Y_ann':10.8} },
+  'XLE':  { exp:'0.09%',  issuer:'State Street Global Advisors', bench:'S&P Energy Select Sector', structure:'Open-End', div:'분기 배당', divYield:'3.42%', numH:22,
+            desc:'S&P 500 내 에너지 섹터(정유·가스·정제·서비스)를 추종하는 ETF.',
+            holdings:[['XOM','Exxon Mobil Corp.',23.74],['CVX','Chevron Corp.',18.32],['COP','ConocoPhillips',6.84],['EOG','EOG Resources',5.21],['MPC','Marathon Petroleum',4.87],['SLB','SLB (Schlumberger)',4.62],['PSX','Phillips 66',4.38],['VLO','Valero Energy',3.95],['OXY','Occidental Petroleum',3.42],['KMI','Kinder Morgan',2.87]],
+            perf:{'1M':-1.4,'3M':-2.8,'YTD':-3.2,'1Y':4.2,'3Y_ann':22.4,'5Y_ann':16.8} },
+  'IWM':  { exp:'0.19%',  issuer:'BlackRock (iShares)',           bench:'Russell 2000',        structure:'Open-End', div:'분기 배당', divYield:'1.23%', numH:2000,
+            desc:'미국 소형주 약 2,000개로 구성된 Russell 2000 지수를 추종합니다. 미국 내수 경기에 민감합니다.',
+            holdings:[['SMCI','Super Micro Computer',0.52],['MTSI','MACOM Technology',0.41],['VIRT','Virtu Financial',0.38],['SPSC','SPS Commerce',0.36],['MGNI','Magnite Inc.',0.34],['AEIS','Advanced Energy Ind.',0.33],['TMDX','TransMedics Group',0.32],['SKYW','SkyWest Inc.',0.31],['CTRE','CareTrust REIT',0.30],['HALO','Halozyme Therapeutics',0.29]],
+            perf:{'1M':1.2,'3M':3.4,'YTD':5.8,'1Y':14.2,'3Y_ann':6.4,'5Y_ann':9.1} },
+  'VEA':  { exp:'0.05%',  issuer:'Vanguard',                      bench:'FTSE Dev. All Cap ex US', structure:'Open-End', div:'반기 배당', divYield:'2.98%', numH:3900,
+            desc:'미국·캐나다를 제외한 선진국 주식(유럽·일본·호주 등)에 투자하는 ETF.',
+            holdings:[['NESN','Nestlé S.A.',1.82],['ASML','ASML Holding',1.74],['NOVN','Novartis AG',1.41],['RHHBY','Roche Holding',1.38],['SAP','SAP SE',1.35],['TM','Toyota Motor',1.31],['RDSA','Shell plc',1.24],['AZN','AstraZeneca',1.22],['SIE','Siemens AG',1.18],['HSBC','HSBC Holdings',1.14]],
+            perf:{'1M':1.8,'3M':4.1,'YTD':6.3,'1Y':10.4,'3Y_ann':5.2,'5Y_ann':7.8} },
+  'VWO':  { exp:'0.08%',  issuer:'Vanguard',                      bench:'FTSE Emerging Markets', structure:'Open-End', div:'반기 배당', divYield:'3.42%', numH:5600,
+            desc:'중국·인도·브라질·한국 등 신흥국 주식 시장에 투자하는 ETF.',
+            holdings:[['TSM','Taiwan Semiconductor',5.84],['BABA','Alibaba Group',3.42],['TCS','Tata Consultancy',2.18],['RELI','Reliance Industries',2.04],['PDD','PDD Holdings',1.94],['SMSN','Samsung Electronics',1.87],['JD','JD.com Inc.',1.52],['BIDU','Baidu Inc.',1.41],['INFY','Infosys Ltd.',1.32],['MBT','Mobile TeleSystems',1.24]],
+            perf:{'1M':1.4,'3M':3.8,'YTD':5.2,'1Y':8.4,'3Y_ann':2.1,'5Y_ann':4.8} },
+  'VNQ':  { exp:'0.13%',  issuer:'Vanguard',                      bench:'MSCI US IMI Real Estate 25/50', structure:'Open-End', div:'분기 배당', divYield:'3.85%', numH:163,
+            desc:'미국 부동산 투자신탁(REITs)과 부동산 관련 기업에 투자하는 ETF.',
+            holdings:[['PLD','Prologis Inc.',5.91],['AMT','American Tower',4.83],['EQIX','Equinix Inc.',4.12],['WELL','Welltower Inc.',3.47],['SPG','Simon Property Group',3.22],['DLR','Digital Realty',2.98],['PSA','Public Storage',2.76],['O','Realty Income Corp.',2.65],['CCI','Crown Castle',2.41],['WY','Weyerhaeuser',2.14]],
+            perf:{'1M':1.4,'3M':3.8,'YTD':4.2,'1Y':12.3,'3Y_ann':2.8,'5Y_ann':7.4} },
+  'HYG':  { exp:'0.48%',  issuer:'BlackRock (iShares)',           bench:'iBoxx USD Liquid HY', structure:'Open-End', div:'월 배당', divYield:'5.82%', numH:1195,
+            desc:'미국 투기등급(하이일드) 회사채를 추종하는 ETF. 높은 배당 수익률과 신용 리스크가 특징.',
+            holdings:[['HY01','T-Mobile USA 3.875% 2030',0.58],['HY02','Telecom Italia 5.303% 2034',0.45],['HY03','Carnival Corp. 6.000% 2029',0.43],['HY04','Ford Motor 4.750% 2043',0.41],['HY05','CCO Holdings 4.500% 2032',0.38],['HY06','Netflix Inc. 4.875% 2030',0.36],['HY07','Centene Corp. 4.625% 2029',0.35],['HY08','Bausch Health 5.250% 2030',0.33],['HY09','DISH DBS 5.875% 2024',0.32],['HY10','Pitney Bowes 6.350% 2037',0.31]],
+            perf:{'1M':0.8,'3M':2.1,'YTD':1.9,'1Y':8.7,'3Y_ann':4.2,'5Y_ann':4.8} },
+  'BND':  { exp:'0.03%',  issuer:'Vanguard',                      bench:'Bloomberg US Aggregate', structure:'Open-End', div:'월 배당', divYield:'3.72%', numH:10418,
+            desc:'미국 투자등급 채권 전체(국채·회사채·MBS)를 추종하는 종합 채권 ETF.',
+            holdings:[['UST','US Treasury Notes/Bonds',44.21],['GNMA','GNMA (정부 모기지)',20.14],['FNMA','Fannie Mae MBS',15.38],['CORP','Investment Grade Corp',12.41],['FHLMC','Freddie Mac MBS',5.83],['ABS','Asset-Backed Securities',2.03]],
+            perf:{'1M':0.4,'3M':1.2,'YTD':0.8,'1Y':2.3,'3Y_ann':-1.8,'5Y_ann':0.4} },
+  'GBTC': { exp:'1.50%',  issuer:'Grayscale Investments',         bench:'Bitcoin Price',        structure:'Spot BTC ETF', div:'무배당', divYield:'0%', numH:1,
+            desc:'미국 SEC 승인 현물 비트코인 ETF. 비트코인을 직접 보유하며, BTC 가격을 1:1로 추종합니다.',
+            holdings:[['BTC','Bitcoin (BTC)',100.0]],
+            perf:{'1M':12.4,'3M':38.7,'YTD':45.2,'1Y':124.3,'3Y_ann':28.4,'5Y_ann':48.7} },
+  'SQQQ': { exp:'0.95%',  issuer:'ProShares',                     bench:'Nasdaq-100 × −3',      structure:'Open-End', div:'분기 배당', divYield:'3.21%', numH:0,
+            desc:'Nasdaq-100 지수의 일일 수익률 ×−3배를 추종하는 인버스 레버리지 ETF. 단기 하락 베팅·헤징 목적.',
+            holdings:[],
+            perf:{'1M':-8.9,'3M':-21.4,'YTD':-34.2,'1Y':-67.4,'3Y_ann':-42.8,'5Y_ann':-51.3} },
+  'PEY':  { exp:'0.53%',  issuer:'Invesco',                       bench:'NASDAQ US Dividend Achievers 50', structure:'Open-End', div:'월 배당', divYield:'4.87%', numH:50,
+            desc:'미국 고배당 우량주 50개를 선별해 배당 성장 실적에 따라 투자하는 ETF. 월 배당이 특징.',
+            holdings:[['ALT','Altria Group Inc.',2.42],['T','AT&T Inc.',2.35],['LEG','Leggett & Platt',2.31],['UVV','Universal Corp.',2.28],['HEP','Holly Energy Partners',2.24],['BKH','Black Hills Corp.',2.21],['ESS','Essex Property Trust',2.18],['OHI','Omega Healthcare',2.15],['LAMR','Lamar Advertising',2.12],['NNN','National Retail Prop.',2.09]],
+            perf:{'1M':0.8,'3M':2.4,'YTD':3.2,'1Y':8.4,'3Y_ann':4.2,'5Y_ann':7.8} },
+  'UYR':  { exp:'0.95%',  issuer:'ProShares',                     bench:'Dow Jones US Real Estate × 2', structure:'Open-End', div:'분기 배당', divYield:'1.84%', numH:30,
+            desc:'미국 부동산(REITs) 지수의 일일 수익률 ×2배를 추종하는 레버리지 ETF.',
+            holdings:[['PLD','Prologis (레버리지)',5.91],['AMT','American Tower (레버리지)',4.83],['EQIX','Equinix (레버리지)',4.12]],
+            perf:{'1M':2.8,'3M':7.6,'YTD':8.4,'1Y':22.1,'3Y_ann':3.2,'5Y_ann':9.8} },
+  'IWF':  { exp:'0.19%',  issuer:'BlackRock (iShares)',           bench:'Russell 1000 Growth',  structure:'Open-End', div:'분기 배당', divYield:'0.52%', numH:415,
+            desc:'Russell 1000 성장주 지수를 추종하는 ETF. 기술·헬스케어·소비재 대형 성장주 중심.',
+            holdings:[['NVDA','NVIDIA Corp.',12.34],['AAPL','Apple Inc.',12.21],['MSFT','Microsoft Corp.',11.84],['AMZN','Amazon.com',6.42],['META','Meta Platforms',5.81],['GOOGL','Alphabet Class A',4.12],['TSLA','Tesla Inc.',3.84],['AVGO','Broadcom Inc.',3.21],['GOOG','Alphabet Class C',2.95],['LLY','Eli Lilly',2.84]],
+            perf:{'1M':3.4,'3M':8.2,'YTD':13.1,'1Y':32.4,'3Y_ann':16.8,'5Y_ann':20.4} },
+};
+
+// 섹터 ID → 이름 매핑 (간소화)
+const SECTOR_NAMES = {
+  S01:'📈 US 대형주',S02:'💻 테크놀로지',S03:'🏥 헬스케어',S04:'🏦 금융',S05:'🛍️ 경기소비재',
+  S06:'🛒 필수소비재',S07:'🏭 산업재',S08:'⚡ 유틸리티',S09:'📡 커뮤니케이션',S10:'⛏️ 소재',
+  S11:'🌍 국제선진국',S12:'🌏 신흥국',S13:'📊 중소형주',S14:'🏛️ 투자등급채권',S15:'💵 단기채/현금성',
+  S16:'⚠️ 하이일드',S17:'📈 TIPS/인플레이션',S18:'✨ 금/귀금속',S19:'🛢️ 에너지/원자재',
+  S20:'🏘️ 부동산/REITs',S21:'₿ 가상자산',S22:'📉 인버스/숏',S24:'🧩 테마/특수목적'
+};
+
+// ── URL에서 ticker 추출 ────────────────────────────
+const params = new URLSearchParams(location.search);
+const TICKER = (params.get('ticker') || 'SPY').toUpperCase().trim();
+
+document.getElementById('nav-breadcrumb').textContent = '/ ' + TICKER;
+document.title = TICKER + ' ETF 상세 — CORRYU';
+
+// ── Watchlist (localStorage) ──────────────────────
+const watchlist = new Set(JSON.parse(localStorage.getItem('corryu_watchlist') || '[]'));
+function toggleWatchlist() {
+  if (watchlist.has(TICKER)) watchlist.delete(TICKER);
+  else watchlist.add(TICKER);
+  localStorage.setItem('corryu_watchlist', JSON.stringify([...watchlist]));
+  updateStarBtn();
+}
+function updateStarBtn() {
+  const btn = document.getElementById('star-hero-btn');
+  if (!btn) return;
+  if (watchlist.has(TICKER)) {
+    btn.textContent = '★ 관심종목';
+    btn.classList.add('starred');
+  } else {
+    btn.textContent = '☆ 관심종목 추가';
+    btn.classList.remove('starred');
+  }
+}
+
+// ── 검색 ─────────────────────────────────────────
+document.getElementById('nav-search-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') goToTicker();
+});
+function goToTicker() {
+  const val = document.getElementById('nav-search-input').value.trim().toUpperCase();
+  if (val) location.href = '/etf-detail?ticker=' + encodeURIComponent(val);
+}
+
+// ── Seeded 차트 생성 ─────────────────────────────
+function seededRand(seed) {
+  let s = Math.abs(seed) % 2147483647 || 1;
+  return () => { s = s * 16807 % 2147483647; return (s - 1) / 2147483646; };
+}
+function generatePrices(ticker, cagr, vol, n) {
+  const seed = [...ticker].reduce((acc, c, i) => acc + c.charCodeAt(0) * (i * 31 + 7), 42);
+  const rand = seededRand(seed);
+  const mu  = (cagr || 10) / 100 / 252;
+  const sig = (vol  || 18) / 100 / Math.sqrt(252);
+  let prices = [100];
+  for (let i = 1; i < n; i++) {
+    // 12-sample CLT approximation of normal distribution
+    let z = 0;
+    for (let j = 0; j < 12; j++) z += rand();
+    z = (z - 6);
+    prices.push(prices[i - 1] * Math.exp(mu - 0.5 * sig * sig + sig * z));
+  }
+  return prices;
+}
+
+let currentETF = null;
+function generateChartSVG(ticker, cagr, vol, n) {
+  const prices = generatePrices(ticker, cagr, vol, n);
+  const N = prices.length;
+  const W = 700, H = 200;
+  const P = { t: 18, r: 10, b: 30, l: 50 };
+  const cw = W - P.l - P.r, ch = H - P.t - P.b;
+
+  const minP = Math.min(...prices) * 0.998;
+  const maxP = Math.max(...prices) * 1.002;
+  const rng  = maxP - minP || 1;
+  const toX  = i => P.l + (i / (N - 1)) * cw;
+  const toY  = p => P.t + ch - ((p - minP) / rng) * ch;
+
+  const pts = prices.map((p, i) => toX(i).toFixed(1) + ',' + toY(p).toFixed(1));
+  const line = 'M ' + pts.join(' L ');
+  const area = line + ' L ' + toX(N-1).toFixed(1) + ',' + (P.t+ch) + ' L ' + P.l + ',' + (P.t+ch) + ' Z';
+  const isUp = prices[N-1] >= prices[0];
+  const col  = isUp ? '#4ade80' : '#f87171';
+  const pct  = ((prices[N-1] / prices[0] - 1) * 100).toFixed(1);
+
+  const gridY = [0, 0.25, 0.5, 0.75, 1.0].map(f => {
+    const yv  = (P.t + ch - f * ch).toFixed(1);
+    const pv  = ((minP + f * rng) / prices[0] - 1) * 100;
+    const lbl = (pv > 0 ? '+' : '') + pv.toFixed(0) + '%';
+    return `<line x1="${P.l}" y1="${yv}" x2="${P.l+cw}" y2="${yv}" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+    <text x="${P.l-6}" y="${(+yv+3.5).toFixed(1)}" text-anchor="end" font-size="10" fill="rgba(100,116,139,0.7)" font-family="monospace">${lbl}</text>`;
+  }).join('');
+
+  const xPts = n <= 22 ? ['4주 전','3주 전','2주 전','1주 전','현재']
+             : n <= 65 ? ['3개월 전','2개월 전','1개월 전','현재','']
+             : n <= 130? ['6개월 전','4개월 전','2개월 전','현재','']
+             :           ['1년 전','9개월 전','6개월 전','3개월 전','현재'];
+  const gridX = xPts.map((lbl, i) => {
+    const xv = (P.l + (i / (xPts.length - 1)) * cw).toFixed(1);
+    return `<text x="${xv}" y="${H-5}" text-anchor="middle" font-size="10" fill="rgba(100,116,139,0.6)" font-family="Inter,sans-serif">${lbl}</text>`;
+  }).join('');
+
+  return {
+    svg: `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${col}" stop-opacity="0.18"/><stop offset="100%" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
+  ${gridY}${gridX}
+  <path d="${area}" fill="url(#ag)"/>
+  <path d="${line}" stroke="${col}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="${P.l}" cy="${toY(prices[0]).toFixed(1)}" r="3" fill="${col}" opacity="0.5"/>
+  <circle cx="${(P.l+cw).toFixed(1)}" cy="${toY(prices[N-1]).toFixed(1)}" r="4" fill="${col}"/>
+</svg>`, pct, isUp
+  };
+}
+
+const PERIOD_DAYS = { '1M': 22, '3M': 65, '6M': 130, '1Y': 252 };
+const PERIOD_LABEL = { '1M': '1개월 수익률 (시뮬레이션)', '3M': '3개월 수익률 (시뮬레이션)', '6M': '6개월 수익률 (시뮬레이션)', '1Y': '1년 수익률 (시뮬레이션)' };
+
+function switchPeriod(period, el) {
+  if (!currentETF) return;
+  document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const n = PERIOD_DAYS[period];
+  const res = generateChartSVG(currentETF.ticker, currentETF.cagr, currentETF.vol, n);
+  document.getElementById('chart-container').innerHTML = res.svg;
+  const pctEl = document.getElementById('chart-pct');
+  pctEl.textContent = (res.isUp ? '+' : '') + res.pct + '%';
+  pctEl.className = 'chart-pct ' + (res.isUp ? 'ret-pos' : 'ret-neg');
+  document.getElementById('chart-period-label').textContent = PERIOD_LABEL[period];
+}
+
+// ── 렌더링 함수들 ──────────────────────────────────
+function fmtAUM(v) {
+  if (!v) return '—';
+  const m = v / 1e6;
+  return m >= 1000 ? '$' + (m/1000).toFixed(1) + 'B' : '$' + Math.round(m) + 'M';
+}
+function fmtPct(v, dec=1) {
+  if (v === null || v === undefined) return '—';
+  return (v > 0 ? '+' : '') + v.toFixed(dec) + '%';
+}
+function fmtNum(v, dec=2) {
+  if (v === null || v === undefined) return '—';
+  return v.toFixed(dec);
+}
+function metricColor(key, val) {
+  if (val === null || val === undefined) return 'val-neutral';
+  if (key === 'z_score')   return val <= -1.5 ? 'val-neg' : val >= 2.0 ? 'val-pos' : 'val-neutral';
+  if (key === 'rsi')       return val <= 30 ? 'val-neg' : val >= 70 ? 'val-pos' : 'val-neutral';
+  if (key === 'range_52w') return val <= 20 ? 'val-neg' : val >= 80 ? 'val-pos' : 'val-neutral';
+  if (key === 'ma200_pct') return val <= -10 ? 'val-neg' : val >= 15 ? 'val-pos' : 'val-neutral';
+  if (key === 'mdd_52w')   return val <= -20 ? 'val-pos' : 'val-neutral';
+  if (key === 'cagr')      return val >= 15 ? 'val-good' : val < 0 ? 'val-pos' : 'val-neutral';
+  if (key === 'sortino')   return val >= 1.2 ? 'val-purple' : val < 0 ? 'val-pos' : 'val-neutral';
+  if (key === 'r_anchor')  return Math.abs(val) >= 0.7 ? 'val-pos' : 'val-neutral';
+  return 'val-neutral';
+}
+
+function renderGauge(val, min, max, color) {
+  const pct = Math.max(0, Math.min(100, ((val - min) / (max - min)) * 100));
+  return `<div class="gauge-wrap"><div class="gauge-bar"><div class="gauge-fill" style="width:${pct.toFixed(1)}%;background:${color}"></div></div></div>`;
+}
+
+function renderPage(etf, sectorId) {
+  currentETF = etf;
+  const supp = SUPP[etf.ticker] || {};
+  const sector = SECTOR_NAMES[sectorId] || sectorId || '—';
+
+  // ── Hero ───────────────────────────────────────
+  document.getElementById('h-ticker').textContent = etf.ticker;
+  document.getElementById('h-ticker').style.color = '#e2e8f0';
+  document.getElementById('h-name').textContent   = etf.name;
+  document.getElementById('h-aum').textContent     = fmtAUM(etf.aum);
+  document.getElementById('h-desc').textContent    = supp.desc || '— 해당 ETF의 상세 설명은 준비 중입니다.';
+  document.getElementById('h-datadate').textContent = '2026-02-26';
+  document.getElementById('note-datadate').textContent = '2026-02-26';
+
+  const badgesHtml =
+    `<span class="badge badge-sector">${sector}</span>` +
+    (etf.is_legacy ? '<span class="badge badge-legacy">Legacy</span>' : '<span class="badge badge-active">Active</span>') +
+    (etf.short_history ? '<span class="badge badge-short">짧은연혁 (&lt;3Y)</span>' : '');
+  document.getElementById('h-badges').innerHTML = badgesHtml;
+  updateStarBtn();
+
+  // ── Quick Stats ─────────────────────────────────
+  document.getElementById('qs-exp').textContent      = supp.exp      || '데이터 준비 중';
+  document.getElementById('qs-inception').textContent = (etf.inception && etf.inception !== '1900-01-01') ? etf.inception : '—';
+  document.getElementById('qs-issuer').textContent   = supp.issuer   || '데이터 준비 중';
+  document.getElementById('qs-bench').textContent    = supp.bench    || '데이터 준비 중';
+  document.getElementById('qs-numh').textContent     = supp.numH !== undefined ? supp.numH.toLocaleString() + '개' : '—';
+
+  // ── 차트 ────────────────────────────────────────
+  const res1Y = generateChartSVG(etf.ticker, etf.cagr, etf.vol, 252);
+  document.getElementById('chart-container').innerHTML = res1Y.svg;
+  const pctEl = document.getElementById('chart-pct');
+  pctEl.textContent = (res1Y.isUp ? '+' : '') + res1Y.pct + '%';
+  pctEl.className   = 'chart-pct ' + (res1Y.isUp ? 'ret-pos' : 'ret-neg');
+  document.getElementById('chart-cagr').textContent = fmtPct(etf.cagr);
+  document.getElementById('chart-vol').textContent  = fmtPct(etf.vol);
+
+  // ── 기간별 수익률 ───────────────────────────────
+  const perf = supp.perf || {};
+  const periods = [
+    { key: '1M',     label: '1개월',   ann: false },
+    { key: '3M',     label: '3개월',   ann: false },
+    { key: 'YTD',    label: 'YTD (연초 이후)', ann: false },
+    { key: '1Y',     label: '1년',     ann: false },
+    { key: '3Y_ann', label: '3년 (연환산)',     ann: true },
+    { key: '5Y_ann', label: '5년 (연환산)',     ann: true },
+  ];
+  const perfRows = periods.map(p => {
+    const v = perf[p.key];
+    const cls = v === undefined ? 'ret-na' : v >= 0 ? 'ret-pos' : 'ret-neg';
+    const disp = v === undefined ? '—' : fmtPct(v);
+    const annLabel = p.ann ? '연환산' : '누적';
+    return `<tr>
+      <td class="perf-period">${p.label}</td>
+      <td class="${cls}">${disp}</td>
+      <td style="color:var(--text-muted);font-size:0.75rem">${annLabel}</td>
+      <td style="color:var(--text-muted);font-size:0.73rem">${v !== undefined ? '예시' : '—'}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('perf-table-body').innerHTML = perfRows;
+
+  // ── 상위 구성종목 ───────────────────────────────
+  const holdings = supp.holdings;
+  let holdHtml = '';
+  if (!holdings || holdings.length === 0) {
+    holdHtml = '<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:0.85rem">구성종목 데이터 준비 중</div>';
+  } else {
+    const maxW = Math.max(...holdings.map(h => h[2]));
+    holdHtml = holdings.map(([tk, nm, wt], i) =>
+      `<div class="holding-row">
+        <span class="holding-rank">${i+1}</span>
+        <span class="holding-ticker">${tk}</span>
+        <span class="holding-name">${nm}</span>
+        <div class="holding-bar-wrap">
+          <div class="holding-bar-bg"><div class="holding-bar" style="width:${(wt/maxW*100).toFixed(1)}%"></div></div>
+        </div>
+        <span class="holding-weight">${wt.toFixed(2)}%</span>
+      </div>`
+    ).join('');
+    const top10Sum = holdings.reduce((s, h) => s + h[2], 0);
+    holdHtml += `<div class="holdings-footer">
+      <span>상위 10개 합계: <strong style="color:#94a3b8">${top10Sum.toFixed(1)}%</strong></span>
+      <span>총 ${(supp.numH || '?').toLocaleString()}개 종목 · 예시 데이터</span>
+    </div>`;
+  }
+  document.getElementById('holdings-container').innerHTML = holdHtml;
+
+  // ── 분석 지표 ───────────────────────────────────
+  const metrics = [
+    { label: 'Z-Score', key: 'z_score',   val: etf.short_history ? null : etf.z_score,   fmt: v => fmtNum(v, 2),   gauge: [v => renderGauge(v, -3, 3, '#3b82f6')] },
+    { label: 'RSI (14일)', key: 'rsi',     val: etf.rsi,           fmt: v => fmtNum(v, 0) + '  ', gauge: [v => renderGauge(v, 0, 100, '#f59e0b')] },
+    { label: '52W Range', key: 'range_52w', val: etf.range_52w,    fmt: v => fmtNum(v, 0) + '%',  gauge: [v => renderGauge(v, 0, 100, '#8b5cf6')] },
+    { label: '200MA 이격', key: 'ma200_pct', val: etf.short_history ? null : etf.ma200_pct, fmt: v => fmtPct(v), gauge: [] },
+    { label: '52W MDD',   key: 'mdd_52w',  val: etf.short_history ? null : etf.mdd_52w,  fmt: v => fmtPct(v), gauge: [] },
+    { label: 'r_Anchor',  key: 'r_anchor', val: etf.r_anchor,      fmt: v => fmtNum(v, 2), gauge: [] },
+    { label: 'SMH Corr',  key: 'smh_corr', val: etf.smh_corr,      fmt: v => v !== null && v !== undefined ? fmtNum(v, 2) : '—', gauge: [] },
+    { label: 'CAGR',      key: 'cagr',     val: etf.short_history ? null : etf.cagr,     fmt: v => fmtPct(v), gauge: [] },
+    { label: '연환산 변동성', key: 'vol',  val: etf.short_history ? null : etf.vol,      fmt: v => fmtPct(v, 1), gauge: [] },
+    { label: 'Sortino',   key: 'sortino',  val: etf.short_history ? null : etf.sortino,  fmt: v => fmtNum(v, 2), gauge: [] },
+  ];
+  const metricsHtml = metrics.map(m => {
+    const display = m.val === null || m.val === undefined ? '—' : m.fmt(m.val);
+    const cls     = m.val !== null && m.val !== undefined ? metricColor(m.key, m.val) : 'val-neutral';
+    return `<div class="metric-row">
+      <span class="metric-label">${m.label}</span>
+      <span class="metric-value ${cls}">${display}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('metrics-container').innerHTML = metricsHtml;
+
+  // ── 펀드 정보 ───────────────────────────────────
+  const infoRows = [
+    { label: 'Rank',      val: etf.rank === 9999 ? '—' : ('#' + etf.rank) },
+    { label: 'AUM',       val: fmtAUM(etf.aum) },
+    { label: '수수료',    val: supp.exp      || '—' },
+    { label: '발행사',    val: supp.issuer   || '—' },
+    { label: '구조',      val: supp.structure || '—' },
+    { label: '배당 방식', val: supp.div      || '—' },
+    { label: '배당 수익률',val: supp.divYield || '—' },
+    { label: '벤치마크',  val: supp.bench    || '—' },
+    { label: '상장일',    val: (etf.inception && etf.inception !== '1900-01-01') ? etf.inception : '—' },
+    { label: '섹터',      val: sector },
+    { label: 'Status',    val: etf.is_legacy ? (etf._user_override ? 'User Legacy' : 'Legacy') : 'Active' },
+  ];
+  const infoHtml = infoRows.map(r =>
+    `<div class="info-row"><span class="info-label">${r.label}</span><span class="info-value">${r.val}</span></div>`
+  ).join('');
+  document.getElementById('fund-info-container').innerHTML = infoHtml;
+
+  // 페이지 표시
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('page-content').style.display = 'block';
+}
+
+// ── 데이터 로드 ───────────────────────────────────
+fetch('/etf_data.json')
+  .then(r => { if (!r.ok) throw new Error('fetch failed'); return r.json(); })
+  .then(data => {
+    let found = null, foundSid = null;
+    for (const [sid, etfs] of Object.entries(data)) {
+      const e = etfs.find(x => x.ticker === TICKER);
+      if (e) { found = e; foundSid = sid; break; }
+    }
+    if (!found) {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('error-title').textContent = '"' + TICKER + '" ETF를 찾을 수 없습니다';
+      document.getElementById('error-msg').textContent   = '티커 심볼을 확인하거나 위 검색창에서 다시 검색해주세요.';
+      document.getElementById('error-state').style.display = 'flex';
+      return;
+    }
+    // localStorage 오버라이드 반영 (읽기 전용)
+    const ov = JSON.parse(localStorage.getItem('corryu_user_overrides') || '{}');
+    if (ov[TICKER]) {
+      if ('is_legacy' in ov[TICKER]) found.is_legacy = ov[TICKER].is_legacy;
+      if (ov[TICKER].is_legacy) found._user_override = true;
+    }
+    renderPage(found, foundSid);
+    I18n.init();
+  })
+  .catch(() => {
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('error-title').textContent = '데이터를 불러올 수 없습니다';
+    document.getElementById('error-msg').textContent   = '네트워크 상태를 확인하거나 잠시 후 다시 시도해주세요.';
+    document.getElementById('error-state').style.display = 'flex';
+  });
+</script>
+</body>
+</html>
