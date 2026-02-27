@@ -145,6 +145,19 @@ nav {
 }
 .star-hero-btn.starred { color: #fbbf24; border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.08); }
 .star-hero-btn:hover { color: #fbbf24; border-color: rgba(251,191,36,0.3); }
+.compare-hero-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: none; border: 1px solid rgba(167,139,250,0.25); cursor: pointer;
+  color: #a78bfa; font-size: 0.78rem; font-weight: 700; padding: 6px 12px; border-radius: 8px;
+  transition: all 0.15s; text-decoration: none; font-family: inherit; margin-top: 10px;
+}
+.compare-hero-btn:hover { background: rgba(167,139,250,0.1); border-color: rgba(167,139,250,0.5); }
+
+/* ── 지표 이력 트렌드 ── */
+.metric-stat-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.metric-current-val { font-size: 1.4rem; font-weight: 900; letter-spacing: -0.03em; }
+.metric-ref-dots { display: flex; gap: 10px; flex-wrap: wrap; }
+.metric-ref-dot { display: flex; align-items: center; gap: 4px; font-size: 0.7rem; color: var(--text-muted); }
 
 /* ── Quick Stats Bar ── */
 .quick-stats {
@@ -302,7 +315,15 @@ nav {
     <span class="nav-sep">/</span>
     <a href="/landing" class="nav-brand"><span class="text-gradient">CORRYU</span></a>
     <span id="nav-breadcrumb" style="font-size:0.82rem;color:var(--text-muted)"></span>
-    <div class="nav-search" style="margin-left:auto">
+    <div style="display:flex;align-items:center;gap:12px;margin-left:auto">
+      <a href="/compare" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px" title="ETF 비교">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>비교
+      </a>
+      <a href="/portfolio" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px" title="포트폴리오">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>포트폴리오
+      </a>
+    </div>
+    <div class="nav-search">
       <input type="text" id="nav-search-input" placeholder="다른 티커 검색 (예: QQQ)" autocomplete="off">
       <button onclick="goToTicker()">→</button>
     </div>
@@ -336,6 +357,9 @@ nav {
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:2px">
             <div class="hero-ticker" id="h-ticker">—</div>
             <button class="star-hero-btn" id="star-hero-btn" onclick="toggleWatchlist()" title="관심종목 추가/제거">★</button>
+            <a href="#" id="compare-hero-link" class="compare-hero-btn" title="ETF 비교 페이지로 이동">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>비교하기
+            </a>
           </div>
           <div class="hero-name" id="h-name">—</div>
           <div class="hero-badges" id="h-badges"></div>
@@ -431,6 +455,26 @@ nav {
         <div class="glass card">
           <div class="card-title">상위 10개 구성종목</div>
           <div id="holdings-container"></div>
+        </div>
+
+        <!-- 지표 이력 트렌드 카드 -->
+        <div class="glass card" id="trend-card">
+          <div class="card-title">지표 이력 트렌드 (1년 시뮬레이션)</div>
+          <div class="chart-tabs" style="margin-bottom:12px" id="metric-tabs">
+            <button class="chart-tab active" onclick="switchMetric('zscore',this)">Z-Score</button>
+            <button class="chart-tab" onclick="switchMetric('rsi',this)">RSI</button>
+            <button class="chart-tab" onclick="switchMetric('range52w',this)">52W Range</button>
+            <button class="chart-tab" onclick="switchMetric('mdd',this)">MDD</button>
+          </div>
+          <div class="metric-stat-row">
+            <div>
+              <span id="metric-current-label" style="font-size:0.75rem;color:var(--text-muted)">현재 Z-Score</span>
+              <span class="metric-current-val" id="metric-current-val">—</span>
+            </div>
+            <div class="metric-ref-dots" id="metric-ref-legend"></div>
+          </div>
+          <div class="chart-container" id="metric-chart-container"></div>
+          <div class="chart-disclaimer">※ 과거 1년 지표 시뮬레이션 데이터입니다. 실제 이력과 다를 수 있습니다.</div>
         </div>
 
       </div>
@@ -850,9 +894,170 @@ function renderPage(etf, sectorId) {
   ).join('');
   document.getElementById('fund-info-container').innerHTML = infoHtml;
 
+  // ── 비교하기 버튼 URL 세팅 ──
+  const compareLink = document.getElementById('compare-hero-link');
+  if (compareLink) compareLink.href = '/compare?tickers=' + encodeURIComponent(etf.ticker);
+
+  // ── 지표 이력 트렌드 초기화 ──
+  // short_history ETF는 Z-Score 탭 비활성화하고 RSI로 기본 설정
+  if (etf.short_history) {
+    currentMetricType = 'rsi';
+    document.querySelectorAll('#metric-tabs .chart-tab').forEach((t, i) => {
+      t.classList.remove('active');
+      if (i === 0) { t.style.opacity = '0.3'; t.style.pointerEvents = 'none'; t.title = '짧은연혁 ETF — Z-Score 없음'; }
+      if (i === 1) t.classList.add('active');
+    });
+  }
+  renderMetricChart(etf);
+
   // 페이지 표시
   document.getElementById('loading-state').style.display = 'none';
   document.getElementById('page-content').style.display = 'block';
+}
+
+// ── 지표 이력 트렌드 ──────────────────────────────
+const METRIC_CONFIG = {
+  zscore:  { label: 'Z-Score',   unit: '',  min: -3,  max: 3,   refs: [-2, -1.5, 0, 1.5, 2],   refColor: { '-2': '#60a5fa', '-1.5': '#93c5fd', '0': '#475569', '1.5': '#fca5a5', '2': '#f87171' }, color: v => v > 1.5 ? '#f87171' : v < -1.5 ? '#60a5fa' : '#94a3b8' },
+  rsi:     { label: 'RSI (14일)', unit: '',  min: 0,   max: 100, refs: [30, 50, 70],            refColor: { '30': '#60a5fa', '50': '#475569', '70': '#f87171' },                                  color: v => v > 70 ? '#f87171' : v < 30 ? '#60a5fa' : '#94a3b8' },
+  range52w:{ label: '52W Range', unit: '%', min: 0,   max: 100, refs: [20, 50, 80],            refColor: { '20': '#60a5fa', '50': '#475569', '80': '#4ade80' },                                  color: v => v > 80 ? '#4ade80' : v < 20 ? '#60a5fa' : '#94a3b8' },
+  mdd:     { label: '52W MDD',   unit: '%', min: -50, max: 0,   refs: [-30, -20, -10],         refColor: { '-30': '#f87171', '-20': '#fca5a5', '-10': '#fcd34d' },                               color: v => v < -20 ? '#f87171' : v < -10 ? '#fbbf24' : '#94a3b8' },
+};
+
+let currentMetricType = 'zscore';
+let currentETFForMetric = null;
+
+function genMetricSeries(ticker, metricType, n = 252) {
+  const baseSeed = [...ticker].reduce((a,c,i) => a + c.charCodeAt(0)*(i*13+5), 77);
+  const offsets  = { zscore: 1000, rsi: 2000, range52w: 3000, mdd: 4000 };
+  const rand = seededRand(baseSeed + offsets[metricType]);
+
+  if (metricType === 'zscore') {
+    let z = (rand() - 0.5) * 3;
+    const s = [z];
+    for (let i = 1; i < n; i++) {
+      let noise = 0; for (let j = 0; j < 6; j++) noise += rand() - 0.5;
+      z = z * 0.96 + noise * 0.22;
+      z = Math.max(-3, Math.min(3, z));
+      s.push(z);
+    }
+    return s;
+  }
+  if (metricType === 'rsi') {
+    let v = 30 + rand() * 40;
+    const s = [v];
+    for (let i = 1; i < n; i++) {
+      let noise = 0; for (let j = 0; j < 4; j++) noise += rand() - 0.5;
+      v = v * 0.91 + 50 * 0.09 + noise * 6;
+      v = Math.max(10, Math.min(90, v));
+      s.push(v);
+    }
+    return s;
+  }
+  if (metricType === 'range52w') {
+    let v = 20 + rand() * 60;
+    const s = [v];
+    for (let i = 1; i < n; i++) {
+      let noise = 0; for (let j = 0; j < 4; j++) noise += rand() - 0.5;
+      v = v * 0.97 + 50 * 0.03 + noise * 4;
+      v = Math.max(0, Math.min(100, v));
+      s.push(v);
+    }
+    return s;
+  }
+  if (metricType === 'mdd') {
+    let v = -5 - rand() * 15;
+    const s = [v];
+    for (let i = 1; i < n; i++) {
+      let noise = 0; for (let j = 0; j < 4; j++) noise += rand() - 0.5;
+      v = v * 0.96 + (-10) * 0.04 + noise * 1.8;
+      v = Math.min(0, Math.max(-50, v));
+      s.push(v);
+    }
+    return s;
+  }
+  return [];
+}
+
+function generateMetricChartSVG(series, metricType, currentVal) {
+  const cfg = METRIC_CONFIG[metricType];
+  const N = series.length;
+  const W = 700, H = 200;
+  const P = { t: 18, r: 10, b: 30, l: 50 };
+  const cw = W - P.l - P.r, ch = H - P.t - P.b;
+  const rng = cfg.max - cfg.min;
+  const toX = i => P.l + (i / (N - 1)) * cw;
+  const toY = v => P.t + ch - ((v - cfg.min) / rng) * ch;
+
+  // Reference lines
+  const refLines = cfg.refs.map(r => {
+    const yv = toY(r).toFixed(1);
+    const refCol = cfg.refColor[String(r)] || 'rgba(255,255,255,0.08)';
+    const lbl = r + cfg.unit;
+    return `<line x1="${P.l}" y1="${yv}" x2="${P.l + cw}" y2="${yv}" stroke="${refCol}" stroke-opacity="0.3" stroke-width="1" stroke-dasharray="3,3"/>
+    <text x="${P.l - 5}" y="${(+yv + 3.5).toFixed(1)}" text-anchor="end" font-size="10" fill="rgba(100,116,139,0.7)" font-family="monospace">${lbl}</text>`;
+  }).join('');
+
+  // Fill area under the line (subtle)
+  const pts = series.map((v, i) => toX(i).toFixed(1) + ',' + toY(v).toFixed(1));
+  const linePath = 'M ' + pts.join(' L ');
+  const lineColor = currentVal !== null && currentVal !== undefined ? cfg.color(currentVal) : '#94a3b8';
+
+  // X labels
+  const xLabels = ['1년 전', '9개월 전', '6개월 전', '3개월 전', '현재'].map((l, i) =>
+    `<text x="${(P.l + (i / 4) * cw).toFixed(1)}" y="${H - 5}" text-anchor="middle" font-size="10" fill="rgba(100,116,139,0.6)" font-family="Inter,sans-serif">${l}</text>`
+  ).join('');
+
+  const lastX = toX(N - 1).toFixed(1);
+  const lastY = toY(series[N - 1]).toFixed(1);
+
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  ${refLines}${xLabels}
+  <path d="${linePath}" stroke="${lineColor}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="${lastX}" cy="${lastY}" r="4" fill="${lineColor}"/>
+</svg>`;
+}
+
+function switchMetric(type, el) {
+  document.querySelectorAll('#metric-tabs .chart-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentMetricType = type;
+  if (currentETFForMetric) renderMetricChart(currentETFForMetric);
+}
+
+function renderMetricChart(etf) {
+  currentETFForMetric = etf;
+  const cfg = METRIC_CONFIG[currentMetricType];
+  const series = genMetricSeries(etf.ticker, currentMetricType);
+
+  // Current value from actual ETF data
+  const valMap = { zscore: etf.z_score, rsi: etf.rsi, range52w: etf.range_52w, mdd: etf.mdd_52w };
+  const currentVal = etf.short_history && currentMetricType === 'zscore' ? null : (valMap[currentMetricType] ?? null);
+
+  // Update UI
+  const label = document.getElementById('metric-current-label');
+  const valEl = document.getElementById('metric-current-val');
+  label.textContent = '현재 ' + cfg.label;
+
+  if (currentVal !== null && currentVal !== undefined) {
+    const formatted = currentMetricType === 'zscore' || currentMetricType === 'rsi'
+      ? currentVal.toFixed(currentMetricType === 'rsi' ? 0 : 2)
+      : currentVal.toFixed(1) + cfg.unit;
+    valEl.textContent = formatted;
+    valEl.style.color = cfg.color(currentVal);
+  } else {
+    valEl.textContent = '— (데이터 없음)';
+    valEl.style.color = '#334155';
+  }
+
+  // Reference legend
+  const legend = document.getElementById('metric-ref-legend');
+  legend.innerHTML = cfg.refs.map(r => {
+    const c = cfg.refColor[String(r)] || '#475569';
+    return `<span class="metric-ref-dot"><span style="display:inline-block;width:20px;height:2px;background:${c};opacity:0.6;border-radius:1px"></span>${r}${cfg.unit}</span>`;
+  }).join('');
+
+  // Chart
+  document.getElementById('metric-chart-container').innerHTML = generateMetricChartSVG(series, currentMetricType, currentVal);
 }
 
 // ── 데이터 로드 ───────────────────────────────────
