@@ -50,7 +50,7 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
 .chart-card { padding: 22px 24px; margin-bottom: 16px; }
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
 .card-title { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); }
-.chart-tabs { display: flex; gap: 4px; }
+.chart-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
 .chart-tab { padding: 4px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; border: none; cursor: pointer; background: rgba(255,255,255,0.04); color: var(--text-muted); transition: all 0.15s; font-family: inherit; }
 .chart-tab.active { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
 .chart-tab:hover:not(.active) { color: var(--text-primary); background: rgba(255,255,255,0.07); }
@@ -63,6 +63,14 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
 .legend-link:hover { color: #60a5fa; }
 .legend-pct { font-size: 0.82rem; font-weight: 700; }
 .empty-chart { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 240px; color: var(--text-muted); gap: 8px; }
+
+/* ── 커스텀 기간 입력 ── */
+.custom-range-row { display: flex; align-items: center; gap: 8px; margin: 10px 0 4px; flex-wrap: wrap; }
+.range-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.04em; white-space: nowrap; }
+.range-input { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-size: 0.78rem; padding: 4px 8px; font-family: inherit; outline: none; cursor: pointer; color-scheme: dark; }
+.range-input:focus { border-color: rgba(59,130,246,0.5); }
+.range-sep { color: var(--text-muted); font-size: 0.82rem; }
+.range-error { font-size: 0.72rem; color: #f87171; min-height: 16px; margin-bottom: 6px; }
 
 /* ── 비교 테이블 ── */
 .table-card { padding: 22px 24px; margin-bottom: 16px; overflow-x: auto; }
@@ -131,7 +139,7 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
     <div class="selector-row" id="chip-row">
       <!-- chips injected here -->
       <div class="add-input-wrap" id="add-wrap">
-        <input type="text" class="add-input" id="add-input" placeholder="티커 입력 (예: QQQ)" maxlength="10" autocomplete="off">
+        <input type="text" class="add-input" id="add-input" placeholder="티커 입력 (예: QQQ 또는 QQQ SPY SOXX)" maxlength="20" autocomplete="off">
         <button class="add-btn" onclick="addTicker()">+ 추가</button>
       </div>
     </div>
@@ -148,8 +156,20 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
         <button class="chart-tab" onclick="switchPeriod('3M',this)">3개월</button>
         <button class="chart-tab" onclick="switchPeriod('6M',this)">6개월</button>
         <button class="chart-tab active" onclick="switchPeriod('1Y',this)">1년</button>
+        <button class="chart-tab" onclick="switchPeriod('3Y',this)">3년</button>
+        <button class="chart-tab" onclick="switchPeriod('5Y',this)">5년</button>
+        <button class="chart-tab" onclick="switchPeriod('10Y',this)">10년</button>
+        <button class="chart-tab" onclick="switchPeriod('15Y',this)">15년</button>
+        <button class="chart-tab" onclick="switchPeriod('20Y',this)">20년</button>
       </div>
     </div>
+    <div class="custom-range-row">
+      <span class="range-label">직접 설정</span>
+      <input type="date" id="date-start" class="range-input" onchange="applyCustomRange()">
+      <span class="range-sep">~</span>
+      <input type="date" id="date-end" class="range-input" onchange="applyCustomRange()">
+    </div>
+    <div class="range-error" id="range-error"></div>
     <div class="chart-container" id="chart-container">
       <div class="empty-chart">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -207,6 +227,14 @@ const SUPP = {
 let allData = {};     // ticker → etf object (flattened from etf_data.json)
 let selectedETFs = []; // ordered list of etf objects
 let currentPeriod = '1Y';
+let customRange = null; // { start: 'YYYY-MM-DD', end: 'YYYY-MM-DD' } | null
+
+// ── 날짜 입력 max 설정 (미래 날짜 선택 방지) ─────────
+(function() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('date-start').max = today;
+  document.getElementById('date-end').max   = today;
+})();
 
 // ── URL 파라미터에서 초기 tickers 로드 ──────────────
 const urlParams = new URLSearchParams(location.search);
@@ -231,20 +259,27 @@ function generatePrices(ticker, cagr, vol, n) {
 
 // ── 다중 차트 SVG ─────────────────────────────────────
 function generateMultiChartSVG(etfs, n) {
+  const MAX_RENDER = 500; // SVG 성능을 위해 최대 렌더링 포인트 제한
   const series = etfs.map((etf, idx) => {
     const raw = generatePrices(etf.ticker, etf.cagr, etf.vol, n);
-    const base = raw[0];
-    const prices = raw.map(p => p/base*100);
-    const pct = ((prices[n-1]/100-1)*100).toFixed(1);
+    let sampled;
+    if (raw.length > MAX_RENDER) {
+      const step = (raw.length-1)/(MAX_RENDER-1);
+      sampled = Array.from({length:MAX_RENDER}, (_,i) => raw[Math.round(i*step)]);
+    } else { sampled = raw; }
+    const base = sampled[0];
+    const prices = sampled.map(p => p/base*100);
+    const pct = ((prices[prices.length-1]/100-1)*100).toFixed(1);
     return { ticker: etf.ticker, prices, pct, color: ETF_COLORS[idx] };
   });
 
+  const ns = series[0].prices.length;
   const allVals = series.flatMap(s => s.prices);
   const minP = Math.min(...allVals)*0.998, maxP = Math.max(...allVals)*1.002;
   const rng = maxP-minP||1;
   const W=700, H=240, P={t:18,r:10,b:30,l:50};
   const cw=W-P.l-P.r, ch=H-P.t-P.b;
-  const toX = i => P.l+(i/(n-1))*cw;
+  const toX = i => P.l+(i/(ns-1))*cw;
   const toY = p => P.t+ch-((p-minP)/rng)*ch;
 
   const gridY = [0,0.25,0.5,0.75,1.0].map(f => {
@@ -260,10 +295,26 @@ function generateMultiChartSVG(etfs, n) {
   const paths = series.map(s => {
     const pts = s.prices.map((p,i) => toX(i).toFixed(1)+','+toY(p).toFixed(1));
     return `<path d="M ${pts.join(' L ')}" stroke="${s.color}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="${toX(n-1).toFixed(1)}" cy="${toY(s.prices[n-1]).toFixed(1)}" r="4" fill="${s.color}"/>`;
+    <circle cx="${toX(ns-1).toFixed(1)}" cy="${toY(s.prices[ns-1]).toFixed(1)}" r="4" fill="${s.color}"/>`;
   }).join('');
 
-  const xPts = n<=22?['4주 전','','','현재']:n<=65?['3개월 전','2개월 전','1개월 전','현재']:n<=130?['6개월 전','4개월 전','2개월 전','현재']:['1년 전','9개월 전','3개월 전','현재'];
+  let xPts;
+  if (customRange) {
+    const s = new Date(customRange.start), e = new Date(customRange.end);
+    const fmt = d => `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}`;
+    const m1 = new Date(s.getTime()+(e-s)/3), m2 = new Date(s.getTime()+(e-s)*2/3);
+    xPts = [fmt(s), fmt(m1), fmt(m2), fmt(e)];
+  } else {
+    xPts = n<=22  ? ['4주 전','','','현재']
+         : n<=65  ? ['3개월 전','2개월 전','1개월 전','현재']
+         : n<=130 ? ['6개월 전','4개월 전','2개월 전','현재']
+         : n<=252 ? ['1년 전','9개월 전','3개월 전','현재']
+         : n<=756 ? ['3년 전','2년 전','1년 전','현재']
+         : n<=1260? ['5년 전','3년 전','1년 전','현재']
+         : n<=2520? ['10년 전','6년 전','2년 전','현재']
+         : n<=3780? ['15년 전','10년 전','5년 전','현재']
+         :          ['20년 전','10년 전','5년 전','현재'];
+  }
   const xLabels = xPts.map((l,i)=>`<text x="${(P.l+(i/(xPts.length-1))*cw).toFixed(1)}" y="${H-5}" text-anchor="middle" font-size="10" fill="rgba(100,116,139,0.6)" font-family="Inter,sans-serif">${l}</text>`).join('');
 
   return {
@@ -345,14 +396,19 @@ function showError(msg) {
 
 function addTicker() {
   const input = document.getElementById('add-input');
-  const t = input.value.trim().toUpperCase();
-  if (!t) return;
+  const raw = input.value.trim().toUpperCase();
+  if (!raw) return;
   input.value = '';
-  if (selectedETFs.length >= 3) { showError('최대 3개까지 추가할 수 있습니다.'); return; }
-  if (selectedETFs.some(e => e.ticker === t)) { showError(`${t}는 이미 추가되어 있습니다.`); return; }
-  const found = allData[t];
-  if (!found) { showError(`"${t}" ETF를 CORRYU 데이터베이스에서 찾을 수 없습니다.`); return; }
-  selectedETFs.push(found);
+  // 구분자: 쉼표 / 슬래시 / 세미콜론 / 파이프 / 공백 (조합·연속 허용)
+  // 구분자 없는 단일 문자열(예: QQQQLDSPY)은 분리하지 않음
+  const tokens = raw.split(/[,\/;|\s]+/).filter(Boolean);
+  for (const t of tokens) {
+    if (selectedETFs.length >= 3) { showError('최대 3개까지 추가할 수 있습니다.'); break; }
+    if (selectedETFs.some(e => e.ticker === t)) { showError(`${t}는 이미 추가되어 있습니다.`); continue; }
+    const found = allData[t];
+    if (!found) { showError(`"${t}" ETF를 CORRYU 데이터베이스에서 찾을 수 없습니다.`); continue; }
+    selectedETFs.push(found);
+  }
   updateURL();
   renderChips();
   renderAll();
@@ -366,23 +422,82 @@ function removeTicker(ticker) {
 }
 
 // ── 차트 렌더링 ───────────────────────────────────────
-const PERIOD_DAYS = {'1M':22,'3M':65,'6M':130,'1Y':252};
+const PERIOD_DAYS = {
+  '1M':22, '3M':65, '6M':130, '1Y':252,
+  '3Y':756, '5Y':1260, '10Y':2520, '15Y':3780, '20Y':5040
+};
+
+// 기간 프리셋의 시작일 계산 (상장일 비교용)
+function getPeriodStartDate(period) {
+  const d = new Date();
+  if (period.endsWith('M')) d.setMonth(d.getMonth() - parseInt(period));
+  else if (period.endsWith('Y')) d.setFullYear(d.getFullYear() - parseInt(period));
+  return d;
+}
+
+// 커스텀/프리셋에 따라 n(거래일 수) 반환
+function getChartDays() {
+  if (customRange) {
+    const ms = new Date(customRange.end) - new Date(customRange.start);
+    return Math.max(Math.round(ms / 86400000 * 252 / 365), 2);
+  }
+  return PERIOD_DAYS[currentPeriod] || 252;
+}
+
+// 상장일 초과 여부 체크 → range-error 표시
+function checkInceptionError() {
+  const el = document.getElementById('range-error');
+  if (!el) return;
+  if (selectedETFs.length === 0) { el.textContent = ''; return; }
+
+  const startDate = customRange ? new Date(customRange.start) : getPeriodStartDate(currentPeriod);
+  const errors = [];
+  for (const etf of selectedETFs) {
+    if (etf.inception && etf.inception !== '1900-01-01') {
+      const inc = new Date(etf.inception);
+      if (startDate < inc) {
+        errors.push(`${etf.ticker} 상장일 ${etf.inception}`);
+      }
+    }
+  }
+  el.textContent = errors.length ? `⚠️ 설정 기간이 상장일 이전입니다 — ${errors.join(', ')}` : '';
+}
+
 function switchPeriod(period, el) {
   document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
   currentPeriod = period;
+  customRange = null;
+  document.getElementById('date-start').value = '';
+  document.getElementById('date-end').value = '';
+  renderChart();
+}
+
+// 직접 날짜 입력 적용
+function applyCustomRange() {
+  const start = document.getElementById('date-start').value;
+  const end   = document.getElementById('date-end').value;
+  const errEl = document.getElementById('range-error');
+  if (!start || !end) return;
+  if (new Date(end) <= new Date(start)) {
+    errEl.textContent = '⚠️ 종료일은 시작일 이후여야 합니다.';
+    return;
+  }
+  document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+  customRange = { start, end };
   renderChart();
 }
 
 function renderChart() {
   const container = document.getElementById('chart-container');
   const legend    = document.getElementById('chart-legend');
+  checkInceptionError();
   if (selectedETFs.length === 0) {
     container.innerHTML = `<div class="empty-chart"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span style="font-size:0.85rem">ETF를 선택하면 차트가 표시됩니다</span></div>`;
     legend.innerHTML = '';
     return;
   }
-  const n = PERIOD_DAYS[currentPeriod];
+  const n = getChartDays();
   const { svg, series } = generateMultiChartSVG(selectedETFs, n);
   container.innerHTML = svg;
   legend.innerHTML = series.map((s,i) => {
