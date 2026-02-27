@@ -178,11 +178,13 @@ nav{position:fixed;top:3px;left:0;right:0;z-index:100;background:rgba(10,13,20,0
           </div>
         </div>
         <div class="sg-item">
-          <label>리밸런싱</label>
+          <label>리밸런싱 주기</label>
           <select class="sg-select" id="rebal-sel">
-            <option value="annual">연간</option>
-            <option value="none">없음 (Buy & Hold)</option>
+            <option value="none">없음 (Buy &amp; Hold)</option>
+            <option value="annual" selected>연간</option>
+            <option value="semiannual">반기</option>
             <option value="quarter">분기</option>
+            <option value="monthly">월</option>
           </select>
         </div>
         <div class="sg-item">
@@ -196,10 +198,30 @@ nav{position:fixed;top:3px;left:0;right:0;z-index:100;background:rgba(10,13,20,0
         <div class="sg-item">
           <label>벤치마크</label>
           <select class="sg-select" id="bench-sel">
-            <option value="SPY">S&P 500 (SPY)</option>
+            <option value="SPY">S&amp;P 500 (SPY)</option>
             <option value="QQQ">NASDAQ 100 (QQQ)</option>
             <option value="none">없음</option>
           </select>
+        </div>
+      </div>
+
+      <!-- ── 적립식 투자 ── -->
+      <div class="card-title">적립식 투자</div>
+      <div class="settings-grid" style="margin-bottom:14px">
+        <div class="sg-item">
+          <label>적립 주기</label>
+          <select class="sg-select" id="dca-freq" onchange="onDcaFreqChange()">
+            <option value="none">없음 (일시납)</option>
+            <option value="monthly">월</option>
+            <option value="quarterly">분기</option>
+            <option value="semiannual">반기</option>
+            <option value="annually">연간</option>
+          </select>
+        </div>
+        <div class="sg-item" id="dca-amt-wrap" style="visibility:hidden">
+          <label>적립금 (USD/회)</label>
+          <input type="number" class="sg-select" id="dca-amt" value="500" min="0" step="100"
+                 placeholder="500" style="text-align:right">
         </div>
       </div>
 
@@ -389,8 +411,13 @@ function simBenchmark(ticker, year) {
   return simReturn(etf, year);
 }
 
+// DCA 주기 토글
+function onDcaFreqChange() {
+  const freq = document.getElementById('dca-freq').value;
+  document.getElementById('dca-amt-wrap').style.visibility = freq !== 'none' ? 'visible' : 'hidden';
+}
+
 function runBacktest() {
-  // 유효성 검사
   setErr('');
   const holdings = [];
   for (const r of rows) {
@@ -404,64 +431,118 @@ function runBacktest() {
   const totalW = holdings.reduce((s, h) => s + h.weight, 0);
   if (Math.abs(totalW - 1) > 0.005) { setErr(`비중 합계가 ${(totalW*100).toFixed(1)}%입니다. 100%가 되어야 합니다.`); return; }
 
-  const initVal = parseFloat(document.getElementById('init-sel').value);
+  const initVal     = parseFloat(document.getElementById('init-sel').value);
   const benchTicker = document.getElementById('bench-sel').value;
-  const currYear = 2025;
+  const dcaFreq     = document.getElementById('dca-freq').value;
+  const dcaAmount   = dcaFreq !== 'none' ? (parseFloat(document.getElementById('dca-amt').value) || 0) : 0;
+  const hasDCA      = dcaFreq !== 'none' && dcaAmount > 0;
+
+  const currYear  = 2025;
   const startYear = currYear - period;
 
-  // 시뮬레이션 실행
-  const years = [];
-  for (let y = startYear; y < currYear; y++) years.push(y);
+  // 연간 수익률 사전 생성 (결정론적, 월별 시뮬레이션에서 재사용)
+  const pre = {}; // "TICKER:YEAR" → annual return
+  for (const h of holdings) {
+    for (let y = startYear; y < currYear; y++)
+      pre[h.etf.ticker + ':' + y] = simReturn(h.etf, y);
+  }
+  if (benchTicker !== 'none') {
+    const bEtf = allData[benchTicker];
+    for (let y = startYear; y < currYear; y++)
+      pre[benchTicker + ':' + y] = bEtf
+        ? simReturn(bEtf, y)
+        : randNorm(0.10, 0.15, hashStr(benchTicker + ':y' + y));
+  }
 
-  let portVal = initVal, benchVal = initVal;
-  const portSeries  = [{ year: startYear, val: initVal }];
-  const benchSeries = [{ year: startYear, val: initVal }];
-  const annualData  = [];
+  // DCA 적립 간격 (월 단위)
+  const dcaEvery = { monthly: 1, quarterly: 3, semiannual: 6, annually: 12 }[dcaFreq] ?? Infinity;
 
-  years.forEach(y => {
-    // 포트폴리오 수익률 (연간 리밸런싱 가정)
-    const portRet = holdings.reduce((s, h) => s + h.weight * simReturn(h.etf, y), 0);
-    portVal  *= (1 + portRet);
-    portSeries.push({ year: y + 1, val: portVal });
+  // ── 월별 시뮬레이션 ─────────────────────────────────────
+  let portVal       = initVal;
+  let benchVal      = initVal;
+  let totalInvested = initVal;
 
-    // 벤치마크
-    const benchRet = benchTicker !== 'none' ? simBenchmark(benchTicker, y) : 0;
-    benchVal *= (1 + benchRet);
-    if (benchTicker !== 'none') benchSeries.push({ year: y + 1, val: benchVal });
+  const portSeries     = [{ year: startYear, val: initVal }];
+  const benchSeries    = benchTicker !== 'none' ? [{ year: startYear, val: initVal }] : [];
+  const investedSeries = [{ year: startYear, val: initVal }];
+  const monthlyVals    = [initVal]; // MDD 계산용
+  const annualData     = [];
 
-    annualData.push({ year: y, portRet, benchRet });
-  });
+  let portYearStart  = initVal;
+  let benchYearStart = initVal;
 
-  // 통계 계산
+  for (let m = 0; m < period * 12; m++) {
+    const year      = startYear + Math.floor(m / 12);
+    const monthOfYr = m % 12;
+
+    // 연간 수익률 → 월 수익률
+    const portAnnual  = holdings.reduce((s, h) => s + h.weight * (pre[h.etf.ticker + ':' + year] || 0), 0);
+    const benchAnnual = benchTicker !== 'none' ? (pre[benchTicker + ':' + year] || 0) : 0;
+    const portMo  = Math.pow(1 + portAnnual,  1 / 12) - 1;
+    const benchMo = Math.pow(1 + benchAnnual, 1 / 12) - 1;
+
+    portVal  *= (1 + portMo);
+    benchVal *= (1 + benchMo);
+
+    // 적립식 입금 (m=0은 초기 납입이므로 스킵)
+    if (hasDCA && m > 0 && m % dcaEvery === 0) {
+      portVal       += dcaAmount;
+      totalInvested += dcaAmount;
+    }
+
+    monthlyVals.push(portVal);
+
+    // 연말 데이터 기록
+    if (monthOfYr === 11) {
+      annualData.push({
+        year,
+        portRet:  portVal  / portYearStart  - 1,
+        benchRet: benchTicker !== 'none' ? benchVal / benchYearStart - 1 : 0,
+      });
+      portSeries.push({ year: year + 1, val: portVal });
+      investedSeries.push({ year: year + 1, val: totalInvested });
+      if (benchTicker !== 'none') benchSeries.push({ year: year + 1, val: benchVal });
+      portYearStart  = portVal;
+      benchYearStart = benchVal;
+    }
+  }
+
+  // ── 통계 ────────────────────────────────────────────────
   const portReturns = annualData.map(d => d.portRet);
-  const n = portReturns.length;
-  const finalCum = portVal / initVal;
-  const cagr = (Math.pow(finalCum, 1 / n) - 1) * 100;
+  const n    = portReturns.length;
   const mean = portReturns.reduce((s, r) => s + r, 0) / n;
-  const vol  = Math.sqrt(portReturns.reduce((s, r) => s + (r - mean) ** 2, 0) / Math.max(n-1,1)) * 100;
+  const vol  = Math.sqrt(portReturns.reduce((s, r) => s + (r - mean) ** 2, 0) / Math.max(n - 1, 1)) * 100;
 
-  // MDD
-  let peak = initVal, mdd = 0;
-  let runVal = initVal;
-  portReturns.forEach(r => {
-    runVal *= (1 + r);
-    peak = Math.max(peak, runVal);
-    mdd = Math.min(mdd, (runVal - peak) / peak);
-  });
+  // MDD (월별 기준)
+  let peak = monthlyVals[0], mdd = 0;
+  for (const v of monthlyVals) {
+    peak = Math.max(peak, v);
+    mdd  = Math.min(mdd, (v - peak) / peak);
+  }
+
+  // 수익률
+  const totalGain = portVal - totalInvested;
+  const totalRet  = (portVal / totalInvested - 1) * 100;
+  // DCA 없을 때는 initVal 기준 CAGR, DCA 있을 때는 최종/납입 기준 단순연환산
+  const cagr = hasDCA
+    ? (Math.pow(Math.max(portVal / totalInvested, 1e-6), 1 / n) - 1) * 100
+    : (Math.pow(portVal / initVal, 1 / n) - 1) * 100;
 
   const rfr = 0.04;
   const sharpe = vol > 0 ? (cagr / 100 - rfr) / (vol / 100) : 0;
-  const downReturns = portReturns.filter(r => r < 0);
-  const downsideDev = Math.sqrt(downReturns.reduce((s, r) => s + r ** 2, 0) / Math.max(n, 1));
-  const sortino = downsideDev > 0 ? (cagr / 100 - rfr) / downsideDev : 5;
-  const totalRet = (finalCum - 1) * 100;
+  const downR  = portReturns.filter(r => r < 0);
+  const downD  = Math.sqrt(downR.reduce((s, r) => s + r ** 2, 0) / Math.max(n, 1));
+  const sortino = downD > 0 ? (cagr / 100 - rfr) / downD : 5;
 
-  // 벤치마크 vs 포트폴리오 alpha
-  const benchFinal = benchVal / initVal;
-  const benchCAGR  = benchTicker !== 'none' ? (Math.pow(benchFinal, 1/n) - 1) * 100 : null;
-  const alpha      = benchCAGR != null ? cagr - benchCAGR : null;
+  const benchCAGR = benchTicker !== 'none'
+    ? (Math.pow(benchVal / initVal, 1 / n) - 1) * 100 : null;
+  const alpha = benchCAGR != null ? cagr - benchCAGR : null;
 
-  lastResult = { holdings, period, portSeries, benchSeries, annualData, stats: { cagr, vol, mdd: mdd*100, sharpe, sortino, totalRet, alpha, initVal }, benchTicker };
+  lastResult = {
+    holdings, period, portSeries, benchSeries, investedSeries, annualData, benchTicker,
+    hasDCA, dcaAmount, dcaFreq,
+    stats: { cagr, vol, mdd: mdd * 100, sharpe, sortino, totalRet, alpha, initVal, totalInvested, portVal, totalGain },
+  };
 
   showResults(lastResult);
 }
@@ -474,22 +555,42 @@ function showResults(result) {
   const res = document.getElementById('results');
   res.style.display = 'block';
 
-  const { stats, holdings, portSeries, benchSeries, annualData, benchTicker } = result;
+  const { stats, holdings, portSeries, benchSeries, investedSeries, annualData, benchTicker, hasDCA } = result;
 
   // ── 통계 카드 ──
   const alphaCard = stats.alpha != null
     ? `<div class="stat-card"><div class="stat-label">vs 벤치마크 (α)</div><div class="stat-val ${stats.alpha>=0?'pos':'neg'}">${stats.alpha>=0?'+':''}${stats.alpha.toFixed(1)}%</div><div class="stat-sub">연 초과수익</div></div>` : '';
+
+  const dcaCards = hasDCA ? `
+    <div class="stat-card">
+      <div class="stat-label">총 납입금</div>
+      <div class="stat-val mu">$${fmtD(stats.totalInvested)}</div>
+      <div class="stat-sub">초기 + 적립 합산</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">총 수익금</div>
+      <div class="stat-val ${stats.totalGain>=0?'pos':'neg'}">${stats.totalGain>=0?'+':''}$${fmtD(Math.abs(stats.totalGain))}</div>
+      <div class="stat-sub">최종 − 납입금</div>
+    </div>` : '';
+
+  // DCA 없을 때: "총 수익률" 카드는 initVal 기준
+  const retLabel = hasDCA ? '수익률 (납입 대비)' : '총 수익률';
+  const retSub   = hasDCA
+    ? `$${fmtD(stats.totalInvested)} → $${fmtD(stats.portVal)}`
+    : `$${fmtD(stats.initVal)} → $${fmtD(stats.portVal)}`;
+
   document.getElementById('stat-cards').innerHTML = `
     <div class="stat-card">
-      <div class="stat-label">총 수익률</div>
+      <div class="stat-label">${retLabel}</div>
       <div class="stat-val ${stats.totalRet>=0?'pos':'neg'}">${stats.totalRet>=0?'+':''}${stats.totalRet.toFixed(1)}%</div>
-      <div class="stat-sub">$${fmtD(stats.initVal)} → $${fmtD(stats.initVal*(1+stats.totalRet/100))}</div>
+      <div class="stat-sub">${retSub}</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">CAGR</div>
       <div class="stat-val ${stats.cagr>=0?'pos':'neg'}">${stats.cagr>=0?'+':''}${stats.cagr.toFixed(1)}%</div>
-      <div class="stat-sub">연평균 수익률</div>
+      <div class="stat-sub">${hasDCA ? '납입 대비 연환산' : '연평균 수익률'}</div>
     </div>
+    ${dcaCards}
     <div class="stat-card">
       <div class="stat-label">변동성</div>
       <div class="stat-val amb">${stats.vol.toFixed(1)}%</div>
@@ -498,7 +599,7 @@ function showResults(result) {
     <div class="stat-card">
       <div class="stat-label">최대 낙폭 (MDD)</div>
       <div class="stat-val neg">${stats.mdd.toFixed(1)}%</div>
-      <div class="stat-sub">최대 고점 대비</div>
+      <div class="stat-sub">최대 고점 대비 (월별)</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Sharpe</div>
@@ -513,7 +614,7 @@ function showResults(result) {
     ${alphaCard}`;
 
   // ── 누적 수익 라인 차트 ──
-  drawCumChart(portSeries, benchSeries, benchTicker, stats.initVal);
+  drawCumChart(portSeries, benchSeries, investedSeries, benchTicker, stats.initVal, hasDCA);
 
   // ── 연도별 바 차트 ──
   drawAnnualChart(annualData, benchTicker);
@@ -530,7 +631,8 @@ function showResults(result) {
   // 범례
   const legend = `
     <div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div>내 포트폴리오</div>
-    ${benchTicker !== 'none' ? `<div class="legend-item"><div class="legend-dot" style="background:#475569;border-top:1px dashed #64748b"></div>${benchTicker} (벤치마크)</div>` : ''}`;
+    ${benchTicker !== 'none' ? `<div class="legend-item"><div class="legend-dot" style="background:#475569;border-top:1px dashed #64748b"></div>${benchTicker} (벤치마크)</div>` : ''}
+    ${hasDCA ? `<div class="legend-item"><div class="legend-dot" style="background:#f59e0b;border-top:1px dashed #f59e0b"></div>납입금 (누적)</div>` : ''}`;
   document.getElementById('cum-legend').innerHTML = legend;
 
   res.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -539,11 +641,13 @@ function showResults(result) {
 // ─────────────────────────────────────────────────────────────────────────────
 // SVG 누적 수익 라인 차트
 // ─────────────────────────────────────────────────────────────────────────────
-function drawCumChart(portSeries, benchSeries, benchTicker, initVal) {
-  const W=700, H=240, P={t:16,r:20,b:36,l:72};
+function drawCumChart(portSeries, benchSeries, investedSeries, benchTicker, initVal, hasDCA) {
+  const W=700, H=240, P={t:16,r:24,b:36,l:72};
   const cw=W-P.l-P.r, ch=H-P.t-P.b;
 
-  const allVals = portSeries.map(d=>d.val).concat(benchTicker!=='none'?benchSeries.map(d=>d.val):[]);
+  const allVals = portSeries.map(d=>d.val)
+    .concat(benchTicker!=='none' ? benchSeries.map(d=>d.val) : [])
+    .concat(hasDCA ? investedSeries.map(d=>d.val) : []);
   const minV = Math.min(...allVals) * 0.97;
   const maxV = Math.max(...allVals) * 1.03;
   const years = portSeries.map(d=>d.year);
@@ -552,11 +656,11 @@ function drawCumChart(portSeries, benchSeries, benchTicker, initVal) {
   const toX = y => P.l + ((y - minY) / (maxY - minY)) * cw;
   const toY = v => P.t + ch - ((v - minV) / (maxV - minV)) * ch;
 
-  // Y 그리드 레이블 (투자금 기준 %)
+  // Y 그리드 레이블
   const yTicks = [];
   const valRange = maxV - minV;
   const rawStep = valRange / 4;
-  const mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
+  const mag = Math.pow(10, Math.floor(Math.log10(Math.max(rawStep, 1))));
   const step = Math.ceil(rawStep / mag) * mag;
   for (let v = Math.ceil(minV/step)*step; v <= maxV; v += step) yTicks.push(v);
 
@@ -573,12 +677,18 @@ function drawCumChart(portSeries, benchSeries, benchTicker, initVal) {
   // 기준선 (원금)
   const baseLine = `<line x1="${P.l}" y1="${toY(initVal).toFixed(1)}" x2="${P.l+cw}" y2="${toY(initVal).toFixed(1)}" stroke="rgba(255,255,255,0.08)" stroke-dasharray="3,3" stroke-width="1"/>`;
 
+  // 납입금 누적 선 (DCA 활성 시)
+  let investedLine = '';
+  if (hasDCA && investedSeries.length > 1) {
+    const iPath = 'M ' + investedSeries.map(d => `${toX(d.year).toFixed(1)} ${toY(d.val).toFixed(1)}`).join(' L ');
+    investedLine = `<path d="${iPath}" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,3" opacity=".7"/>`;
+  }
+
   // 포트폴리오 라인 + 면적
-  const portPts = portSeries.map(d => `${toX(d.year).toFixed(1)},${toY(d.val).toFixed(1)}`).join(' ');
   const portPath = 'M ' + portSeries.map(d => `${toX(d.year).toFixed(1)} ${toY(d.val).toFixed(1)}`).join(' L ');
-  const areaPath = `${portPath} L ${toX(maxY)} ${toY(minV)} L ${toX(minY)} ${toY(minV)} Z`;
+  const areaPath = `${portPath} L ${toX(maxY).toFixed(1)} ${toY(minV).toFixed(1)} L ${toX(minY).toFixed(1)} ${toY(minV).toFixed(1)} Z`;
   const portLine = `
-    <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b82f6" stop-opacity=".3"/><stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/></linearGradient></defs>
+    <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b82f6" stop-opacity=".25"/><stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/></linearGradient></defs>
     <path d="${areaPath}" fill="url(#ag)"/>
     <path d="${portPath}" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
 
@@ -589,14 +699,17 @@ function drawCumChart(portSeries, benchSeries, benchTicker, initVal) {
     benchLine = `<path d="${bPath}" fill="none" stroke="#475569" stroke-width="1.5" stroke-dasharray="5,3"/>`;
   }
 
-  // 끝점 값 레이블
+  // 끝점 레이블
   const lastPort = portSeries[portSeries.length-1];
-  const portPct = ((lastPort.val/initVal-1)*100);
-  const endLabel = `<text x="${(toX(lastPort.year)+5).toFixed(1)}" y="${(toY(lastPort.val)-4).toFixed(1)}" font-size="10" font-weight="700" fill="${portPct>=0?'#4ade80':'#f87171'}" font-family="Inter,sans-serif">${portPct>=0?'+':''}${portPct.toFixed(1)}%</text>`;
+  const endText  = hasDCA
+    ? `$${fmtD(lastPort.val)}`
+    : `${((lastPort.val/initVal-1)*100)>=0?'+':''}${((lastPort.val/initVal-1)*100).toFixed(1)}%`;
+  const endColor = lastPort.val >= initVal ? '#4ade80' : '#f87171';
+  const endLabel = `<text x="${(toX(lastPort.year)+4).toFixed(1)}" y="${(toY(lastPort.val)-4).toFixed(1)}" font-size="10" font-weight="700" fill="${endColor}" font-family="Inter,sans-serif">${endText}</text>`;
 
   document.getElementById('cum-chart').innerHTML = `
     <svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-      ${grid}${xLabels}${baseLine}${portLine}${benchLine}${endLabel}
+      ${grid}${xLabels}${baseLine}${investedLine}${portLine}${benchLine}${endLabel}
     </svg>`;
 }
 
@@ -661,7 +774,10 @@ function buildShareURL() {
     .filter(r => r.ticker && r.weight)
     .map(r => `${r.ticker.toUpperCase()}:${r.weight}`)
     .join(',');
-  const url = `${location.origin}/backtest?portfolio=${encodeURIComponent(portfolio)}&period=${period}`;
+  const dcaFreq = document.getElementById('dca-freq').value;
+  const dcaAmt  = document.getElementById('dca-amt').value;
+  let url = `${location.origin}/backtest?portfolio=${encodeURIComponent(portfolio)}&period=${period}`;
+  if (dcaFreq !== 'none') url += `&dca=${dcaFreq}&dca_amt=${dcaAmt}`;
   return url;
 }
 
@@ -694,6 +810,14 @@ function loadFromURL() {
   const portfolio = params.get('portfolio');
   const prd = parseInt(params.get('period'));
   if (prd && [3,5,7,10].includes(prd)) setPeriod(prd);
+  // DCA 복원
+  const dca    = params.get('dca');
+  const dcaAmt = params.get('dca_amt');
+  if (dca && ['monthly','quarterly','semiannual','annually'].includes(dca)) {
+    document.getElementById('dca-freq').value = dca;
+    onDcaFreqChange();
+    if (dcaAmt) document.getElementById('dca-amt').value = dcaAmt;
+  }
   if (portfolio) {
     rows = [];
     portfolio.split(',').forEach(item => {
@@ -715,8 +839,9 @@ addRow('BND', 40);
 const lb = document.getElementById('lb');
 lb.style.width = '40%';
 fetch('/etf_data.json').then(r => r.json()).then(data => {
-  for (const [sid, etfs] of Object.entries(data)) {
-    if (sid === 'sectorMeta' || !Array.isArray(etfs)) continue;
+  const sectors = data.allData || data;
+  for (const [sid, etfs] of Object.entries(sectors)) {
+    if (!Array.isArray(etfs)) continue;
     for (const etf of etfs) allData[etf.ticker] = { ...etf, _sid: sid };
   }
   lb.style.width = '100%';
