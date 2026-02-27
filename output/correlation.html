@@ -143,8 +143,15 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
       <button class="preset-btn" onclick="loadPreset(['SPY','BND','GLD','VNQ','VWO'])">글로벌 자산배분 (5종)</button>
       <button class="preset-btn" onclick="loadPreset(['QQQ','SQQQ'])">QQQ + 인버스</button>
       <button class="preset-btn" onclick="clearAll()">✕ 초기화</button>
+      <span style="width:1px;background:rgba(255,255,255,0.07);margin:0 2px;align-self:stretch;display:inline-block"></span>
+      <button class="preset-btn" id="share-corr-btn" onclick="shareCorrURL()" title="현재 티커 목록을 URL로 복사">🔗 링크 복사</button>
+      <a class="preset-btn" id="backtest-link" href="/backtest" target="_blank" style="text-decoration:none">📊 백테스트 →</a>
     </div>
   </div>
+<style>
+#backtest-link{display:inline-flex;align-items:center}
+#share-corr-btn.copied{background:rgba(74,222,128,0.15);border-color:rgba(74,222,128,0.35);color:#4ade80}
+</style>
 
   <!-- ── 분석 결과 ── -->
   <div id="result-area" style="display:none">
@@ -375,6 +382,7 @@ function renderAll() {
   renderHeatmap();
   renderScatter();
   renderInsights();
+  updateBacktestLink();
 }
 
 // ── 자산 통계 테이블 ──────────────────────────────────
@@ -575,6 +583,26 @@ function renderInsights() {
 document.getElementById('add-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') addTicker();
 });
+
+// ── 공유 기능 ─────────────────────────────────────────
+function shareCorrURL() {
+  if (selected.length === 0) { showError('먼저 ETF를 추가하세요.'); return; }
+  const tickers = selected.map(e => e.ticker).join(',');
+  const url = `${location.origin}/correlation?tickers=${encodeURIComponent(tickers)}`;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById('share-corr-btn');
+    btn.classList.add('copied'); btn.textContent = '✓ 복사됨!';
+    setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '🔗 링크 복사'; }, 2500);
+  });
+}
+
+// 백테스트 링크 — 현재 선택 티커를 균등 배분으로 전달
+function updateBacktestLink() {
+  if (selected.length === 0) return;
+  const w = (100 / selected.length).toFixed(1);
+  const portfolio = selected.map(e => `${e.ticker}:${w}`).join(',');
+  document.getElementById('backtest-link').href = `/backtest?portfolio=${encodeURIComponent(portfolio)}`;
+}
 
 // ── 데이터 로드 ───────────────────────────────────────
 const lb = document.getElementById('loading-bar');

@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>포트폴리오 백테스트 — CORRYU</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+<script src="/i18n.js"></script>
+<style>
+:root{--bg:#0a0d14;--card:rgba(18,22,36,0.92);--border:rgba(255,255,255,0.07);--t1:#e2e8f0;--t2:#94a3b8;--t3:#64748b}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--t1);font-family:'Inter',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+.glass{background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:14px}
+.grad-line{position:fixed;top:0;left:0;right:0;height:3px;z-index:200;background:linear-gradient(90deg,#3b82f6,#8b5cf6,#ec4899,#f59e0b)}
+.tg{background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+nav{position:fixed;top:3px;left:0;right:0;z-index:100;background:rgba(10,13,20,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center}
+.nav-i{max-width:1400px;margin:0 auto;padding:0 24px;width:100%;display:flex;align-items:center;gap:14px}
+.nav-back{display:flex;align-items:center;gap:6px;color:var(--t3);font-size:.82rem;font-weight:600;text-decoration:none;transition:color .15s}
+.nav-back:hover{color:#60a5fa}
+.nav-link{font-size:.78rem;color:var(--t3);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px;transition:color .15s}
+.nav-link:hover{color:var(--t1)}
+.wrap{max-width:1400px;margin:0 auto;padding:76px 20px 56px}
+#lb{height:3px;background:linear-gradient(90deg,#3b82f6,#8b5cf6);position:fixed;top:59px;left:0;width:0;z-index:99;transition:width .4s}
+
+/* ── 레이아웃 ── */
+.main-grid{display:grid;grid-template-columns:360px 1fr;gap:14px;align-items:start}
+@media(max-width:960px){.main-grid{grid-template-columns:1fr}}
+
+/* ── 입력 카드 ── */
+.input-card{padding:20px;position:sticky;top:68px}
+.card-title{font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.page-title{font-size:1.35rem;font-weight:900;letter-spacing:-.03em;margin-bottom:2px}
+.page-sub{font-size:.76rem;color:var(--t3);margin-bottom:16px}
+
+/* 프리셋 */
+.preset-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px}
+.pb{padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--t2);font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
+.pb:hover{background:rgba(255,255,255,0.09);color:var(--t1)}
+
+/* 포트폴리오 행 */
+.port-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.port-row{display:grid;grid-template-columns:1fr 72px 28px;gap:6px;align-items:center}
+.ticker-inp{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:7px;color:var(--t1);font-size:.84rem;font-family:inherit;padding:7px 10px;text-transform:uppercase;outline:none;transition:border .15s;width:100%}
+.ticker-inp:focus{border-color:rgba(59,130,246,0.5)}
+.ticker-inp::placeholder{color:var(--t3);text-transform:none}
+.weight-inp{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:7px;color:var(--t1);font-size:.84rem;font-family:inherit;padding:7px 8px;outline:none;transition:border .15s;text-align:right;width:100%}
+.weight-inp:focus{border-color:rgba(59,130,246,0.5)}
+.del-btn{background:none;border:none;color:var(--t3);cursor:pointer;font-size:1rem;padding:0;line-height:1;transition:color .15s}
+.del-btn:hover{color:#f87171}
+.add-row-btn{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.1);border-radius:7px;color:var(--t3);font-size:.78rem;font-weight:600;cursor:pointer;padding:7px 10px;font-family:inherit;transition:all .15s;width:100%;justify-content:center}
+.add-row-btn:hover{background:rgba(59,130,246,0.07);border-color:rgba(59,130,246,0.3);color:#60a5fa}
+
+/* 비중 합계 표시 */
+.weight-sum{display:flex;align-items:center;justify-content:space-between;padding:6px 0;margin-bottom:10px}
+.ws-bar{height:4px;border-radius:2px;background:rgba(255,255,255,0.06);flex:1;margin:0 10px;overflow:hidden}
+.ws-fill{height:100%;border-radius:2px;transition:width .3s,background .3s}
+.ws-label{font-size:.72rem;font-weight:800;font-variant-numeric:tabular-nums}
+
+/* 설정 */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.sg-item label{display:block;font-size:.67rem;color:var(--t3);font-weight:700;text-transform:uppercase;margin-bottom:5px}
+.sg-tabs{display:flex;border:1px solid var(--border);border-radius:7px;overflow:hidden}
+.sg-tab{flex:1;padding:6px;text-align:center;font-size:.75rem;font-weight:700;cursor:pointer;color:var(--t3);background:none;border:none;font-family:inherit;transition:all .15s}
+.sg-tab.on{background:rgba(59,130,246,0.2);color:#60a5fa}
+.sg-tab:hover:not(.on){background:rgba(255,255,255,0.04);color:var(--t1)}
+.sg-select{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:7px;color:var(--t1);font-size:.82rem;font-family:inherit;padding:6px 8px;outline:none;width:100%}
+
+/* 실행 버튼 */
+.run-btn{width:100%;padding:11px;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);border:none;color:#fff;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit;transition:opacity .2s,transform .1s;letter-spacing:.02em}
+.run-btn:hover{opacity:.9}
+.run-btn:active{transform:scale(.98)}
+.run-btn:disabled{opacity:.4;cursor:not-allowed}
+.err-msg{font-size:.72rem;color:#f87171;min-height:16px;margin-top:6px;text-align:center}
+
+/* ── 결과 영역 ── */
+#results{display:none;animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* 통계 카드 행 */
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:14px}
+.stat-card{padding:14px 16px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,0.02)}
+.stat-label{font-size:.63rem;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.stat-val{font-size:1.35rem;font-weight:900;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.stat-sub{font-size:.7rem;color:var(--t3);margin-top:3px}
+.pos{color:#4ade80}.neg{color:#f87171}.amb{color:#f59e0b}.mu{color:var(--t2)}
+
+/* 차트 카드 */
+.chart-card{padding:18px 20px;margin-bottom:12px}
+.chart-wrap{width:100%;overflow-x:auto}
+.chart-legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:.73rem;color:var(--t2);font-weight:600}
+.legend-dot{width:10px;height:3px;border-radius:2px}
+
+/* 포트폴리오 바 */
+.alloc-card{padding:16px 20px}
+.alloc-bars{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.alloc-row{display:flex;align-items:center;gap:10px}
+.alloc-ticker{width:48px;font-size:.8rem;font-weight:800;text-align:right;flex-shrink:0}
+.alloc-bar-wrap{flex:1;height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden}
+.alloc-bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.alloc-pct{width:40px;font-size:.75rem;color:var(--t3);font-weight:700;text-align:right;flex-shrink:0}
+
+/* 공유 섹션 */
+.share-row{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.share-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:var(--t2);font-size:.75rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
+.share-btn:hover{background:rgba(59,130,246,0.12);border-color:rgba(59,130,246,0.3);color:#60a5fa}
+.share-btn.copied{background:rgba(74,222,128,0.12);border-color:rgba(74,222,128,0.3);color:#4ade80}
+.disclaimer{font-size:.65rem;color:#1e293b;margin-top:8px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="grad-line"></div>
+<div id="lb"></div>
+
+<nav>
+  <div class="nav-i">
+    <a href="/index" class="nav-back">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>대시보드
+    </a>
+    <span style="color:#1e293b">/</span>
+    <a href="/landing" style="font-size:.95rem;font-weight:900;text-decoration:none"><span class="tg">CORRYU</span></a>
+    <span style="font-size:.82rem;color:var(--t3)">/ 백테스트</span>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:14px">
+      <a href="/screener"    class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>스크리너</a>
+      <a href="/correlation" class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="12" cy="16" r="2"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="9" y1="10" x2="11" y2="14"/><line x1="15" y1="10" x2="13" y2="14"/></svg>상관관계</a>
+      <a href="/compare"     class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>비교</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+<div class="main-grid">
+
+  <!-- ── 입력 카드 ── -->
+  <div>
+    <div class="glass input-card">
+      <div class="page-title">포트폴리오 <span class="tg">백테스트</span></div>
+      <div class="page-sub">CORRYU 지표 기반 팩터 모델 시뮬레이션</div>
+
+      <!-- 프리셋 -->
+      <div class="card-title">포트폴리오 프리셋</div>
+      <div class="preset-row">
+        <button class="pb" onclick="loadPreset('6040')">📊 60/40 클래식</button>
+        <button class="pb" onclick="loadPreset('allweather')">🌤 올웨더</button>
+        <button class="pb" onclick="loadPreset('golden')">🦋 골든 나비</button>
+        <button class="pb" onclick="loadPreset('tech')">🚀 기술주 집중</button>
+        <button class="pb" onclick="loadPreset('global')">🌏 글로벌 분산</button>
+      </div>
+
+      <!-- 포트폴리오 행 -->
+      <div class="card-title">포트폴리오 구성</div>
+      <div class="port-rows" id="port-rows"></div>
+      <button class="add-row-btn" id="add-row-btn" onclick="addRow()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        종목 추가 (최대 10개)
+      </button>
+
+      <!-- 비중 합계 표시 -->
+      <div class="weight-sum" style="margin-top:10px">
+        <span style="font-size:.7rem;color:var(--t3);font-weight:700">비중 합계</span>
+        <div class="ws-bar"><div class="ws-fill" id="ws-fill" style="width:0%;background:#3b82f6"></div></div>
+        <span class="ws-label" id="ws-label" style="color:var(--t3)">0%</span>
+      </div>
+      <button style="font-size:.72rem;background:none;border:none;color:#60a5fa;cursor:pointer;font-family:inherit;padding:0 0 10px;font-weight:700" onclick="equalWeight()">균등 배분 적용</button>
+
+      <!-- 설정 -->
+      <div class="card-title">시뮬레이션 설정</div>
+      <div class="settings-grid">
+        <div class="sg-item">
+          <label>기간</label>
+          <div class="sg-tabs" id="period-tabs">
+            <button class="sg-tab" data-yr="3"  onclick="setPeriod(3)">3년</button>
+            <button class="sg-tab on" data-yr="5" onclick="setPeriod(5)">5년</button>
+            <button class="sg-tab" data-yr="7"  onclick="setPeriod(7)">7년</button>
+            <button class="sg-tab" data-yr="10" onclick="setPeriod(10)">10년</button>
+          </div>
+        </div>
+        <div class="sg-item">
+          <label>리밸런싱</label>
+          <select class="sg-select" id="rebal-sel">
+            <option value="annual">연간</option>
+            <option value="none">없음 (Buy & Hold)</option>
+            <option value="quarter">분기</option>
+          </select>
+        </div>
+        <div class="sg-item">
+          <label>초기 투자금</label>
+          <select class="sg-select" id="init-sel">
+            <option value="10000">$10,000</option>
+            <option value="100000">$100,000</option>
+            <option value="1000000">$1,000,000</option>
+          </select>
+        </div>
+        <div class="sg-item">
+          <label>벤치마크</label>
+          <select class="sg-select" id="bench-sel">
+            <option value="SPY">S&P 500 (SPY)</option>
+            <option value="QQQ">NASDAQ 100 (QQQ)</option>
+            <option value="none">없음</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="run-btn" id="run-btn" onclick="runBacktest()">
+        ▶ 백테스트 실행
+      </button>
+      <div class="err-msg" id="err-msg"></div>
+    </div>
+  </div>
+
+  <!-- ── 결과 영역 ── -->
+  <div id="results">
+
+    <!-- 통계 카드 -->
+    <div class="stat-cards" id="stat-cards"></div>
+
+    <!-- 누적 수익 차트 -->
+    <div class="glass chart-card" id="cum-card">
+      <div class="card-title">누적 수익률</div>
+      <div class="chart-legend" id="cum-legend"></div>
+      <div class="chart-wrap" id="cum-chart"></div>
+      <div class="disclaimer">※ CORRYU 팩터 모델 기반 시뮬레이션입니다. 과거 결과는 미래 수익을 보장하지 않습니다.</div>
+    </div>
+
+    <!-- 연도별 수익률 차트 -->
+    <div class="glass chart-card" id="annual-card" style="margin-bottom:12px">
+      <div class="card-title">연도별 수익률</div>
+      <div class="chart-wrap" id="annual-chart"></div>
+    </div>
+
+    <!-- 포트폴리오 구성 + 공유 -->
+    <div class="glass alloc-card">
+      <div class="card-title">포트폴리오 구성</div>
+      <div class="alloc-bars" id="alloc-bars"></div>
+      <div class="share-row">
+        <button class="share-btn" id="share-url-btn" onclick="shareURL()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          링크 복사
+        </button>
+        <button class="share-btn" onclick="shareText()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          텍스트 복사
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /results -->
+
+  <!-- 빈 상태 (결과 전) -->
+  <div id="empty-hint" style="display:flex;align-items:center;justify-content:center;min-height:300px;padding:40px">
+    <div style="text-align:center;color:var(--t3)">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity=".2" style="margin:0 auto 12px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <div style="font-size:.92rem">포트폴리오를 구성하고</div>
+      <div style="font-size:.85rem;margin-top:4px">백테스트 실행 버튼을 눌러보세요</div>
+    </div>
+  </div>
+
+</div><!-- /main-grid -->
+</div><!-- /wrap -->
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// 상수 & 색상
+// ─────────────────────────────────────────────────────────────────────────────
+const COLORS = ['#3b82f6','#a78bfa','#f59e0b','#4ade80','#f87171','#38bdf8','#fb923c','#c084fc','#22d3ee','#a3e635'];
+const PRESETS_DEF = {
+  '6040':      [['SPY',60],['BND',40]],
+  allweather:  [['SPY',30],['TLT',40],['GLD',15],['IEI',7.5],['DBC',7.5]],
+  golden:      [['SPY',20],['IWM',20],['TLT',20],['SHY',20],['GLD',20]],
+  tech:        [['QQQ',50],['SOXX',25],['VGT',25]],
+  global:      [['VTI',40],['VEA',20],['VWO',10],['BND',20],['GLD',10]],
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 상태
+// ─────────────────────────────────────────────────────────────────────────────
+let allData = {};
+let period  = 5;
+let lastResult = null;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 포트폴리오 행 관리
+// ─────────────────────────────────────────────────────────────────────────────
+let rows = []; // [{id, ticker, weight}]
+let rowId = 0;
+
+function addRow(ticker='', weight='') {
+  if (rows.length >= 10) return;
+  const id = ++rowId;
+  rows.push({id, ticker, weight});
+  renderRows();
+}
+
+function removeRow(id) {
+  rows = rows.filter(r => r.id !== id);
+  renderRows();
+}
+
+function renderRows() {
+  const container = document.getElementById('port-rows');
+  container.innerHTML = rows.map((r, i) => `
+    <div class="port-row" data-id="${r.id}">
+      <input class="ticker-inp" type="text" placeholder="티커 (예: SPY)" value="${r.ticker}"
+        oninput="updateRow(${r.id},'ticker',this.value)" onblur="this.value=this.value.toUpperCase()" maxlength="10">
+      <div style="position:relative">
+        <input class="weight-inp" type="number" placeholder="%" min="0" max="100" step="0.5" value="${r.weight}"
+          oninput="updateRow(${r.id},'weight',this.value)" style="padding-right:18px">
+        <span style="position:absolute;right:7px;top:50%;transform:translateY(-50%);font-size:.72rem;color:var(--t3);pointer-events:none">%</span>
+      </div>
+      <button class="del-btn" onclick="removeRow(${r.id})">✕</button>
+    </div>`).join('');
+  document.getElementById('add-row-btn').style.display = rows.length >= 10 ? 'none' : 'flex';
+  updateWeightSum();
+}
+
+function updateRow(id, field, val) {
+  const r = rows.find(r => r.id === id);
+  if (r) r[field] = field === 'ticker' ? val.toUpperCase() : val;
+  updateWeightSum();
+}
+
+function updateWeightSum() {
+  const total = rows.reduce((s, r) => s + (parseFloat(r.weight) || 0), 0);
+  const pct = Math.min(100, total);
+  const fill = document.getElementById('ws-fill');
+  const label = document.getElementById('ws-label');
+  fill.style.width = pct + '%';
+  fill.style.background = Math.abs(total - 100) < 0.1 ? '#4ade80' : total > 100 ? '#f87171' : '#f59e0b';
+  label.style.color = Math.abs(total - 100) < 0.1 ? '#4ade80' : total > 100 ? '#f87171' : '#f59e0b';
+  label.textContent = total.toFixed(1) + '%';
+}
+
+function equalWeight() {
+  if (rows.length === 0) return;
+  const w = (100 / rows.length).toFixed(1);
+  rows.forEach(r => r.weight = w);
+  renderRows();
+}
+
+function setPeriod(yr) {
+  period = yr;
+  document.querySelectorAll('#period-tabs .sg-tab').forEach(t => t.classList.toggle('on', +t.dataset.yr === yr));
+}
+
+function loadPreset(key) {
+  const def = PRESETS_DEF[key];
+  if (!def) return;
+  rows = [];
+  def.forEach(([ticker, weight]) => { const id = ++rowId; rows.push({id, ticker, weight}); });
+  renderRows();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 시뮬레이션 엔진 (결정론적 팩터 모델)
+// ─────────────────────────────────────────────────────────────────────────────
+function hashStr(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+function lcg(seed) {
+  let s = Math.abs(seed % 2147483647) || 1;
+  return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+}
+
+// Normal(mean, std) via Box-Muller
+function randNorm(mean, std, seed) {
+  const rng = lcg(seed);
+  const u1 = Math.max(rng(), 1e-10);
+  const u2 = rng();
+  const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  return mean + z * std;
+}
+
+function simReturn(etf, year) {
+  const seed = hashStr(etf.ticker + ':y' + year);
+  // 연간 수익률: Normal(CAGR, Vol) — 단년도 변동성은 더 크게
+  const mu  = (etf.cagr || 10) / 100;
+  const sig = (etf.vol  || 15) / 100;
+  return randNorm(mu, sig, seed);
+}
+
+function simBenchmark(ticker, year) {
+  const etf = allData[ticker];
+  if (!etf) return randNorm(0.10, 0.15, hashStr(ticker + ':y' + year));
+  return simReturn(etf, year);
+}
+
+function runBacktest() {
+  // 유효성 검사
+  setErr('');
+  const holdings = [];
+  for (const r of rows) {
+    const t = r.ticker.trim().toUpperCase();
+    const w = parseFloat(r.weight);
+    if (!t || !w) continue;
+    if (!allData[t]) { setErr(`"${t}"를 찾을 수 없습니다. 티커를 확인해주세요.`); return; }
+    holdings.push({ etf: allData[t], weight: w / 100 });
+  }
+  if (holdings.length < 1) { setErr('종목을 1개 이상 추가하세요.'); return; }
+  const totalW = holdings.reduce((s, h) => s + h.weight, 0);
+  if (Math.abs(totalW - 1) > 0.005) { setErr(`비중 합계가 ${(totalW*100).toFixed(1)}%입니다. 100%가 되어야 합니다.`); return; }
+
+  const initVal = parseFloat(document.getElementById('init-sel').value);
+  const benchTicker = document.getElementById('bench-sel').value;
+  const currYear = 2025;
+  const startYear = currYear - period;
+
+  // 시뮬레이션 실행
+  const years = [];
+  for (let y = startYear; y < currYear; y++) years.push(y);
+
+  let portVal = initVal, benchVal = initVal;
+  const portSeries  = [{ year: startYear, val: initVal }];
+  const benchSeries = [{ year: startYear, val: initVal }];
+  const annualData  = [];
+
+  years.forEach(y => {
+    // 포트폴리오 수익률 (연간 리밸런싱 가정)
+    const portRet = holdings.reduce((s, h) => s + h.weight * simReturn(h.etf, y), 0);
+    portVal  *= (1 + portRet);
+    portSeries.push({ year: y + 1, val: portVal });
+
+    // 벤치마크
+    const benchRet = benchTicker !== 'none' ? simBenchmark(benchTicker, y) : 0;
+    benchVal *= (1 + benchRet);
+    if (benchTicker !== 'none') benchSeries.push({ year: y + 1, val: benchVal });
+
+    annualData.push({ year: y, portRet, benchRet });
+  });
+
+  // 통계 계산
+  const portReturns = annualData.map(d => d.portRet);
+  const n = portReturns.length;
+  const finalCum = portVal / initVal;
+  const cagr = (Math.pow(finalCum, 1 / n) - 1) * 100;
+  const mean = portReturns.reduce((s, r) => s + r, 0) / n;
+  const vol  = Math.sqrt(portReturns.reduce((s, r) => s + (r - mean) ** 2, 0) / Math.max(n-1,1)) * 100;
+
+  // MDD
+  let peak = initVal, mdd = 0;
+  let runVal = initVal;
+  portReturns.forEach(r => {
+    runVal *= (1 + r);
+    peak = Math.max(peak, runVal);
+    mdd = Math.min(mdd, (runVal - peak) / peak);
+  });
+
+  const rfr = 0.04;
+  const sharpe = vol > 0 ? (cagr / 100 - rfr) / (vol / 100) : 0;
+  const downReturns = portReturns.filter(r => r < 0);
+  const downsideDev = Math.sqrt(downReturns.reduce((s, r) => s + r ** 2, 0) / Math.max(n, 1));
+  const sortino = downsideDev > 0 ? (cagr / 100 - rfr) / downsideDev : 5;
+  const totalRet = (finalCum - 1) * 100;
+
+  // 벤치마크 vs 포트폴리오 alpha
+  const benchFinal = benchVal / initVal;
+  const benchCAGR  = benchTicker !== 'none' ? (Math.pow(benchFinal, 1/n) - 1) * 100 : null;
+  const alpha      = benchCAGR != null ? cagr - benchCAGR : null;
+
+  lastResult = { holdings, period, portSeries, benchSeries, annualData, stats: { cagr, vol, mdd: mdd*100, sharpe, sortino, totalRet, alpha, initVal }, benchTicker };
+
+  showResults(lastResult);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 결과 렌더링
+// ─────────────────────────────────────────────────────────────────────────────
+function showResults(result) {
+  document.getElementById('empty-hint').style.display = 'none';
+  const res = document.getElementById('results');
+  res.style.display = 'block';
+
+  const { stats, holdings, portSeries, benchSeries, annualData, benchTicker } = result;
+
+  // ── 통계 카드 ──
+  const alphaCard = stats.alpha != null
+    ? `<div class="stat-card"><div class="stat-label">vs 벤치마크 (α)</div><div class="stat-val ${stats.alpha>=0?'pos':'neg'}">${stats.alpha>=0?'+':''}${stats.alpha.toFixed(1)}%</div><div class="stat-sub">연 초과수익</div></div>` : '';
+  document.getElementById('stat-cards').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">총 수익률</div>
+      <div class="stat-val ${stats.totalRet>=0?'pos':'neg'}">${stats.totalRet>=0?'+':''}${stats.totalRet.toFixed(1)}%</div>
+      <div class="stat-sub">$${fmtD(stats.initVal)} → $${fmtD(stats.initVal*(1+stats.totalRet/100))}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">CAGR</div>
+      <div class="stat-val ${stats.cagr>=0?'pos':'neg'}">${stats.cagr>=0?'+':''}${stats.cagr.toFixed(1)}%</div>
+      <div class="stat-sub">연평균 수익률</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">변동성</div>
+      <div class="stat-val amb">${stats.vol.toFixed(1)}%</div>
+      <div class="stat-sub">연간 표준편차</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">최대 낙폭 (MDD)</div>
+      <div class="stat-val neg">${stats.mdd.toFixed(1)}%</div>
+      <div class="stat-sub">최대 고점 대비</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Sharpe</div>
+      <div class="stat-val ${stats.sharpe>=1?'pos':'mu'}">${stats.sharpe.toFixed(2)}</div>
+      <div class="stat-sub">위험 조정 수익</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Sortino</div>
+      <div class="stat-val ${stats.sortino>=1.2?'pos':'mu'}">${Math.min(stats.sortino,9.99).toFixed(2)}</div>
+      <div class="stat-sub">하방 위험 조정</div>
+    </div>
+    ${alphaCard}`;
+
+  // ── 누적 수익 라인 차트 ──
+  drawCumChart(portSeries, benchSeries, benchTicker, stats.initVal);
+
+  // ── 연도별 바 차트 ──
+  drawAnnualChart(annualData, benchTicker);
+
+  // ── 포트폴리오 구성 바 ──
+  const allocBars = holdings.map((h, i) => `
+    <div class="alloc-row">
+      <span class="alloc-ticker" style="color:${COLORS[i%COLORS.length]}">${h.etf.ticker}</span>
+      <div class="alloc-bar-wrap"><div class="alloc-bar-fill" style="width:${(h.weight*100).toFixed(1)}%;background:${COLORS[i%COLORS.length]}"></div></div>
+      <span class="alloc-pct">${(h.weight*100).toFixed(1)}%</span>
+    </div>`).join('');
+  document.getElementById('alloc-bars').innerHTML = allocBars;
+
+  // 범례
+  const legend = `
+    <div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div>내 포트폴리오</div>
+    ${benchTicker !== 'none' ? `<div class="legend-item"><div class="legend-dot" style="background:#475569;border-top:1px dashed #64748b"></div>${benchTicker} (벤치마크)</div>` : ''}`;
+  document.getElementById('cum-legend').innerHTML = legend;
+
+  res.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SVG 누적 수익 라인 차트
+// ─────────────────────────────────────────────────────────────────────────────
+function drawCumChart(portSeries, benchSeries, benchTicker, initVal) {
+  const W=700, H=240, P={t:16,r:20,b:36,l:72};
+  const cw=W-P.l-P.r, ch=H-P.t-P.b;
+
+  const allVals = portSeries.map(d=>d.val).concat(benchTicker!=='none'?benchSeries.map(d=>d.val):[]);
+  const minV = Math.min(...allVals) * 0.97;
+  const maxV = Math.max(...allVals) * 1.03;
+  const years = portSeries.map(d=>d.year);
+  const minY = years[0], maxY = years[years.length-1];
+
+  const toX = y => P.l + ((y - minY) / (maxY - minY)) * cw;
+  const toY = v => P.t + ch - ((v - minV) / (maxV - minV)) * ch;
+
+  // Y 그리드 레이블 (투자금 기준 %)
+  const yTicks = [];
+  const valRange = maxV - minV;
+  const rawStep = valRange / 4;
+  const mag = Math.pow(10, Math.floor(Math.log10(rawStep)));
+  const step = Math.ceil(rawStep / mag) * mag;
+  for (let v = Math.ceil(minV/step)*step; v <= maxV; v += step) yTicks.push(v);
+
+  const grid = yTicks.map(v => {
+    const pct = ((v/initVal - 1) * 100);
+    return `<line x1="${P.l}" y1="${toY(v).toFixed(1)}" x2="${P.l+cw}" y2="${toY(v).toFixed(1)}" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      <text x="${(P.l-6).toFixed(1)}" y="${(toY(v)+3.5).toFixed(1)}" text-anchor="end" font-size="9.5" fill="#475569" font-family="monospace">${pct>=0?'+':''}${pct.toFixed(0)}%</text>`;
+  }).join('');
+
+  const xLabels = years.map(y =>
+    `<text x="${toX(y).toFixed(1)}" y="${(H-5).toFixed(1)}" text-anchor="middle" font-size="9.5" fill="#475569" font-family="monospace">${y}</text>`
+  ).join('');
+
+  // 기준선 (원금)
+  const baseLine = `<line x1="${P.l}" y1="${toY(initVal).toFixed(1)}" x2="${P.l+cw}" y2="${toY(initVal).toFixed(1)}" stroke="rgba(255,255,255,0.08)" stroke-dasharray="3,3" stroke-width="1"/>`;
+
+  // 포트폴리오 라인 + 면적
+  const portPts = portSeries.map(d => `${toX(d.year).toFixed(1)},${toY(d.val).toFixed(1)}`).join(' ');
+  const portPath = 'M ' + portSeries.map(d => `${toX(d.year).toFixed(1)} ${toY(d.val).toFixed(1)}`).join(' L ');
+  const areaPath = `${portPath} L ${toX(maxY)} ${toY(minV)} L ${toX(minY)} ${toY(minV)} Z`;
+  const portLine = `
+    <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b82f6" stop-opacity=".3"/><stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/></linearGradient></defs>
+    <path d="${areaPath}" fill="url(#ag)"/>
+    <path d="${portPath}" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+
+  // 벤치마크 라인
+  let benchLine = '';
+  if (benchTicker !== 'none' && benchSeries.length) {
+    const bPath = 'M ' + benchSeries.map(d => `${toX(d.year).toFixed(1)} ${toY(d.val).toFixed(1)}`).join(' L ');
+    benchLine = `<path d="${bPath}" fill="none" stroke="#475569" stroke-width="1.5" stroke-dasharray="5,3"/>`;
+  }
+
+  // 끝점 값 레이블
+  const lastPort = portSeries[portSeries.length-1];
+  const portPct = ((lastPort.val/initVal-1)*100);
+  const endLabel = `<text x="${(toX(lastPort.year)+5).toFixed(1)}" y="${(toY(lastPort.val)-4).toFixed(1)}" font-size="10" font-weight="700" fill="${portPct>=0?'#4ade80':'#f87171'}" font-family="Inter,sans-serif">${portPct>=0?'+':''}${portPct.toFixed(1)}%</text>`;
+
+  document.getElementById('cum-chart').innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+      ${grid}${xLabels}${baseLine}${portLine}${benchLine}${endLabel}
+    </svg>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SVG 연도별 수익률 바 차트
+// ─────────────────────────────────────────────────────────────────────────────
+function drawAnnualChart(annualData, benchTicker) {
+  const W=700, H=200, P={t:16,r:20,b:36,l:56};
+  const cw=W-P.l-P.r, ch=H-P.t-P.b;
+  const n = annualData.length;
+  const hasBench = benchTicker !== 'none';
+  const barW = (cw / n) * (hasBench ? 0.37 : 0.6);
+  const gap  = (cw / n);
+
+  const portRets  = annualData.map(d => d.portRet * 100);
+  const benchRets = hasBench ? annualData.map(d => d.benchRet * 100) : [];
+  const allRets   = portRets.concat(benchRets);
+  const maxAbs    = Math.max(15, ...allRets.map(Math.abs)) * 1.15;
+
+  const toY = pct => P.t + ch/2 - (pct / maxAbs) * (ch/2);
+  const zero = P.t + ch / 2;
+
+  // Y 그리드
+  const yLabels = [-maxAbs*0.67, 0, maxAbs*0.67].map(v =>
+    `<line x1="${P.l}" y1="${toY(v).toFixed(1)}" x2="${P.l+cw}" y2="${toY(v).toFixed(1)}" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+     <text x="${(P.l-5).toFixed(1)}" y="${(toY(v)+3.5).toFixed(1)}" text-anchor="end" font-size="9" fill="#475569" font-family="monospace">${v>0?'+':''}${v.toFixed(0)}%</text>`
+  ).join('');
+
+  // 0선
+  const zeroLine = `<line x1="${P.l}" y1="${zero.toFixed(1)}" x2="${P.l+cw}" y2="${zero.toFixed(1)}" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>`;
+
+  const bars = annualData.map((d, i) => {
+    const cx   = P.l + i * gap + gap / 2;
+    const portH = Math.abs(d.portRet * 100) / maxAbs * (ch / 2);
+    const portY = d.portRet >= 0 ? zero - portH : zero;
+    const portColor = d.portRet >= 0 ? '#3b82f6' : '#ef4444';
+    let benchBar = '';
+    if (hasBench) {
+      const bH = Math.abs(d.benchRet * 100) / maxAbs * (ch / 2);
+      const bY = d.benchRet >= 0 ? zero - bH : zero;
+      benchBar = `<rect x="${(cx + barW*0.1).toFixed(1)}" y="${bY.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(bH,1).toFixed(1)}" fill="${d.benchRet>=0?'#475569':'#7f1d1d'}" rx="2" opacity=".7"/>`;
+    }
+    const portX = hasBench ? cx - barW * 1.1 : cx - barW / 2;
+    return `
+      <rect x="${portX.toFixed(1)}" y="${portY.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(portH,1).toFixed(1)}" fill="${portColor}" rx="2"/>
+      ${benchBar}
+      <text x="${cx.toFixed(1)}" y="${(H-6).toFixed(1)}" text-anchor="middle" font-size="9" fill="#475569" font-family="monospace">${d.year}</text>
+      <text x="${portX+barW/2}" y="${(d.portRet>=0?portY-3:portY+portH+9).toFixed(1)}" text-anchor="middle" font-size="8.5" font-weight="700" fill="${d.portRet>=0?'#60a5fa':'#f87171'}" font-family="monospace">${d.portRet>=0?'+':''}${(d.portRet*100).toFixed(0)}%</text>`;
+  }).join('');
+
+  document.getElementById('annual-chart').innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+      ${yLabels}${zeroLine}${bars}
+    </svg>`;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 공유 기능
+// ─────────────────────────────────────────────────────────────────────────────
+function buildShareURL() {
+  const portfolio = rows
+    .filter(r => r.ticker && r.weight)
+    .map(r => `${r.ticker.toUpperCase()}:${r.weight}`)
+    .join(',');
+  const url = `${location.origin}/backtest?portfolio=${encodeURIComponent(portfolio)}&period=${period}`;
+  return url;
+}
+
+function shareURL() {
+  navigator.clipboard.writeText(buildShareURL()).then(() => {
+    const btn = document.getElementById('share-url-btn');
+    btn.classList.add('copied');
+    btn.textContent = '✓ 복사됨!';
+    setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg> 링크 복사'; }, 2500);
+  });
+}
+
+function shareText() {
+  if (!lastResult) return;
+  const s = lastResult.stats;
+  const holdings = lastResult.holdings.map(h => `${h.etf.ticker} ${(h.weight*100).toFixed(0)}%`).join(' + ');
+  const text = `📊 CORRYU 백테스트 결과\n포트폴리오: ${holdings}\n기간: ${period}년\n\nCAGR ${s.cagr>=0?'+':''}${s.cagr.toFixed(1)}% | 총수익 ${s.totalRet>=0?'+':''}${s.totalRet.toFixed(1)}%\n변동성 ${s.vol.toFixed(1)}% | MDD ${s.mdd.toFixed(1)}% | Sharpe ${s.sharpe.toFixed(2)}\n\n${buildShareURL()}`;
+  navigator.clipboard.writeText(text).then(() => alert('클립보드에 복사됐습니다!'));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 유틸
+// ─────────────────────────────────────────────────────────────────────────────
+function setErr(msg) { document.getElementById('err-msg').textContent = msg; }
+function fmtD(v) { return v >= 1e6 ? (v/1e6).toFixed(2)+'M' : v >= 1e3 ? (v/1e3).toFixed(1)+'K' : Math.round(v).toString(); }
+
+// URL 파라미터로 초기 포트폴리오 로드
+function loadFromURL() {
+  const params = new URLSearchParams(location.search);
+  const portfolio = params.get('portfolio');
+  const prd = parseInt(params.get('period'));
+  if (prd && [3,5,7,10].includes(prd)) setPeriod(prd);
+  if (portfolio) {
+    rows = [];
+    portfolio.split(',').forEach(item => {
+      const [ticker, weight] = item.split(':');
+      if (ticker && weight) { const id = ++rowId; rows.push({ id, ticker: ticker.toUpperCase(), weight }); }
+    });
+    renderRows();
+    if (rows.length >= 1 && Object.keys(allData).length > 0) runBacktest();
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 초기화
+// ─────────────────────────────────────────────────────────────────────────────
+// 기본 행 2개
+addRow('SPY', 60);
+addRow('BND', 40);
+
+const lb = document.getElementById('lb');
+lb.style.width = '40%';
+fetch('/etf_data.json').then(r => r.json()).then(data => {
+  for (const [sid, etfs] of Object.entries(data)) {
+    if (sid === 'sectorMeta' || !Array.isArray(etfs)) continue;
+    for (const etf of etfs) allData[etf.ticker] = { ...etf, _sid: sid };
+  }
+  lb.style.width = '100%';
+  setTimeout(() => { lb.style.width = '0'; lb.style.transition = 'none'; }, 400);
+  loadFromURL();
+  I18n.init();
+}).catch(() => setErr('데이터 로드 실패. 새로고침 해주세요.'));
+</script>
+</body>
+</html>
