@@ -96,10 +96,10 @@ create trigger trg_vote_counts
 
 
 -- ── 5. 확인 쿼리 (실행 후 결과 확인) ──────────────────────────────
-select table_name, row_security
-from information_schema.tables
-where table_schema = 'public'
-  and table_name in ('profiles', 'comments', 'comment_votes');
+select tablename, rowsecurity
+from pg_tables
+where schemaname = 'public'
+  and tablename in ('profiles', 'comments', 'comment_votes');
 
 
 -- ── 6. ticker_likes (종목 좋아요) ────────────────────────────────
@@ -146,7 +146,7 @@ create or replace view ticker_likes_weekly as
 
 
 -- ── 8. 확인 쿼리 ──────────────────────────────────────────────────
-select table_name, row_security
-from information_schema.tables
-where table_schema = 'public'
-  and table_name in ('profiles', 'comments', 'comment_votes', 'ticker_likes');
+select tablename, rowsecurity
+from pg_tables
+where schemaname = 'public'
+  and tablename in ('profiles', 'comments', 'comment_votes', 'ticker_likes');
