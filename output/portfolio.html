@@ -299,7 +299,8 @@ function logout() {
 // ── ETF 데이터 ────────────────────────────────────────
 let allData = {};
 fetch('/etf_data.json').then(r=>r.json()).then(data => {
-  for (const [, etfs] of Object.entries(data)) {
+  for (const [, etfs] of Object.entries(data.allData || data)) {
+    if (!Array.isArray(etfs)) continue;
     for (const etf of etfs) allData[etf.ticker] = etf;
   }
   loadSavedPortfolio();
