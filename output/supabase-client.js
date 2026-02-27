@@ -7,8 +7,8 @@
  * 4. supabase_migration.sql 을 SQL Editor에서 실행하세요
  * ─────────────────────────────────────────────────────────
  */
-const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
-const SUPABASE_KEY = 'YOUR_ANON_PUBLIC_KEY';
+const SUPABASE_URL = 'https://pksehljuhuowmhzgetxp.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_f5GvapL-1ARW_Q6f64uCow_FuCpxem2';
 
 // ── 클라이언트 초기화 ─────────────────────────────────────
 let _sb = null;
@@ -18,7 +18,7 @@ try {
   });
 } catch(e) { console.warn('[CORRYU] Supabase 초기화 실패:', e.message); }
 
-const IS_CONFIGURED = SUPABASE_URL !== 'https://YOUR_PROJECT_ID.supabase.co' && !!_sb;
+const IS_CONFIGURED = SUPABASE_URL !== 'https://YOUR_PROJECT_ID.supabase.co' && SUPABASE_KEY !== 'YOUR_ANON_PUBLIC_KEY' && !!_sb;
 
 // ── CorryuAuth 네임스페이스 ───────────────────────────────
 window.CorryuAuth = {
