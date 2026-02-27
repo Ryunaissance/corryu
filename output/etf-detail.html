@@ -6,8 +6,39 @@
 <title>ETF 상세 — CORRYU</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/supabase-client.js"></script>
 <script src="/i18n.js"></script>
 <style>
+/* ── 댓글 공통 스타일 ─────────────────────────────── */
+.c-sort-btn{padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);color:#64748b;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
+.c-sort-btn.c-sort-on{background:rgba(59,130,246,0.14);border-color:rgba(59,130,246,0.35);color:#60a5fa}
+.c-item{padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.c-item:last-child{border-bottom:none}
+.c-reply-item{padding:10px 0 0 0;margin-left:44px}
+.c-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.82rem;flex-shrink:0}
+.c-nick{font-size:.84rem;font-weight:800;color:#e2e8f0}
+.c-time{font-size:.72rem;color:#475569}
+.c-body{font-size:.85rem;color:#cbd5e1;line-height:1.65;margin:6px 0 8px;white-space:pre-wrap;word-break:break-word}
+.c-action-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.c-vote-btn{display:inline-flex;align-items:center;gap:4px;background:none;border:none;color:#475569;font-size:.78rem;font-weight:700;cursor:pointer;padding:3px 7px;border-radius:5px;font-family:inherit;transition:all .15s}
+.c-vote-btn:hover{background:rgba(255,255,255,0.05);color:#94a3b8}
+.c-vote-btn.voted-like{color:#4ade80}
+.c-vote-btn.voted-dislike{color:#f87171}
+.c-reply-toggle{background:none;border:none;color:#475569;font-size:.75rem;font-weight:700;cursor:pointer;padding:3px 7px;border-radius:5px;font-family:inherit;transition:all .15s}
+.c-reply-toggle:hover{background:rgba(255,255,255,0.05);color:#94a3b8}
+.c-reply-count{font-size:.72rem;color:#334155}
+.c-del-btn{background:none;border:none;color:#334155;font-size:.7rem;cursor:pointer;padding:2px 6px;border-radius:4px;font-family:inherit;transition:color .15s;margin-left:auto}
+.c-del-btn:hover{color:#f87171}
+.c-reply-form{margin-top:10px;margin-left:44px;display:flex;gap:8px;align-items:flex-start}
+.c-reply-textarea{flex:1;min-height:56px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#e2e8f0;font-size:.82rem;font-family:inherit;padding:8px 10px;outline:none;resize:vertical;transition:border .15s;line-height:1.5}
+.c-reply-textarea:focus{border-color:rgba(59,130,246,0.4)}
+.c-reply-submit{padding:5px 12px;border-radius:7px;background:#3b82f6;border:none;color:#fff;font-size:.76rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+.c-reply-cancel{padding:5px 10px;border-radius:7px;background:none;border:1px solid rgba(255,255,255,0.08);color:#64748b;font-size:.76rem;font-weight:700;cursor:pointer;font-family:inherit}
+.c-replies-list{margin-top:8px;padding-left:44px;border-left:2px solid rgba(255,255,255,0.06)}
+.c-reply-item-inner{padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.c-reply-item-inner:last-child{border-bottom:none}
+</style>
 :root {
   --bg-primary: #0a0d14;
   --bg-card:    rgba(18,22,36,0.92);
@@ -515,6 +546,84 @@ nav {
       </div>
     </div>
   </div><!-- /page-content -->
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- 💬 종목 토론 (댓글)                                            -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <div id="comment-section" style="display:none;margin-top:16px">
+  <div style="background:rgba(18,22,36,0.92);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:22px 24px">
+
+    <!-- 헤더 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:1.05rem;font-weight:900;letter-spacing:-.02em">💬 종목 토론</span>
+        <span id="c-total-badge" style="padding:2px 8px;border-radius:10px;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.25);color:#60a5fa;font-size:.72rem;font-weight:800">0</span>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button class="c-sort-btn c-sort-on" data-sort="recent" onclick="setSortBy('recent')">최신순</button>
+        <button class="c-sort-btn" data-sort="likes" onclick="setSortBy('likes')">인기순</button>
+      </div>
+    </div>
+
+    <!-- 미연결 상태 배너 -->
+    <div id="c-not-configured" style="display:none;text-align:center;padding:28px;color:#334155;font-size:.82rem;border:1px dashed rgba(255,255,255,0.06);border-radius:10px;margin-bottom:12px">
+      <div style="font-size:1.4rem;margin-bottom:6px">⚙️</div>
+      댓글 기능을 사용하려면 <code style="color:#60a5fa">supabase-client.js</code>에 Supabase URL·Key를 설정하고<br>
+      <code>supabase_migration.sql</code>을 실행하세요.
+    </div>
+
+    <!-- 로그인 배너 (미로그인 시) -->
+    <div id="c-login-banner" style="display:none;margin-bottom:12px">
+      <a href="#" onclick="goLogin(event)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.2);text-decoration:none;color:#94a3b8;transition:background .15s" onmouseover="this.style.background='rgba(59,130,246,0.12)'" onmouseout="this.style.background='rgba(59,130,246,0.07)'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        <span style="font-size:.84rem;font-weight:600;color:#60a5fa">로그인하고 댓글 작성하기</span>
+        <span style="margin-left:auto;font-size:.72rem">회원가입 →</span>
+      </a>
+    </div>
+
+    <!-- 작성 폼 (로그인 시) -->
+    <div id="c-write-form" style="display:none;margin-bottom:16px">
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <div id="c-my-avatar" style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.84rem;flex-shrink:0"></div>
+        <div style="flex:1">
+          <textarea id="c-textarea" placeholder="이 종목에 대한 의견을 남겨보세요…" maxlength="2000"
+            style="width:100%;min-height:72px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:9px;color:#e2e8f0;font-size:.84rem;font-family:inherit;padding:10px 12px;outline:none;resize:vertical;transition:border .15s;line-height:1.5"
+            onfocus="this.style.borderColor='rgba(59,130,246,0.45)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'"></textarea>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
+            <span id="c-char-count" style="font-size:.68rem;color:#334155">0 / 2000</span>
+            <button onclick="submitTopComment()" style="padding:6px 16px;border-radius:7px;background:#3b82f6;border:none;color:#fff;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .15s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">댓글 등록 →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 댓글 목록 -->
+    <div id="c-list" style="display:flex;flex-direction:column;gap:2px"></div>
+
+    <!-- 더 보기 로딩 -->
+    <div id="c-load-more" style="display:none;text-align:center;margin-top:12px">
+      <button onclick="loadMoreComments()" style="padding:7px 20px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#94a3b8;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit">더 보기</button>
+    </div>
+
+    <!-- 게스트 게이트 (미로그인 + 댓글 있을 때) -->
+    <div id="c-guest-gate" style="display:none;position:relative;margin-top:-60px">
+      <div style="height:80px;background:linear-gradient(to bottom,transparent,rgba(10,13,20,0.97));pointer-events:none"></div>
+      <div style="text-align:center;padding:20px 16px 8px;background:rgba(10,13,20,0.97)">
+        <div style="font-size:.84rem;color:#475569;margin-bottom:10px">🔒 나머지 댓글은 로그인 후 볼 수 있습니다</div>
+        <a href="#" onclick="goLogin(event)" style="display:inline-flex;align-items:center;gap:6px;padding:8px 20px;border-radius:9px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;font-size:.82rem;font-weight:700;text-decoration:none">무료 회원가입 · 로그인</a>
+      </div>
+    </div>
+
+    <!-- 빈 상태 -->
+    <div id="c-empty" style="display:none;text-align:center;padding:36px;color:#334155">
+      <div style="font-size:1.6rem;margin-bottom:8px">💬</div>
+      <div style="font-size:.84rem">아직 댓글이 없습니다. 첫 번째 의견을 남겨보세요!</div>
+    </div>
+
+    <div style="font-size:.63rem;color:#1e293b;margin-top:14px;text-align:right">커뮤니티 가이드라인을 지켜 건강한 토론 문화를 만들어주세요.</div>
+  </div>
+  </div><!-- /comment-section -->
+
 </div><!-- /main-wrap -->
 
 <script>
@@ -1102,6 +1211,334 @@ fetch('/etf_data.json')
     document.getElementById('error-msg').textContent   = '네트워크 상태를 확인하거나 잠시 후 다시 시도해주세요.';
     document.getElementById('error-state').style.display = 'flex';
   });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 💬 댓글 시스템
+// ═══════════════════════════════════════════════════════════════════════════
+(async function initComments() {
+  const section = document.getElementById('comment-section');
+  section.style.display = 'block';
+
+  // Supabase 미연결 상태
+  if (!CorryuAuth.isConfigured) {
+    document.getElementById('c-not-configured').style.display = 'block';
+    return;
+  }
+
+  // ── 아바타 색상 팔레트 ────────────────────────────────────────────
+  const AVATAR_COLORS = [
+    '#3b82f6','#8b5cf6','#f59e0b','#22c55e','#ef4444',
+    '#0ea5e9','#f97316','#a855f7','#06b6d4','#84cc16',
+  ];
+  function nickColor(nick) {
+    let h = 0; for (const c of nick) h = (Math.imul(31,h)+c.charCodeAt(0))|0;
+    return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+  }
+
+  // ── 시간 포맷 ─────────────────────────────────────────────────────
+  function timeAgo(iso) {
+    const diff = (Date.now() - new Date(iso)) / 1000;
+    if (diff < 60)       return '방금 전';
+    if (diff < 3600)     return Math.floor(diff/60) + '분 전';
+    if (diff < 86400)    return Math.floor(diff/3600) + '시간 전';
+    if (diff < 604800)   return Math.floor(diff/86400) + '일 전';
+    return new Date(iso).toLocaleDateString('ko-KR', {year:'numeric',month:'2-digit',day:'2-digit'}).replace(/\. /g,'.').replace('.','');
+  }
+
+  // ── HTML 이스케이프 ───────────────────────────────────────────────
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // ── 상태 ─────────────────────────────────────────────────────────
+  let currentUser = null;
+  let currentProfile = null;
+  let myVotes = {}; // {comment_id: 'like'|'dislike'}
+  let comments = [];
+  let sortBy = 'recent'; // 'recent' | 'likes'
+  let offset = 0;
+  const PAGE_SIZE = 20;
+  const GUEST_LIMIT = 3; // 비로그인 시 보여줄 최대 수
+
+  // ── 로그인 상태 초기화 ────────────────────────────────────────────
+  currentUser = await CorryuAuth.getUser();
+  if (currentUser) {
+    currentProfile = await CorryuAuth.getProfile(currentUser.id);
+    showWriteForm();
+    await loadMyVotes();
+  } else {
+    document.getElementById('c-login-banner').style.display = 'block';
+  }
+
+  // 문자 수 카운터
+  document.getElementById('c-textarea')?.addEventListener('input', function() {
+    document.getElementById('c-char-count').textContent = this.value.length + ' / 2000';
+  });
+
+  // ── 내 투표 내역 로드 ─────────────────────────────────────────────
+  async function loadMyVotes() {
+    if (!currentUser) return;
+    const { data } = await _sb.from('comment_votes')
+      .select('comment_id, vote_type').eq('user_id', currentUser.id);
+    if (data) data.forEach(v => myVotes[v.comment_id] = v.vote_type);
+  }
+
+  // ── 댓글 로드 ─────────────────────────────────────────────────────
+  async function loadComments(reset = false) {
+    if (reset) { comments = []; offset = 0; }
+
+    let q = _sb.from('comments')
+      .select('*')
+      .eq('ticker', TICKER)
+      .is('parent_id', null)
+      .eq('is_deleted', false);
+
+    if (sortBy === 'likes') q = q.order('likes', { ascending: false }).order('created_at', { ascending: false });
+    else                    q = q.order('created_at', { ascending: false });
+
+    const limit = currentUser ? PAGE_SIZE : GUEST_LIMIT + 1;
+    q = q.range(offset, offset + limit - 1);
+
+    const { data, error } = await q;
+    if (error) { console.error('[CORRYU comments]', error); return; }
+
+    // 각 상위 댓글의 답글 로드
+    if (data && data.length > 0) {
+      const ids = data.map(c => c.id);
+      const { data: replies } = await _sb.from('comments')
+        .select('*').in('parent_id', ids).eq('is_deleted', false)
+        .order('created_at', { ascending: true });
+
+      const replyMap = {};
+      (replies || []).forEach(r => {
+        if (!replyMap[r.parent_id]) replyMap[r.parent_id] = [];
+        replyMap[r.parent_id].push(r);
+      });
+      data.forEach(c => c.replies = replyMap[c.id] || []);
+    }
+
+    if (reset) comments = data || [];
+    else       comments = comments.concat(data || []);
+    offset += data?.length || 0;
+
+    renderComments(data?.length || 0, limit);
+    await updateTotal();
+  }
+
+  // ── 전체 댓글 수 업데이트 ─────────────────────────────────────────
+  async function updateTotal() {
+    const { count } = await _sb.from('comments')
+      .select('*', { count: 'exact', head: true })
+      .eq('ticker', TICKER).eq('is_deleted', false).is('parent_id', null);
+    document.getElementById('c-total-badge').textContent = count ?? 0;
+  }
+
+  // ── 댓글 렌더링 ───────────────────────────────────────────────────
+  function renderComments(fetchedCount, limit) {
+    const list = document.getElementById('c-list');
+    const empty = document.getElementById('c-empty');
+    const gate  = document.getElementById('c-guest-gate');
+    const more  = document.getElementById('c-load-more');
+
+    if (comments.length === 0) {
+      list.innerHTML = ''; empty.style.display = 'block'; gate.style.display = 'none'; more.style.display = 'none'; return;
+    }
+    empty.style.display = 'none';
+
+    // 게스트 제한
+    const display = currentUser ? comments : comments.slice(0, GUEST_LIMIT);
+    const hasMore  = currentUser ? (fetchedCount >= limit) : (comments.length > GUEST_LIMIT);
+
+    list.innerHTML = display.map(c => renderTopComment(c)).join('');
+
+    gate.style.display = (!currentUser && comments.length >= GUEST_LIMIT) ? 'block' : 'none';
+    more.style.display = (currentUser && hasMore) ? 'block' : 'none';
+  }
+
+  function renderTopComment(c) {
+    const color = nickColor(c.nickname);
+    const myVote = myVotes[c.id];
+    const isOwn = currentUser && currentUser.id === c.user_id;
+    const repliesHtml = (c.replies || []).map(r => renderReply(r)).join('');
+    const replyCount = c.replies?.length || 0;
+    return `<div class="c-item" id="c-${c.id}">
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <div class="c-avatar" style="background:${color}">${esc(c.nickname.charAt(0).toUpperCase())}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="c-nick">${esc(c.nickname)}</span>
+            <span class="c-time">${timeAgo(c.created_at)}</span>
+            ${isOwn ? `<button class="c-del-btn" onclick="deleteComment('${c.id}',false)">삭제</button>` : ''}
+          </div>
+          <div class="c-body">${esc(c.content)}</div>
+          <div class="c-action-row">
+            <button class="c-vote-btn ${myVote==='like'?'voted-like':''}" onclick="vote('${c.id}','like')">
+              👍 <span id="lk-${c.id}">${c.likes}</span>
+            </button>
+            <button class="c-vote-btn ${myVote==='dislike'?'voted-dislike':''}" onclick="vote('${c.id}','dislike')">
+              👎 <span id="dk-${c.id}">${c.dislikes}</span>
+            </button>
+            ${currentUser ? `<button class="c-reply-toggle" onclick="toggleReplyForm('${c.id}')">💬 답글</button>` : ''}
+            ${replyCount > 0 ? `<span class="c-reply-count">${replyCount}개 답글</span>` : ''}
+          </div>
+          <!-- 답글 작성 폼 -->
+          <div id="rf-${c.id}" style="display:none;margin-top:10px">
+            <div class="c-reply-form" style="margin-left:0">
+              <textarea class="c-reply-textarea" id="rt-${c.id}" placeholder="답글을 작성하세요…" maxlength="2000"></textarea>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <button class="c-reply-submit" onclick="submitReply('${c.id}')">등록</button>
+                <button class="c-reply-cancel" onclick="toggleReplyForm('${c.id}')">취소</button>
+              </div>
+            </div>
+          </div>
+          <!-- 답글 목록 -->
+          <div class="c-replies-list" id="rl-${c.id}" style="${replyCount===0?'display:none':'display:block'}">${repliesHtml}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function renderReply(r) {
+    const color = nickColor(r.nickname);
+    const myVote = myVotes[r.id];
+    const isOwn = currentUser && currentUser.id === r.user_id;
+    return `<div class="c-reply-item-inner" id="c-${r.id}">
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <div class="c-avatar" style="width:28px;height:28px;font-size:.72rem;background:${color}">${esc(r.nickname.charAt(0).toUpperCase())}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="c-nick" style="font-size:.8rem">${esc(r.nickname)}</span>
+            <span class="c-time">${timeAgo(r.created_at)}</span>
+            ${isOwn ? `<button class="c-del-btn" onclick="deleteComment('${r.id}',true)">삭제</button>` : ''}
+          </div>
+          <div class="c-body" style="font-size:.82rem">${esc(r.content)}</div>
+          <div class="c-action-row">
+            <button class="c-vote-btn ${myVote==='like'?'voted-like':''}" onclick="vote('${r.id}','like')">
+              👍 <span id="lk-${r.id}">${r.likes}</span>
+            </button>
+            <button class="c-vote-btn ${myVote==='dislike'?'voted-dislike':''}" onclick="vote('${r.id}','dislike')">
+              👎 <span id="dk-${r.id}">${r.dislikes}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ── 작성 폼 표시 ─────────────────────────────────────────────────
+  function showWriteForm() {
+    const form = document.getElementById('c-write-form');
+    const av   = document.getElementById('c-my-avatar');
+    form.style.display = 'block';
+    if (currentProfile) {
+      const color = nickColor(currentProfile.nickname);
+      av.style.background = color;
+      av.textContent = currentProfile.nickname.charAt(0).toUpperCase();
+    }
+  }
+
+  // ── 댓글 등록 ─────────────────────────────────────────────────────
+  window.submitTopComment = async function() {
+    if (!currentUser || !currentProfile) return;
+    const ta = document.getElementById('c-textarea');
+    const content = ta.value.trim();
+    if (!content) return;
+    const { error } = await _sb.from('comments').insert({
+      ticker: TICKER, user_id: currentUser.id, nickname: currentProfile.nickname,
+      content, parent_id: null, depth: 0,
+    });
+    if (error) { alert('등록 실패: ' + error.message); return; }
+    ta.value = ''; document.getElementById('c-char-count').textContent = '0 / 2000';
+    await loadComments(true);
+  };
+
+  // ── 답글 폼 토글 ─────────────────────────────────────────────────
+  window.toggleReplyForm = function(parentId) {
+    const form = document.getElementById('rf-' + parentId);
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    if (form.style.display === 'block') document.getElementById('rt-' + parentId)?.focus();
+  };
+
+  // ── 답글 등록 ─────────────────────────────────────────────────────
+  window.submitReply = async function(parentId) {
+    if (!currentUser || !currentProfile) return;
+    const ta = document.getElementById('rt-' + parentId);
+    const content = ta?.value.trim();
+    if (!content) return;
+    const { error } = await _sb.from('comments').insert({
+      ticker: TICKER, user_id: currentUser.id, nickname: currentProfile.nickname,
+      content, parent_id: parentId, depth: 1,
+    });
+    if (error) { alert('등록 실패: ' + error.message); return; }
+    ta.value = '';
+    document.getElementById('rf-' + parentId).style.display = 'none';
+    await loadComments(true);
+  };
+
+  // ── 댓글 삭제 (소프트) ───────────────────────────────────────────
+  window.deleteComment = async function(id, isReply) {
+    if (!confirm('댓글을 삭제하시겠습니까?')) return;
+    await _sb.from('comments').update({ is_deleted: true }).eq('id', id);
+    await loadComments(true);
+  };
+
+  // ── 좋아요 / 싫어요 ──────────────────────────────────────────────
+  window.vote = async function(commentId, type) {
+    if (!currentUser) { goLogin(); return; }
+    const prev = myVotes[commentId];
+    const lkEl = document.getElementById('lk-' + commentId);
+    const dkEl = document.getElementById('dk-' + commentId);
+
+    if (prev === type) {
+      // 같은 버튼 → 취소
+      await _sb.from('comment_votes').delete()
+        .eq('comment_id', commentId).eq('user_id', currentUser.id);
+      delete myVotes[commentId];
+    } else {
+      // 새 투표 또는 변경
+      await _sb.from('comment_votes').upsert(
+        { comment_id: commentId, user_id: currentUser.id, vote_type: type },
+        { onConflict: 'comment_id,user_id' }
+      );
+      myVotes[commentId] = type;
+    }
+
+    // 최신 카운트 가져오기
+    const { data } = await _sb.from('comments').select('likes,dislikes').eq('id', commentId).single();
+    if (data && lkEl && dkEl) { lkEl.textContent = data.likes; dkEl.textContent = data.dislikes; }
+
+    // 버튼 스타일 업데이트
+    const lkBtn = document.querySelector(`#c-${commentId} .c-vote-btn:first-child`);
+    const dkBtn = document.querySelector(`#c-${commentId} .c-vote-btn:nth-child(2)`);
+    lkBtn?.classList.toggle('voted-like',    myVotes[commentId] === 'like');
+    dkBtn?.classList.toggle('voted-dislike', myVotes[commentId] === 'dislike');
+  };
+
+  // ── 정렬 전환 ─────────────────────────────────────────────────────
+  window.setSortBy = function(s) {
+    sortBy = s;
+    document.querySelectorAll('.c-sort-btn').forEach(b => b.classList.toggle('c-sort-on', b.dataset.sort === s));
+    loadComments(true);
+  };
+
+  // ── 더 보기 ────────────────────────────────────────────────────────
+  window.loadMoreComments = function() { loadComments(false); };
+
+  // ── 로그인 리디렉션 ──────────────────────────────────────────────
+  window.goLogin = function(e) {
+    e?.preventDefault();
+    location.href = '/login?redirect=' + encodeURIComponent(location.href);
+  };
+
+  // ── 최초 로드 ─────────────────────────────────────────────────────
+  await loadComments(true);
+
+  // ── 실시간 구독 (새 댓글 알림) ───────────────────────────────────
+  _sb.channel('comments:' + TICKER)
+    .on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'comments', filter: 'ticker=eq.' + TICKER },
+      () => { loadComments(true); }
+    ).subscribe();
+
+})();
 </script>
 </body>
 </html>

@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>로그인 — CORRYU</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/supabase-client.js"></script>
 <script src="/i18n.js"></script>
 <style>
 :root {
@@ -283,9 +285,12 @@ body {
           placeholder="name@example.com" autocomplete="email" required>
       </div>
 
-      <div class="form-group" id="name-group" style="display:none">
-        <label class="form-label" for="name">이름</label>
-        <input type="text" id="name" class="form-input" placeholder="홍길동" autocomplete="name">
+      <div class="form-group" id="nickname-group" style="display:none">
+        <label class="form-label" for="nickname">닉네임 <span style="color:#64748b;font-weight:400">(댓글 작성 시 표시)</span></label>
+        <input type="text" id="nickname" class="form-input" placeholder="2~12자, 영문·한글·숫자·_"
+          autocomplete="username" minlength="2" maxlength="12"
+          oninput="this.value=this.value.replace(/[^\w\uAC00-\uD7A3]/g,'')">
+        <div id="nickname-hint" style="font-size:.72rem;color:#64748b;margin-top:4px"></div>
       </div>
 
       <div class="form-group">
@@ -326,19 +331,19 @@ function switchTab(tab, el) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
 
-  const nameGroup  = document.getElementById('name-group');
+  const nickGroup  = document.getElementById('nickname-group');
   const forgotLink = document.getElementById('forgot-link');
   const submitBtn  = document.getElementById('submit-btn');
   const passInput  = document.getElementById('password');
 
   if (tab === 'signup') {
-    nameGroup.style.display  = 'block';
+    nickGroup.style.display  = 'block';
     forgotLink.style.display = 'none';
     submitBtn.textContent    = '계정 만들기';
     passInput.setAttribute('placeholder', '8자 이상의 비밀번호');
     passInput.setAttribute('autocomplete', 'new-password');
   } else {
-    nameGroup.style.display  = 'none';
+    nickGroup.style.display  = 'none';
     forgotLink.style.display = 'block';
     submitBtn.textContent    = '로그인';
     passInput.setAttribute('placeholder', '••••••••');
@@ -346,36 +351,106 @@ function switchTab(tab, el) {
   }
 }
 
-// ── 소셜 로그인 (Supabase 연결 후 구현) ──────────────
-function socialLogin(provider) {
-  // TODO: Supabase OAuth
-  // supabase.auth.signInWithOAuth({ provider: provider.toLowerCase() })
-  showToast(provider + ' 로그인은 Supabase 연결 후 활성화됩니다.');
-}
-
-// ── 이메일 로그인 / 회원가입 ──────────────────────────
-function emailLogin(e) {
-  e.preventDefault();
-  const email    = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-
-  if (currentTab === 'signup') {
-    // TODO: supabase.auth.signUp({ email, password })
-    showToast('회원가입은 Supabase 연결 후 활성화됩니다.');
-  } else {
-    // TODO: supabase.auth.signInWithPassword({ email, password })
-    showToast('이메일 로그인은 Supabase 연결 후 활성화됩니다.');
+// ── 소셜 로그인 ───────────────────────────────────────
+async function socialLogin(provider) {
+  if (!CorryuAuth.isConfigured) {
+    showToast('⚙️ Supabase를 먼저 연결하세요 (supabase-client.js)');
+    return;
+  }
+  setLoading(true);
+  try {
+    await CorryuAuth.signInWithOAuth(provider);
+    // OAuth는 리디렉션이므로 여기서 처리 불필요
+  } catch(e) {
+    showToast('❌ ' + (e.message || '소셜 로그인 실패'));
+    setLoading(false);
   }
 }
 
-// ── 비밀번호 찾기 ─────────────────────────────────────
-function forgotPassword(e) {
+// ── 닉네임 중복 검사 (디바운스) ──────────────────────
+let _nickTimer;
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('nickname').addEventListener('input', function() {
+    clearTimeout(_nickTimer);
+    const v = this.value.trim();
+    const hint = document.getElementById('nickname-hint');
+    if (v.length < 2) { hint.textContent = ''; return; }
+    hint.textContent = '확인 중...'; hint.style.color = '#64748b';
+    _nickTimer = setTimeout(async () => {
+      const taken = await CorryuAuth.isNicknameTaken(v);
+      if (taken) { hint.textContent = '이미 사용 중인 닉네임입니다.'; hint.style.color = '#f87171'; }
+      else        { hint.textContent = '✓ 사용 가능한 닉네임입니다.'; hint.style.color = '#4ade80'; }
+    }, 600);
+  });
+});
+
+// ── 이메일 로그인 / 회원가입 ──────────────────────────
+async function emailLogin(e) {
   e.preventDefault();
-  const email = document.getElementById('email').value;
-  if (!email) { showToast('먼저 이메일을 입력해주세요.'); return; }
-  // TODO: supabase.auth.resetPasswordForEmail(email)
-  showToast('비밀번호 재설정은 Supabase 연결 후 활성화됩니다.');
+  if (!CorryuAuth.isConfigured) {
+    showToast('⚙️ Supabase를 먼저 연결하세요 (supabase-client.js)');
+    return;
+  }
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  setLoading(true);
+
+  try {
+    if (currentTab === 'signup') {
+      const nickname = document.getElementById('nickname').value.trim();
+      if (!nickname || nickname.length < 2) {
+        showToast('닉네임을 2자 이상 입력해주세요.'); setLoading(false); return;
+      }
+      const taken = await CorryuAuth.isNicknameTaken(nickname);
+      if (taken) { showToast('이미 사용 중인 닉네임입니다.'); setLoading(false); return; }
+
+      await CorryuAuth.signUp(email, password, nickname);
+      showToast('✅ 가입 완료! 이메일을 확인해 인증 후 로그인하세요.', 5000);
+    } else {
+      await CorryuAuth.signIn(email, password);
+      showToast('✅ 로그인 성공!');
+      // 이전 페이지 또는 대시보드로 이동
+      const redirect = new URLSearchParams(location.search).get('redirect') || '/index';
+      setTimeout(() => { location.href = redirect; }, 800);
+    }
+  } catch(err) {
+    const msg = err.message || '오류가 발생했습니다.';
+    const friendly = msg.includes('Invalid login') ? '이메일 또는 비밀번호가 틀렸습니다.'
+                   : msg.includes('already registered') ? '이미 가입된 이메일입니다.'
+                   : msg.includes('Password should be') ? '비밀번호는 8자 이상이어야 합니다.'
+                   : msg;
+    showToast('❌ ' + friendly);
+  } finally { setLoading(false); }
 }
+
+// ── 비밀번호 찾기 ─────────────────────────────────────
+async function forgotPassword(e) {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  if (!email) { showToast('먼저 이메일을 입력해주세요.'); return; }
+  if (!CorryuAuth.isConfigured) { showToast('⚙️ Supabase를 먼저 연결하세요.'); return; }
+  try {
+    await CorryuAuth.resetPassword(email);
+    showToast('📧 비밀번호 재설정 메일을 발송했습니다.', 5000);
+  } catch(e) { showToast('❌ ' + e.message); }
+}
+
+// ── 버튼 로딩 상태 ────────────────────────────────────
+function setLoading(on) {
+  const btn = document.getElementById('submit-btn');
+  btn.disabled    = on;
+  btn.textContent = on ? '처리 중…' : (currentTab === 'signup' ? '계정 만들기' : '로그인');
+}
+
+// ── 이미 로그인된 경우 리디렉션 ──────────────────────
+(async () => {
+  if (!CorryuAuth.isConfigured) return;
+  const user = await CorryuAuth.getUser();
+  if (user) {
+    const redirect = new URLSearchParams(location.search).get('redirect') || '/index';
+    location.href = redirect;
+  }
+})();
 
 // ── Toast 알림 ────────────────────────────────────────
 let _toastTimer;
