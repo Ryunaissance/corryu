@@ -9,6 +9,8 @@
   "btn.legacy.unmark"  : "레거시 해제",
   "btn.move"           : "↪ 카테고리 이동",
   "btn.clear"          : "×",
+  "btn.watch.add"      : "★ 관심 추가",
+  "btn.watch.remove"   : "☆ 관심 해제",
   "btn.viewGraph"      : "그래프 보기",
   "btn.dashboard"      : "← 대시보드",
 

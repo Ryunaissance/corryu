@@ -9,6 +9,8 @@
   "btn.legacy.unmark"  : "Unmark Legacy",
   "btn.move"           : "↪ Move Category",
   "btn.clear"          : "×",
+  "btn.watch.add"      : "★ Add Watchlist",
+  "btn.watch.remove"   : "☆ Remove",
   "btn.viewGraph"      : "View Graph",
   "btn.dashboard"      : "← Dashboard",
 

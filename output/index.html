@@ -82,6 +82,23 @@ table.dataTable tbody tr.row-selected { background: rgba(59,130,246,0.08) !impor
 #fab-btn-move:hover { background: rgba(139,92,246,0.28); }
 #fab-btn-clear { background: rgba(255,255,255,0.05); color: #64748b; border: 1px solid rgba(255,255,255,0.08); padding: 7px 10px; }
 #fab-btn-clear:hover { background: rgba(255,255,255,0.1); color: #94a3b8; }
+/* Watchlist FAB */
+#fab-btn-watch   { background: rgba(251,191,36,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
+#fab-btn-watch:hover   { background: rgba(251,191,36,0.24); }
+#fab-btn-unwatch { background: rgba(100,116,139,0.1);  color: #94a3b8; border: 1px solid rgba(100,116,139,0.2); }
+#fab-btn-unwatch:hover { background: rgba(100,116,139,0.2); }
+/* 관심종목 탭 */
+.watchlist-tab { color: #fbbf24 !important; }
+.watchlist-tab.active { background: rgba(251,191,36,0.15) !important; color: #fbbf24 !important; border-color: rgba(251,191,36,0.45) !important; box-shadow: 0 0 20px rgba(251,191,36,0.2) !important; }
+.watchlist-tab:hover:not(.active) { background: rgba(251,191,36,0.08) !important; }
+.wl-count { display: inline-flex; align-items: center; justify-content: center; min-width: 17px; height: 17px; border-radius: 9px; background: rgba(251,191,36,0.2); font-size: 0.68rem; font-weight: 800; padding: 0 4px; margin-left: 3px; vertical-align: middle; }
+/* Star 버튼 */
+.star-btn { background: none; border: none; cursor: pointer; color: #2d3748; font-size: 0.95rem; line-height: 1; transition: color 0.12s, transform 0.12s; padding: 1px 3px; border-radius: 3px; vertical-align: middle; }
+.star-btn:hover   { color: #fbbf24; transform: scale(1.25); }
+.star-btn.starred { color: #fbbf24; }
+/* 관심종목 행 강조 */
+table.dataTable tbody tr.row-watchlist { background: rgba(251,191,36,0.04) !important; }
+table.dataTable tbody tr.row-watchlist.row-selected { background: rgba(59,130,246,0.1) !important; }
 
 /* 카테고리 이동 모달 */
 #sector-modal { display:none; position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.72); backdrop-filter:blur(4px); align-items:center; justify-content:center; }
@@ -240,6 +257,8 @@ table.dataTable tbody tr.row-selected { background: rgba(59,130,246,0.08) !impor
     <div id="fab-card">
         <div id="fab-label" id="fab-label-div"></div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button class="fab-btn" id="fab-btn-watch"   data-i18n="btn.watch.add">★ 관심 추가</button>
+            <button class="fab-btn" id="fab-btn-unwatch" data-i18n="btn.watch.remove">☆ 관심 해제</button>
             <button class="fab-btn" id="fab-btn-legacy" data-i18n="btn.legacy.mark">레거시 처리</button>
             <button class="fab-btn" id="fab-btn-unlegacy" data-i18n="btn.legacy.unmark">레거시 해제</button>
             <button class="fab-btn" id="fab-btn-move" data-i18n="btn.move">↪ 카테고리 이동</button>
@@ -298,7 +317,33 @@ function applyUserOverrides() {
 const acDefs = {"EQUITY": {"name": "주식", "name_en": "Equity", "icon": "📈", "order": 1}, "FIXED_INCOME": {"name": "채권", "name_en": "Fixed Income", "icon": "🛡️", "order": 2}, "REAL_ASSETS": {"name": "실물자산", "name_en": "Real Assets", "icon": "🏗️", "order": 3}, "ALTERNATIVE": {"name": "대안", "name_en": "Alternatives", "icon": "⚡", "order": 4}, "THEMATIC": {"name": "테마", "name_en": "Thematic", "icon": "🧩", "order": 5}};
 const sectorDefs = {"S01": {"name": "US 대형주 종합", "name_en": "US Large Cap", "icon": "🇺🇸", "anchor": "VOO", "asset_class": "EQUITY", "super_sector": "EQUITY_MARKET"}, "S02": {"name": "테크놀로지", "name_en": "Technology", "icon": "💻", "anchor": "XLK", "asset_class": "EQUITY", "super_sector": "EQUITY_MARKET"}, "S03": {"name": "헬스케어", "name_en": "Healthcare", "icon": "🏥", "anchor": "XLV", "asset_class": "EQUITY", "super_sector": null}, "S04": {"name": "금융", "name_en": "Financials", "icon": "🏦", "anchor": "XLF", "asset_class": "EQUITY", "super_sector": "EQUITY_MARKET"}, "S05": {"name": "경기소비재", "name_en": "Consumer Discretionary", "icon": "🛍️", "anchor": "XLY", "asset_class": "EQUITY", "super_sector": null}, "S06": {"name": "필수소비재", "name_en": "Consumer Staples", "icon": "🛒", "anchor": "XLP", "asset_class": "EQUITY", "super_sector": null}, "S07": {"name": "산업재", "name_en": "Industrials", "icon": "🏭", "anchor": "XLI", "asset_class": "EQUITY", "super_sector": "EQUITY_MARKET"}, "S08": {"name": "유틸리티", "name_en": "Utilities", "icon": "⚡", "anchor": "XLU", "asset_class": "EQUITY", "super_sector": null}, "S09": {"name": "커뮤니케이션", "name_en": "Communication", "icon": "📡", "anchor": "XLC", "asset_class": "EQUITY", "super_sector": "EQUITY_MARKET"}, "S10": {"name": "소재", "name_en": "Materials", "icon": "⛏️", "anchor": "XLB", "asset_class": "EQUITY", "super_sector": null}, "S11": {"name": "국제선진국", "name_en": "Intl Developed", "icon": "🌍", "anchor": "VEA", "asset_class": "EQUITY", "super_sector": "EQUITY_MARKET"}, "S12": {"name": "신흥국", "name_en": "Emerging Markets", "icon": "🌏", "anchor": "VWO", "asset_class": "EQUITY", "super_sector": null}, "S13": {"name": "중소형주", "name_en": "Small/Mid Cap", "icon": "📊", "anchor": "IWM", "asset_class": "EQUITY", "super_sector": "EQUITY_MARKET"}, "S14": {"name": "투자등급 채권", "name_en": "Investment Grade", "icon": "🏛️", "anchor": "BND", "asset_class": "FIXED_INCOME", "super_sector": null}, "S15": {"name": "단기채/현금성", "name_en": "Short-Term/Cash", "icon": "💵", "anchor": "SHV", "asset_class": "FIXED_INCOME", "super_sector": null}, "S16": {"name": "하이일드/신흥채", "name_en": "High Yield/EM Debt", "icon": "⚠️", "anchor": "HYG", "asset_class": "FIXED_INCOME", "super_sector": null}, "S17": {"name": "TIPS/인플레이션", "name_en": "TIPS/Inflation", "icon": "📈", "anchor": "SCHP", "asset_class": "FIXED_INCOME", "super_sector": null}, "S18": {"name": "금/귀금속", "name_en": "Gold/Precious Metals", "icon": "✨", "anchor": "GLD", "asset_class": "REAL_ASSETS", "super_sector": null}, "S19": {"name": "에너지/원자재", "name_en": "Energy/Commodities", "icon": "🛢️", "anchor": "XLE", "asset_class": "REAL_ASSETS", "super_sector": null}, "S20": {"name": "부동산/REITs", "name_en": "Real Estate/REITs", "icon": "🏘️", "anchor": "VNQ", "asset_class": "REAL_ASSETS", "super_sector": null}, "S21": {"name": "가상자산", "name_en": "Crypto/Digital", "icon": "₿", "anchor": "GBTC", "asset_class": "ALTERNATIVE", "super_sector": null}, "S22": {"name": "인버스/숏", "name_en": "Inverse/Short", "icon": "📉", "anchor": "SQQQ", "asset_class": "ALTERNATIVE", "super_sector": null}, "S24": {"name": "테마/특수목적", "name_en": "Thematic/Specialty", "icon": "🧩", "anchor": "—", "asset_class": "THEMATIC", "super_sector": null}};
 const superSectorDefs = {"EQUITY_MARKET": {"name": "주식 시장", "name_en": "Equity Market", "anchor": "QQQ", "icon": "🌐", "color": "#3b82f6", "sub_sectors": ["S01", "S02", "S04", "S07", "S09", "S11", "S13"]}};
-const myPortfolio = ["PEY", "HYG", "GBTC", "GLD", "VNQ", "UYR", "XLE"];
+// ── 관심종목 / 나의 포트폴리오 (Watchlist) ───────────────
+const WATCHLIST_KEY = 'corryu_watchlist';
+let watchlist = (function() {
+    const saved = localStorage.getItem(WATCHLIST_KEY);
+    // 최초 실행 시 기존 myPortfolio 항목을 초기값으로 마이그레이션
+    const initial = ["PEY", "HYG", "GBTC", "GLD", "VNQ", "UYR", "XLE"];
+    const s = new Set(saved ? JSON.parse(saved) : initial);
+    if (!saved) localStorage.setItem(WATCHLIST_KEY, JSON.stringify([...s]));
+    return s;
+})();
+
+function saveWatchlist() {
+    localStorage.setItem(WATCHLIST_KEY, JSON.stringify([...watchlist]));
+}
+
+function toggleWatchlist(ticker, trEl) {
+    if (watchlist.has(ticker)) watchlist.delete(ticker);
+    else watchlist.add(ticker);
+    saveWatchlist();
+    let starred = watchlist.has(ticker);
+    if (trEl) {
+        $(trEl).find('.star-btn[data-ticker="' + ticker + '"]').toggleClass('starred', starred);
+        $(trEl).toggleClass('row-watchlist', starred);
+    }
+    renderACTabs(); // 카운트 배지 업데이트
+    if (state.activeAC === 'WATCHLIST') table.draw(false); // 관심종목 뷰면 즉시 갱신
+}
 
 // 섹터ID → 슈퍼섹터ID 역방향 맵
 const sectorToSuperSector = {};
@@ -338,6 +383,10 @@ function renderACTabs() {
         let isActive = state.activeAC === ac ? ' active' : '';
         html += '<button class="ac-tab' + isActive + '" data-ac="' + ac + '">' + def.icon + ' ' + sName(def) + '</button>';
     }
+    // 관심종목 탭
+    let wActive = state.activeAC === 'WATCHLIST' ? ' active' : '';
+    let wBadge  = watchlist.size > 0 ? '<span class="wl-count">' + watchlist.size + '</span>' : '';
+    html += '<button class="ac-tab watchlist-tab' + wActive + '" data-ac="WATCHLIST" style="margin-left:8px">★ 관심종목' + wBadge + '</button>';
     $('#acTabs').html(html);
 }
 
@@ -501,6 +550,12 @@ function resetAllOverrides() {
 }
 
 function renderSectorTabs() {
+    // 관심종목 탭에서는 섹터 탭 대신 안내 메시지
+    if (state.activeAC === 'WATCHLIST') {
+        $('#secTabs').html('<span style="color:#64748b;font-size:0.82rem;padding:4px 0">★ 관심종목 ' + watchlist.size + '개 · 모든 섹터 포함</span>');
+        $('#subSecTabs').hide();
+        return;
+    }
     let sectors = [];
     if (state.activeAC === 'ALL') {
         sectors = Object.keys(sectorDefs).sort();
@@ -561,6 +616,18 @@ function renderSubSecTabs() {
 
 function renderSummary() {
     let html = '';
+    // 관심종목 뷰 전용 요약
+    if (state.activeAC === 'WATCHLIST') {
+        let wlData = Object.values(allData).flat().filter(e => watchlist.has(e.ticker));
+        let wCount  = wlData.length;
+        let wActive = wlData.filter(e => !e.is_legacy).length;
+        let wLegacy = wlData.filter(e => e.is_legacy).length;
+        html += '<div class="stat-card"><div class="stat-value" style="color:#fbbf24">★ ' + wCount + '</div><div class="stat-label">관심종목</div></div>';
+        html += '<div class="stat-card"><div class="stat-value text-green-400">' + wActive + '</div><div class="stat-label">Active</div></div>';
+        html += '<div class="stat-card"><div class="stat-value text-red-400">' + wLegacy + '</div><div class="stat-label">Legacy</div></div>';
+        $('#summaryCards').html(html);
+        return;
+    }
     let sec = state.activeSector;
     if (sec === 'ALL') {
         let metas = Object.values(sectorMeta);
@@ -774,9 +841,10 @@ function initDashboard() {
                 data: 'ticker', className: 'text-left font-semibold',
                 render: function(d, type, row) {
                     if (type !== 'display') return d;
-                    let isMine = myPortfolio.includes(d);
-                    let cls = isMine ? 'text-yellow-400 text-base' : 'text-blue-300';
-                    let h = '<span class="'+cls+'">'+d+'</span>';
+                    let isWatched = watchlist.has(d);
+                    let cls   = isWatched ? 'text-yellow-400 text-base' : 'text-blue-300';
+                    let star  = '<button class="star-btn' + (isWatched ? ' starred' : '') + '" data-ticker="' + d + '" title="관심종목 추가/제거" onclick="return false">★</button>';
+                    let h = star + '<span class="' + cls + '">' + d + '</span>';
                     if (row.short_history) h += '<span class="badge-short" title="상장 3년 미만">짧은연혁</span>';
                     return h;
                 }
@@ -786,8 +854,8 @@ function initDashboard() {
                 render: function(d, type, row) {
                     if (type !== 'display') return d;
                     let h = '<div class="leading-tight">'+d+'</div>';
-                    if (myPortfolio.includes(row.ticker)) {
-                        h += '<div class="mt-1"><span class="mine-badge">MY</span></div>';
+                    if (watchlist.has(row.ticker)) {
+                        h += '<div class="mt-1"><span class="mine-badge">★ 관심</span></div>';
                     }
                     return h;
                 }
@@ -880,12 +948,15 @@ function initDashboard() {
             else $(row).removeClass('row-legacy');
             if (selectedTickers.has(data.ticker)) $(row).addClass('row-selected');
             else $(row).removeClass('row-selected');
+            if (watchlist.has(data.ticker)) $(row).addClass('row-watchlist');
+            else $(row).removeClass('row-watchlist');
         }
     });
 
     // Custom filter
     $.fn.dataTable.ext.search.push(function(settings, searchData, dataIndex) {
         let row = settings.aoData[dataIndex]._aData;
+        if (state.activeAC === 'WATCHLIST' && !watchlist.has(row.ticker)) return false;
         if (state.hideLegacy && row.is_legacy) return false;
         if (state.hideShort && row.short_history) return false;
         if (state.minAum > 0 && row.aum < state.minAum * 1e6) return false;
@@ -900,7 +971,14 @@ function initDashboard() {
         state.activeAC = $(this).data('ac');
         state.expandedSuperSector = null;
         renderACTabs();
-        if (state.activeAC === 'ALL') {
+        if (state.activeAC === 'WATCHLIST') {
+            // 관심종목 뷰: 전체 데이터 로드 후 custom filter가 watchlist만 표시
+            state.activeSector = 'ALL';
+            renderSectorTabs();
+            renderSummary();
+            let data = Object.values(allData).flat();
+            table.clear().rows.add(data).draw();
+        } else if (state.activeAC === 'ALL') {
             loadSector('ALL');
         } else {
             let sectors = (acSectors[state.activeAC] || []).sort();
@@ -950,6 +1028,14 @@ function initDashboard() {
         let allChecked = visibleTickers.length > 0 && visibleTickers.every(t => selectedTickers.has(t));
         $('#select-all-cb').prop('checked', allChecked);
     }
+
+    // ── Star 버튼 (관심종목 토글) ─────────────────────
+    $('#masterTable').on('click', '.star-btn', function(e) {
+        e.stopPropagation();
+        let ticker = $(this).data('ticker');
+        let trEl   = $(this).closest('tr')[0];
+        toggleWatchlist(ticker, trEl);
+    });
 
     // 개별 체크박스
     $('#masterTable').on('change', 'input.row-cb', function() {
@@ -1189,6 +1275,51 @@ function initDashboard() {
         if (ok > 0 && typeof table !== 'undefined') table.rows().invalidate('data').draw(false);
         showToast('r_anchor 재계산 완료 (' + ok + '/' + tickerList.length + '종목)', 4000);
     }
+
+    // ── FAB: 관심종목 추가/해제 ───────────────────────
+    $('#fab-btn-watch').on('click', function() {
+        if (selectedTickers.size === 0) return;
+        selectedTickers.forEach(ticker => watchlist.add(ticker));
+        saveWatchlist();
+        renderACTabs();
+        table.rows().every(function() {
+            let d = this.data();
+            if (watchlist.has(d.ticker)) $(this.node()).addClass('row-watchlist');
+        });
+        // star 버튼 업데이트
+        table.rows({ filter: 'applied' }).every(function() {
+            let d = this.data();
+            if (watchlist.has(d.ticker)) $(this.node()).find('.star-btn').addClass('starred');
+        });
+        selectedTickers.clear();
+        $('input.row-cb').prop('checked', false);
+        table.rows().every(function() { $(this.node()).removeClass('row-selected'); });
+        updateFAB();
+        showToast('★ ' + (watchlist.size) + '개 관심종목 저장됨', 2500);
+    });
+
+    $('#fab-btn-unwatch').on('click', function() {
+        if (selectedTickers.size === 0) return;
+        selectedTickers.forEach(ticker => watchlist.delete(ticker));
+        saveWatchlist();
+        renderACTabs();
+        if (state.activeAC === 'WATCHLIST') {
+            table.draw(false); // watchlist 뷰면 제거된 행 즉시 숨김
+        } else {
+            table.rows().every(function() {
+                let d = this.data();
+                if (!watchlist.has(d.ticker)) {
+                    $(this.node()).removeClass('row-watchlist');
+                    $(this.node()).find('.star-btn').removeClass('starred');
+                }
+            });
+        }
+        selectedTickers.clear();
+        $('input.row-cb').prop('checked', false);
+        table.rows().every(function() { $(this.node()).removeClass('row-selected'); });
+        updateFAB();
+        showToast('☆ 관심종목에서 제거됨', 2500);
+    });
 
     $('#fab-btn-legacy').on('click', function() { applyLegacyAction(true); });
     $('#fab-btn-unlegacy').on('click', function() { applyLegacyAction(false); });
