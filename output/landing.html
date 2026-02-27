@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CORRYU — 글로벌 ETF 분석 대시보드</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="/i18n.js"></script>
+<style>
+:root {
+  --bg-primary: #0a0d14;
+  --bg-card: rgba(20,24,38,0.85);
+  --border: rgba(255,255,255,0.07);
+  --text-primary: #e2e8f0;
+  --text-muted: #64748b;
+  --accent: #3b82f6;
+  --accent-glow: rgba(59,130,246,0.3);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── 유틸리티 ── */
+.glass {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.text-gradient {
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.gradient-line {
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);
+}
+
+/* ── Navbar ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(10,13,20,0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  max-width: 1200px; margin: 0 auto; padding: 0 28px;
+  height: 62px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo { font-size: 1.2rem; font-weight: 900; letter-spacing: -0.5px; text-decoration: none; }
+.nav-links { display: flex; align-items: center; gap: 28px; }
+.nav-link {
+  color: var(--text-muted); font-size: 0.875rem; font-weight: 500;
+  text-decoration: none; transition: color 0.15s;
+}
+.nav-link:hover { color: var(--text-primary); }
+.nav-actions { display: flex; align-items: center; gap: 10px; }
+
+.btn-ghost {
+  padding: 7px 14px; border-radius: 8px;
+  background: transparent; border: 1px solid rgba(255,255,255,0.12);
+  color: #94a3b8; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; text-decoration: none; transition: all 0.15s;
+  font-family: inherit;
+}
+.btn-ghost:hover { border-color: rgba(255,255,255,0.28); color: var(--text-primary); }
+
+.btn-primary {
+  padding: 8px 20px; border-radius: 8px;
+  background: var(--accent); border: none;
+  color: white; font-size: 0.875rem; font-weight: 700;
+  cursor: pointer; text-decoration: none; transition: all 0.15s;
+  font-family: inherit;
+}
+.btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+
+/* ── Hero ── */
+.hero {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; padding: 100px 24px 64px;
+  position: relative; overflow: hidden;
+}
+.hero-glow {
+  position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+  width: 900px; height: 500px;
+  background: radial-gradient(ellipse, rgba(59,130,246,0.07) 0%, rgba(139,92,246,0.04) 40%, transparent 70%);
+  pointer-events: none;
+}
+.hero-content { max-width: 780px; position: relative; z-index: 1; }
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 5px 14px; border-radius: 24px;
+  background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25);
+  color: #60a5fa; font-size: 0.78rem; font-weight: 600;
+  margin-bottom: 28px; letter-spacing: 0.02em;
+}
+.hero-badge .dot {
+  width: 6px; height: 6px; border-radius: 50%; background: #60a5fa;
+  animation: pulse-dot 2s infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.hero-title {
+  font-size: clamp(2.8rem, 6.5vw, 5rem);
+  font-weight: 900; line-height: 1.08; letter-spacing: -0.04em;
+  margin-bottom: 24px;
+}
+.hero-sub {
+  font-size: 1.05rem; color: var(--text-muted); line-height: 1.75;
+  max-width: 580px; margin: 0 auto 44px;
+}
+
+.hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+.btn-hero-cta {
+  padding: 15px 34px; border-radius: 12px;
+  background: var(--accent); border: none; color: white;
+  font-size: 0.95rem; font-weight: 700;
+  cursor: pointer; text-decoration: none; transition: all 0.2s;
+  box-shadow: 0 0 28px var(--accent-glow); font-family: inherit;
+}
+.btn-hero-cta:hover {
+  background: #2563eb; transform: translateY(-2px);
+  box-shadow: 0 0 44px rgba(59,130,246,0.5);
+}
+.btn-hero-ghost {
+  padding: 15px 34px; border-radius: 12px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-primary); font-size: 0.95rem; font-weight: 600;
+  cursor: pointer; text-decoration: none; transition: all 0.2s; font-family: inherit;
+}
+.btn-hero-ghost:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.22); }
+
+.hero-scroll-hint {
+  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  color: var(--text-muted); font-size: 0.72rem; letter-spacing: 0.06em;
+  animation: bounce 2.5s infinite;
+}
+@keyframes bounce { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(6px); } }
+
+/* ── Stats Bar ── */
+.stats-bar {
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.015); padding: 52px 24px;
+}
+.stats-inner {
+  max-width: 1000px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; text-align: center;
+}
+.stat-num {
+  font-size: 2.4rem; font-weight: 900; letter-spacing: -0.03em;
+  display: block; line-height: 1.1; margin-bottom: 6px;
+}
+.stat-label { font-size: 0.8rem; color: var(--text-muted); }
+
+/* ── Features ── */
+.features-section { padding: 100px 24px; max-width: 1160px; margin: 0 auto; }
+.section-eyebrow {
+  font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em;
+  color: #60a5fa; text-transform: uppercase; margin-bottom: 12px;
+}
+.section-title {
+  font-size: clamp(1.9rem, 3.5vw, 2.6rem);
+  font-weight: 900; letter-spacing: -0.03em; margin-bottom: 14px; line-height: 1.15;
+}
+.section-sub { color: var(--text-muted); max-width: 480px; line-height: 1.75; font-size: 0.95rem; }
+
+.features-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px; margin-top: 64px;
+}
+.feature-card {
+  padding: 30px; border-radius: 16px;
+  background: rgba(20,24,38,0.7); border: 1px solid var(--border);
+  transition: all 0.22s; cursor: default;
+}
+.feature-card:hover {
+  border-color: rgba(96,165,250,0.25);
+  background: rgba(20,24,38,0.95);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+}
+.feature-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; margin-bottom: 18px;
+}
+.feature-name { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
+.feature-desc { font-size: 0.83rem; color: var(--text-muted); line-height: 1.65; }
+
+/* ── Preview Section ── */
+.preview-section {
+  padding: 80px 24px 100px;
+  border-top: 1px solid var(--border);
+  background: rgba(255,255,255,0.01);
+}
+.preview-inner { max-width: 1100px; margin: 0 auto; }
+.preview-window {
+  border-radius: 16px; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+}
+.preview-bar {
+  background: #161b22; padding: 12px 18px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.preview-dot { width: 10px; height: 10px; border-radius: 50%; }
+.preview-url {
+  flex: 1; background: #0d1117; border-radius: 6px;
+  padding: 4px 12px; font-size: 0.75rem; color: #484f58;
+  font-family: monospace; margin-left: 8px;
+}
+.preview-body {
+  background: #0a0d14; padding: 28px 24px;
+  min-height: 320px;
+}
+.preview-row {
+  display: grid; grid-template-columns: 32px 60px 1fr 64px 64px 64px 64px 64px 64px;
+  gap: 12px; padding: 8px 12px; border-radius: 6px;
+  font-size: 0.76rem; font-family: monospace; align-items: center;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.preview-row.header { color: #475569; font-size: 0.72rem; padding-bottom: 10px; }
+.preview-row:hover { background: rgba(59,130,246,0.05); }
+.preview-badge {
+  display: inline-block; padding: 2px 7px; border-radius: 4px;
+  font-size: 0.68rem; font-weight: 600;
+}
+.badge-active { background: rgba(74,222,128,0.12); color: #4ade80; }
+.badge-legacy { background: rgba(248,113,113,0.12); color: #f87171; }
+
+/* ── CTA Section ── */
+.cta-section { padding: 100px 24px; text-align: center; border-top: 1px solid var(--border); }
+.cta-card {
+  max-width: 620px; margin: 0 auto;
+  padding: 60px 48px; border-radius: 22px;
+  background: var(--bg-card); border: 1px solid rgba(96,165,250,0.15);
+  position: relative; overflow: hidden;
+}
+.cta-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+}
+.cta-glow {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 400px; height: 200px;
+  background: radial-gradient(ellipse, rgba(59,130,246,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ── Footer ── */
+footer {
+  padding: 44px 24px; border-top: 1px solid var(--border);
+  text-align: center; color: var(--text-muted); font-size: 0.8rem;
+}
+.footer-links { display: flex; gap: 24px; justify-content: center; margin: 16px 0; flex-wrap: wrap; }
+.footer-links a { color: var(--text-muted); text-decoration: none; transition: color 0.15s; }
+.footer-links a:hover { color: var(--text-primary); }
+
+/* ── 반응형 ── */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .stats-inner { grid-template-columns: repeat(2, 1fr); gap: 32px; }
+  .stat-num { font-size: 1.9rem; }
+  .cta-card { padding: 40px 24px; }
+  .preview-section { display: none; }
+}
+@media (max-width: 480px) {
+  .hero-title { font-size: 2.4rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- 상단 그래디언트 라인 -->
+<div class="gradient-line" style="height:3px;position:fixed;top:0;left:0;right:0;z-index:200"></div>
+
+<!-- Navbar -->
+<nav>
+  <div class="nav-inner">
+    <a href="/landing" class="nav-logo" style="text-decoration:none">
+      <span class="text-gradient">CORRYU</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features" class="nav-link">기능</a>
+      <a href="#preview" class="nav-link">미리보기</a>
+      <a href="/index" class="nav-link">대시보드</a>
+    </div>
+    <div class="nav-actions">
+      <button id="lang-switcher"
+        onclick="I18n.setLocale(I18n.locale()==='ko'?'en':'ko')"
+        class="btn-ghost">EN</button>
+      <a href="/login" class="btn-ghost">로그인</a>
+      <a href="/login" class="btn-primary">무료 시작</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      1,651개 ETF · 실시간 업데이트
+    </div>
+    <h1 class="hero-title">
+      글로벌 ETF 투자의<br>
+      <span class="text-gradient">새로운 기준</span>
+    </h1>
+    <p class="hero-sub">
+      상관계수·Z-Score·Sortino 등 9가지 핵심 지표로 1,600+ ETF를 한눈에 분석하세요.
+      섹터별 분류, 인터랙티브 그래프, 다기기 동기화까지 하나의 대시보드에서.
+    </p>
+    <div class="hero-actions">
+      <a href="/login" class="btn-hero-cta">무료로 시작하기 →</a>
+      <a href="/index" class="btn-hero-ghost">대시보드 미리보기</a>
+    </div>
+  </div>
+  <div class="hero-scroll-hint">
+    <span>SCROLL</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</section>
+
+<!-- ── Stats Bar ── -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div>
+      <span class="stat-num text-gradient">1,651</span>
+      <span class="stat-label">글로벌 ETF</span>
+    </div>
+    <div>
+      <span class="stat-num" style="color:#a78bfa">23</span>
+      <span class="stat-label">섹터 분류</span>
+    </div>
+    <div>
+      <span class="stat-num" style="color:#34d399">9</span>
+      <span class="stat-label">분석 지표</span>
+    </div>
+    <div>
+      <span class="stat-num" style="color:#fbbf24">5Y</span>
+      <span class="stat-label">히스토리 데이터</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Features ── -->
+<section class="features-section" id="features">
+  <div>
+    <p class="section-eyebrow">주요 기능</p>
+    <h2 class="section-title">
+      투자 판단을 뒷받침하는<br>
+      <span class="text-gradient">프로급 분석 도구</span>
+    </h2>
+    <p class="section-sub">
+      단순 수익률 비교를 넘어, 시장 구조를 꿰뚫는 깊이 있는 분석을 제공합니다.
+    </p>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(59,130,246,0.12)">📊</div>
+      <div class="feature-name">1,600+ ETF 전체 커버리지</div>
+      <p class="feature-desc">미국 상장 ETF 전체를 실시간으로 추적합니다. 시가총액 순위, 상장일, 레거시 여부까지 한눈에 확인.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(139,92,246,0.12)">🔗</div>
+      <div class="feature-name">상관계수 인터랙티브 그래프</div>
+      <p class="feature-desc">ETF 간 상관관계를 네트워크 그래프로 시각화합니다. 임계값 조절, 노드 클릭, 섹터 필터를 지원합니다.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(52,211,153,0.1)">📈</div>
+      <div class="feature-name">9가지 핵심 지표</div>
+      <p class="feature-desc">Z-Score, RSI (14일), Sortino 비율, 52W Range, CAGR, 연환산 변동성, 200일 이평 이격도 등 프로 지표 제공.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(251,191,36,0.1)">🗂️</div>
+      <div class="feature-name">23개 섹터 체계적 분류</div>
+      <p class="feature-desc">주식·채권·실물자산·대안·테마 5개 자산군, 23개 섹터로 분류된 데이터를 원클릭 필터링.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(236,72,153,0.1)">🔄</div>
+      <div class="feature-name">다기기 동기화</div>
+      <p class="feature-desc">레거시 마킹, 카테고리 이동 등 내 커스터마이징 설정이 PC·모바일 어디서든 자동으로 동기화됩니다.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:rgba(96,165,250,0.1)">🌐</div>
+      <div class="feature-name">한국어 / 영어 실시간 전환</div>
+      <p class="feature-desc">버튼 하나로 한국어와 영어를 즉시 전환합니다. 글로벌 투자자와 협업할 때도 문제없습니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Dashboard Preview ── -->
+<section class="preview-section" id="preview">
+  <div class="preview-inner">
+    <div style="text-align:center;margin-bottom:52px">
+      <p class="section-eyebrow">대시보드 미리보기</p>
+      <h2 class="section-title" style="max-width:500px;margin:0 auto 12px">
+        이런 화면에서<br><span class="text-gradient">분석합니다</span>
+      </h2>
+    </div>
+    <div class="preview-window">
+      <div class="preview-bar">
+        <div class="preview-dot" style="background:#ff5f57"></div>
+        <div class="preview-dot" style="background:#febc2e"></div>
+        <div class="preview-dot" style="background:#28c840"></div>
+        <div class="preview-url">corryu.vercel.app</div>
+      </div>
+      <div class="preview-body">
+        <!-- 헤더 미니 -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding:12px 16px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border)">
+          <span style="font-weight:800;font-size:0.9rem"><span class="text-gradient">CORRYU</span> Master Valuation Dashboard</span>
+          <span style="font-size:0.72rem;color:var(--text-muted)">Total 1,651 ETFs · 23 Sectors · Updated: 2026-02-27</span>
+        </div>
+        <!-- 섹터 탭 미니 -->
+        <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">
+          <span style="padding:4px 12px;border-radius:6px;background:rgba(59,130,246,0.2);color:#60a5fa;font-size:0.72rem;font-weight:600">📈 US 대형주</span>
+          <span style="padding:4px 12px;border-radius:6px;background:rgba(255,255,255,0.04);color:var(--text-muted);font-size:0.72rem">💻 테크놀로지</span>
+          <span style="padding:4px 12px;border-radius:6px;background:rgba(255,255,255,0.04);color:var(--text-muted);font-size:0.72rem">🏥 헬스케어</span>
+          <span style="padding:4px 12px;border-radius:6px;background:rgba(255,255,255,0.04);color:var(--text-muted);font-size:0.72rem">🏦 금융</span>
+          <span style="padding:4px 12px;border-radius:6px;background:rgba(255,255,255,0.04);color:var(--text-muted);font-size:0.72rem">🌎 국제선진국</span>
+        </div>
+        <!-- 테이블 헤더 -->
+        <div class="preview-row header">
+          <span>#</span><span>Ticker</span><span>ETF Name</span>
+          <span>r_Anchor</span><span>Z-Score</span><span>RSI</span><span>CAGR</span><span>Status</span>
+        </div>
+        <!-- 샘플 데이터 행들 -->
+        <div class="preview-row">
+          <span style="color:var(--text-muted)">1</span>
+          <span style="color:#60a5fa;font-weight:700">SPY</span>
+          <span style="color:var(--text-muted)">SPDR S&P 500 ETF Trust</span>
+          <span style="color:#4ade80">0.98</span>
+          <span style="color:#fbbf24">+1.2</span>
+          <span>58.3</span>
+          <span style="color:#4ade80">+11.4%</span>
+          <span><span class="preview-badge badge-active">Active</span></span>
+        </div>
+        <div class="preview-row">
+          <span style="color:var(--text-muted)">2</span>
+          <span style="color:#60a5fa;font-weight:700">QQQ</span>
+          <span style="color:var(--text-muted)">Invesco QQQ Trust</span>
+          <span style="color:#4ade80">1.00</span>
+          <span style="color:#f87171">-0.8</span>
+          <span>44.1</span>
+          <span style="color:#4ade80">+15.2%</span>
+          <span><span class="preview-badge badge-active">Active</span></span>
+        </div>
+        <div class="preview-row">
+          <span style="color:var(--text-muted)">3</span>
+          <span style="color:#60a5fa;font-weight:700">IVV</span>
+          <span style="color:var(--text-muted)">iShares Core S&P 500 ETF</span>
+          <span style="color:#4ade80">0.99</span>
+          <span style="color:#fbbf24">+1.1</span>
+          <span>57.9</span>
+          <span style="color:#4ade80">+11.3%</span>
+          <span><span class="preview-badge badge-active">Active</span></span>
+        </div>
+        <div class="preview-row" style="opacity:0.45">
+          <span style="color:var(--text-muted)">4</span>
+          <span style="color:#94a3b8;font-weight:700;text-decoration:line-through">SPXU</span>
+          <span style="color:var(--text-muted);text-decoration:line-through">ProShares UltraPro Short S&P500</span>
+          <span>-0.97</span>
+          <span>-1.4</span>
+          <span>38.2</span>
+          <span style="color:#f87171">-32.1%</span>
+          <span><span class="preview-badge badge-legacy">Legacy</span></span>
+        </div>
+        <div style="text-align:center;margin-top:16px;color:var(--text-muted);font-size:0.75rem">
+          + 1,647개 행 더 보기 · 필터, 정렬, 검색 가능
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ── -->
+<section class="cta-section">
+  <div class="cta-card">
+    <div class="cta-glow"></div>
+    <div style="position:relative">
+      <p style="font-size:0.78rem;font-weight:700;letter-spacing:0.1em;color:#60a5fa;margin-bottom:14px">지금 바로 시작하세요</p>
+      <h2 style="font-size:1.9rem;font-weight:900;letter-spacing:-0.03em;margin-bottom:12px;line-height:1.2">
+        ETF 투자,<br><span class="text-gradient">더 스마트하게</span>
+      </h2>
+      <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:36px;line-height:1.7">
+        무료 계정으로 모든 기능을 사용해보세요.
+      </p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a href="/login" class="btn-hero-cta">무료 계정 만들기</a>
+        <a href="/index" class="btn-hero-ghost">로그인 없이 둘러보기</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer>
+  <div style="margin-bottom:20px">
+    <span class="text-gradient" style="font-weight:900;font-size:1.05rem">CORRYU</span>
+  </div>
+  <div class="footer-links">
+    <a href="/landing">홈</a>
+    <a href="#features">기능</a>
+    <a href="/index">대시보드</a>
+    <a href="/graph">상관관계 그래프</a>
+    <a href="/login">로그인</a>
+  </div>
+  <p style="margin-top:8px">© 2026 CORRYU. 글로벌 ETF 분석 대시보드.</p>
+</footer>
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  I18n.init();
+});
+</script>
+</body>
+</html>
