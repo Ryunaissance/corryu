@@ -419,8 +419,8 @@ const lb = document.getElementById('lb');
 lb.style.width = '40%';
 fetch('/etf_data.json').then(r => r.json()).then(data => {
   sectorMeta = data.sectorMeta || {};
-  for (const [sid, etfs] of Object.entries(data)) {
-    if (sid === 'sectorMeta') continue;
+  const sectors = data.allData || data;
+  for (const [sid, etfs] of Object.entries(sectors)) {
     if (!Array.isArray(etfs)) continue;
     for (const etf of etfs) allEtfs.push({ ...etf, _sid: sid });
   }
