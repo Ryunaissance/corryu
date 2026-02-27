@@ -131,7 +131,7 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
     <div class="selector-row" id="chip-row">
       <!-- chips injected here -->
       <div class="add-input-wrap" id="add-wrap">
-        <input type="text" class="add-input" id="add-input" placeholder="티커 입력 (예: QQQ)" maxlength="10" autocomplete="off">
+        <input type="text" class="add-input" id="add-input" placeholder="티커 입력 (예: QQQ 또는 QQQ,SPY,SOXX)" maxlength="20" autocomplete="off">
         <button class="add-btn" onclick="addTicker()">+ 추가</button>
       </div>
     </div>
@@ -345,14 +345,21 @@ function showError(msg) {
 
 function addTicker() {
   const input = document.getElementById('add-input');
-  const t = input.value.trim().toUpperCase();
-  if (!t) return;
+  const raw = input.value.trim().toUpperCase();
+  if (!raw) return;
   input.value = '';
-  if (selectedETFs.length >= 3) { showError('최대 3개까지 추가할 수 있습니다.'); return; }
-  if (selectedETFs.some(e => e.ticker === t)) { showError(`${t}는 이미 추가되어 있습니다.`); return; }
-  const found = allData[t];
-  if (!found) { showError(`"${t}" ETF를 CORRYU 데이터베이스에서 찾을 수 없습니다.`); return; }
-  selectedETFs.push(found);
+
+  // 쉼표로 구분된 복수 티커 지원 (예: "QQQ,SPY,SOXX")
+  const tokens = raw.split(',').map(s => s.trim()).filter(Boolean);
+
+  for (const t of tokens) {
+    if (selectedETFs.length >= 3) { showError('최대 3개까지 추가할 수 있습니다.'); break; }
+    if (selectedETFs.some(e => e.ticker === t)) { showError(`${t}는 이미 추가되어 있습니다.`); continue; }
+    const found = allData[t];
+    if (!found) { showError(`"${t}" ETF를 CORRYU 데이터베이스에서 찾을 수 없습니다.`); continue; }
+    selectedETFs.push(found);
+  }
+
   updateURL();
   renderChips();
   renderAll();
