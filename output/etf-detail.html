@@ -340,30 +340,30 @@ nav {
   <div class="nav-inner">
     <a href="/index" class="nav-back">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-      대시보드
+      <span data-i18n="nav.dashboard">대시보드</span>
     </a>
     <span class="nav-sep">/</span>
     <a href="/landing" class="nav-brand"><span class="text-gradient">CORRYU</span></a>
     <span id="nav-breadcrumb" style="font-size:0.82rem;color:var(--text-muted)"></span>
     <div style="display:flex;align-items:center;gap:12px;margin-left:auto">
-      <a href="/screener" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px" title="ETF 스크리너">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>스크리너
+      <a href="/screener" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg><span data-i18n="nav.screener">스크리너</span>
       </a>
-      <a id="nav-backtest-link" href="/backtest" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px" title="이 ETF로 백테스트">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>백테스트
+      <a id="nav-backtest-link" href="/backtest" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span data-i18n="detail.nav.backtest">백테스트</span>
       </a>
-      <a href="/correlation" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px" title="상관관계 분석">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="12" cy="16" r="2"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="9" y1="10" x2="11" y2="14"/><line x1="15" y1="10" x2="13" y2="14"/></svg>상관관계
+      <a href="/correlation" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="12" cy="16" r="2"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="9" y1="10" x2="11" y2="14"/><line x1="15" y1="10" x2="13" y2="14"/></svg><span data-i18n="nav.correlation">상관관계</span>
       </a>
-      <a href="/compare" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px" title="ETF 비교">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>비교
+      <a href="/compare" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span data-i18n="nav.compare">비교</span>
       </a>
-      <a href="/portfolio" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px" title="포트폴리오">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>포트폴리오
+      <a href="/portfolio" style="font-size:0.78rem;color:var(--text-muted);text-decoration:none;font-weight:600;display:flex;align-items:center;gap:4px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg><span data-i18n="detail.nav.portfolio">포트폴리오</span>
       </a>
     </div>
     <div class="nav-search">
-      <input type="text" id="nav-search-input" placeholder="다른 티커 검색 (예: QQQ)" autocomplete="off">
+      <input type="text" id="nav-search-input" data-i18n-placeholder="detail.nav.search.placeholder" placeholder="다른 티커 검색 (예: QQQ)" autocomplete="off">
       <button onclick="goToTicker()">→</button>
     </div>
   </div>
@@ -375,15 +375,15 @@ nav {
   <!-- 로딩 상태 -->
   <div id="loading-state">
     <div class="spinner"></div>
-    <p style="color:var(--text-muted);font-size:0.85rem">ETF 데이터 로딩 중…</p>
+    <p style="color:var(--text-muted);font-size:0.85rem" data-i18n="detail.loading">ETF 데이터 로딩 중…</p>
   </div>
 
   <!-- 에러 상태 -->
   <div id="error-state" style="display:none">
     <div style="font-size:2rem">🔍</div>
-    <h2 id="error-title" style="font-size:1.1rem;font-weight:700">ETF를 찾을 수 없습니다</h2>
+    <h2 id="error-title" style="font-size:1.1rem;font-weight:700" data-i18n="detail.not.found">ETF를 찾을 수 없습니다</h2>
     <p id="error-msg" style="font-size:0.85rem;color:var(--text-muted)"></p>
-    <a href="/index" style="margin-top:12px;padding:8px 20px;border-radius:8px;background:var(--accent);color:white;text-decoration:none;font-size:0.85rem;font-weight:700">← 대시보드로 돌아가기</a>
+    <a href="/index" style="margin-top:12px;padding:8px 20px;border-radius:8px;background:var(--accent);color:white;text-decoration:none;font-size:0.85rem;font-weight:700" data-i18n="detail.back">← 대시보드로 돌아가기</a>
   </div>
 
   <!-- 실제 콘텐츠 (JS로 표시) -->
@@ -397,7 +397,7 @@ nav {
             <div class="hero-ticker" id="h-ticker">—</div>
             <button class="star-hero-btn" id="star-hero-btn" onclick="toggleWatchlist()" title="관심종목 추가/제거">★</button>
             <a href="#" id="compare-hero-link" class="compare-hero-btn" title="ETF 비교 페이지로 이동">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>비교하기
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span data-i18n="detail.compare.btn">비교하기</span>
             </a>
             <!-- 종목 좋아요 버튼 -->
             <button id="tl-btn" onclick="tickerLikeToggle()" title="이 종목 좋아요"
@@ -411,13 +411,13 @@ nav {
           <p class="hero-desc" id="h-desc"></p>
         </div>
         <div class="hero-price-box">
-          <div class="price-label">실시간 시세</div>
-          <div class="price-na">— 연동 예정</div>
+          <div class="price-label" data-i18n="detail.price.label">실시간 시세</div>
+          <div class="price-na" data-i18n="detail.price.na">— 연동 예정</div>
           <div style="margin-top:12px;text-align:right">
             <div style="font-size:0.72rem;color:var(--text-muted)">AUM</div>
             <div style="font-size:1.1rem;font-weight:800" id="h-aum">—</div>
           </div>
-          <div class="price-note">데이터 기준일: <span id="h-datadate">—</span></div>
+          <div class="price-note"><span data-i18n="detail.datadate">데이터 기준일:</span> <span id="h-datadate">—</span></div>
         </div>
       </div>
     </div>
@@ -425,23 +425,23 @@ nav {
     <!-- ── Quick Stats ── -->
     <div class="quick-stats" id="quick-stats">
       <div class="qs-item">
-        <div class="qs-label">수수료 (Expense Ratio)</div>
+        <div class="qs-label" data-i18n="detail.qs.expense">수수료 (Expense Ratio)</div>
         <div class="qs-value" id="qs-exp">—</div>
       </div>
       <div class="qs-item">
-        <div class="qs-label">최초 상장일</div>
+        <div class="qs-label" data-i18n="detail.qs.inception">최초 상장일</div>
         <div class="qs-value" id="qs-inception">—</div>
       </div>
       <div class="qs-item">
-        <div class="qs-label">발행사</div>
+        <div class="qs-label" data-i18n="detail.qs.issuer">발행사</div>
         <div class="qs-value" id="qs-issuer" style="font-size:0.82rem">—</div>
       </div>
       <div class="qs-item">
-        <div class="qs-label">벤치마크</div>
+        <div class="qs-label" data-i18n="detail.qs.benchmark">벤치마크</div>
         <div class="qs-value" id="qs-bench" style="font-size:0.78rem">—</div>
       </div>
       <div class="qs-item">
-        <div class="qs-label">구성 종목 수</div>
+        <div class="qs-label" data-i18n="detail.qs.holdings">구성 종목 수</div>
         <div class="qs-value" id="qs-numh">—</div>
       </div>
     </div>
@@ -454,12 +454,12 @@ nav {
 
         <!-- 차트 카드 -->
         <div class="glass card">
-          <div class="card-title">시뮬레이션 가격 차트</div>
+          <div class="card-title" data-i18n="detail.chart.title">시뮬레이션 가격 차트</div>
           <div class="chart-tabs">
-            <button class="chart-tab" onclick="switchPeriod('1M',this)">1개월</button>
-            <button class="chart-tab" onclick="switchPeriod('3M',this)">3개월</button>
-            <button class="chart-tab" onclick="switchPeriod('6M',this)">6개월</button>
-            <button class="chart-tab active" onclick="switchPeriod('1Y',this)">1년</button>
+            <button class="chart-tab" onclick="switchPeriod('1M',this)" data-i18n="detail.chart.tab.1M">1개월</button>
+            <button class="chart-tab" onclick="switchPeriod('3M',this)" data-i18n="detail.chart.tab.3M">3개월</button>
+            <button class="chart-tab" onclick="switchPeriod('6M',this)" data-i18n="detail.chart.tab.6M">6개월</button>
+            <button class="chart-tab active" onclick="switchPeriod('1Y',this)" data-i18n="detail.chart.tab.1Y">1년</button>
           </div>
           <div class="chart-stat">
             <div>
@@ -472,39 +472,39 @@ nav {
             </div>
           </div>
           <div class="chart-container" id="chart-container"></div>
-          <div class="chart-disclaimer">
+          <div class="chart-disclaimer" data-i18n="detail.chart.disclaimer">
             ※ CAGR·변동성 기반 시뮬레이션 차트입니다. 실제 가격 데이터가 아닙니다.
           </div>
         </div>
 
         <!-- 기간별 수익률 카드 -->
         <div class="glass card">
-          <div class="card-title">기간별 수익률</div>
+          <div class="card-title" data-i18n="detail.perf.title">기간별 수익률</div>
           <table class="perf-table">
             <thead>
               <tr>
-                <th>기간</th>
-                <th>수익률</th>
-                <th>연환산</th>
-                <th>비고</th>
+                <th data-i18n="detail.perf.period">기간</th>
+                <th data-i18n="detail.perf.return">수익률</th>
+                <th data-i18n="detail.perf.ann">연환산</th>
+                <th data-i18n="detail.perf.note">비고</th>
               </tr>
             </thead>
             <tbody id="perf-table-body"></tbody>
           </table>
-          <div style="margin-top:10px;font-size:0.7rem;color:#334155">
+          <div style="margin-top:10px;font-size:0.7rem;color:#334155" data-i18n="detail.perf.disclaimer">
             ※ 기간별 수익률은 예시 데이터입니다. 실제 수익률은 출처에 따라 다를 수 있습니다.
           </div>
         </div>
 
         <!-- 상위 구성종목 카드 -->
         <div class="glass card">
-          <div class="card-title">상위 10개 구성종목</div>
+          <div class="card-title" data-i18n="detail.holdings.title">상위 10개 구성종목</div>
           <div id="holdings-container"></div>
         </div>
 
         <!-- 지표 이력 트렌드 카드 -->
         <div class="glass card" id="trend-card">
-          <div class="card-title">지표 이력 트렌드 (1년 시뮬레이션)</div>
+          <div class="card-title" data-i18n="detail.trend.title">지표 이력 트렌드 (1년 시뮬레이션)</div>
           <div class="chart-tabs" style="margin-bottom:12px" id="metric-tabs">
             <button class="chart-tab active" onclick="switchMetric('zscore',this)">Z-Score</button>
             <button class="chart-tab" onclick="switchMetric('rsi',this)">RSI</button>
@@ -513,13 +513,13 @@ nav {
           </div>
           <div class="metric-stat-row">
             <div>
-              <span id="metric-current-label" style="font-size:0.75rem;color:var(--text-muted)">현재 Z-Score</span>
+              <span id="metric-current-label" style="font-size:0.75rem;color:var(--text-muted)" data-i18n="detail.trend.current">현재 Z-Score</span>
               <span class="metric-current-val" id="metric-current-val">—</span>
             </div>
             <div class="metric-ref-dots" id="metric-ref-legend"></div>
           </div>
           <div class="chart-container" id="metric-chart-container"></div>
-          <div class="chart-disclaimer">※ 과거 1년 지표 시뮬레이션 데이터입니다. 실제 이력과 다를 수 있습니다.</div>
+          <div class="chart-disclaimer" data-i18n="detail.trend.disclaimer">※ 과거 1년 지표 시뮬레이션 데이터입니다. 실제 이력과 다를 수 있습니다.</div>
         </div>
 
       </div>
@@ -529,23 +529,23 @@ nav {
 
         <!-- 분석 지표 카드 -->
         <div class="glass card">
-          <div class="card-title">CORRYU 분석 지표</div>
+          <div class="card-title" data-i18n="detail.analytics.title">CORRYU 분석 지표</div>
           <div id="metrics-container"></div>
         </div>
 
         <!-- 펀드 정보 카드 -->
         <div class="glass card">
-          <div class="card-title">펀드 기본 정보</div>
+          <div class="card-title" data-i18n="detail.info.title">펀드 기본 정보</div>
           <div id="fund-info-container"></div>
         </div>
 
         <!-- 데이터 기준 안내 -->
         <div class="data-note">
-          <div style="font-weight:700;color:#475569;margin-bottom:6px;font-size:0.75rem">📋 데이터 안내</div>
-          <div>데이터 기준일: <strong id="note-datadate" style="color:#94a3b8">2026-02-26</strong></div>
-          <div style="margin-top:4px">Z-Score·RSI·52W Range 등 분석 지표는 CORRYU가 직접 산출한 수치입니다.</div>
-          <div style="margin-top:4px">수수료·구성종목 비율은 예시 데이터이며, 실제와 다를 수 있습니다.</div>
-          <div style="margin-top:4px">본 자료는 투자 권유가 아닙니다. 투자 판단은 본인의 책임입니다.</div>
+          <div style="font-weight:700;color:#475569;margin-bottom:6px;font-size:0.75rem" data-i18n="detail.data.note">📋 데이터 안내</div>
+          <div><span data-i18n="detail.datadate">데이터 기준일:</span> <strong id="note-datadate" style="color:#94a3b8">2026-02-26</strong></div>
+          <div style="margin-top:4px" data-i18n="detail.data.line1">Z-Score·RSI·52W Range 등 분석 지표는 CORRYU가 직접 산출한 수치입니다.</div>
+          <div style="margin-top:4px" data-i18n="detail.data.line2">수수료·구성종목 비율은 예시 데이터이며, 실제와 다를 수 있습니다.</div>
+          <div style="margin-top:4px" data-i18n="detail.data.line3">본 자료는 투자 권유가 아닙니다. 투자 판단은 본인의 책임입니다.</div>
         </div>
 
       </div>
@@ -561,12 +561,12 @@ nav {
     <!-- 헤더 -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
       <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:1.05rem;font-weight:900;letter-spacing:-.02em">💬 종목 토론</span>
+        <span style="font-size:1.05rem;font-weight:900;letter-spacing:-.02em" data-i18n="detail.comments.title">💬 종목 토론</span>
         <span id="c-total-badge" style="padding:2px 8px;border-radius:10px;background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.25);color:#60a5fa;font-size:.72rem;font-weight:800">0</span>
       </div>
       <div style="display:flex;gap:4px">
-        <button class="c-sort-btn c-sort-on" data-sort="recent" onclick="setSortBy('recent')">최신순</button>
-        <button class="c-sort-btn" data-sort="likes" onclick="setSortBy('likes')">인기순</button>
+        <button class="c-sort-btn c-sort-on" data-sort="recent" onclick="setSortBy('recent')" data-i18n="detail.comments.latest">최신순</button>
+        <button class="c-sort-btn" data-sort="likes" onclick="setSortBy('likes')" data-i18n="detail.comments.popular">인기순</button>
       </div>
     </div>
 
@@ -581,8 +581,8 @@ nav {
     <div id="c-login-banner" style="display:none;margin-bottom:12px">
       <a href="#" onclick="goLogin(event)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.2);text-decoration:none;color:#94a3b8;transition:background .15s" onmouseover="this.style.background='rgba(59,130,246,0.12)'" onmouseout="this.style.background='rgba(59,130,246,0.07)'">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-        <span style="font-size:.84rem;font-weight:600;color:#60a5fa">로그인하고 댓글 작성하기</span>
-        <span style="margin-left:auto;font-size:.72rem">회원가입 →</span>
+        <span style="font-size:.84rem;font-weight:600;color:#60a5fa" data-i18n="detail.comments.login.prompt">로그인하고 댓글 작성하기</span>
+        <span style="margin-left:auto;font-size:.72rem" data-i18n="detail.comments.signup">회원가입 →</span>
       </a>
     </div>
 
@@ -591,12 +591,12 @@ nav {
       <div style="display:flex;gap:10px;align-items:flex-start">
         <div id="c-my-avatar" style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.84rem;flex-shrink:0"></div>
         <div style="flex:1">
-          <textarea id="c-textarea" placeholder="이 종목에 대한 의견을 남겨보세요…" maxlength="2000"
+          <textarea id="c-textarea" data-i18n-placeholder="detail.comments.placeholder" placeholder="이 종목에 대한 의견을 남겨보세요…" maxlength="2000"
             style="width:100%;min-height:72px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:9px;color:#e2e8f0;font-size:.84rem;font-family:inherit;padding:10px 12px;outline:none;resize:vertical;transition:border .15s;line-height:1.5"
             onfocus="this.style.borderColor='rgba(59,130,246,0.45)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'"></textarea>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
             <span id="c-char-count" style="font-size:.68rem;color:#334155">0 / 2000</span>
-            <button onclick="submitTopComment()" style="padding:6px 16px;border-radius:7px;background:#3b82f6;border:none;color:#fff;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .15s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">댓글 등록 →</button>
+            <button onclick="submitTopComment()" style="padding:6px 16px;border-radius:7px;background:#3b82f6;border:none;color:#fff;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit;transition:opacity .15s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'" data-i18n="detail.comments.submit">댓글 등록 →</button>
           </div>
         </div>
       </div>
@@ -607,25 +607,25 @@ nav {
 
     <!-- 더 보기 로딩 -->
     <div id="c-load-more" style="display:none;text-align:center;margin-top:12px">
-      <button onclick="loadMoreComments()" style="padding:7px 20px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#94a3b8;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit">더 보기</button>
+      <button onclick="loadMoreComments()" style="padding:7px 20px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#94a3b8;font-size:.78rem;font-weight:700;cursor:pointer;font-family:inherit" data-i18n="detail.comments.more">더 보기</button>
     </div>
 
     <!-- 게스트 게이트 (미로그인 + 댓글 있을 때) -->
     <div id="c-guest-gate" style="display:none;position:relative;margin-top:-60px">
       <div style="height:80px;background:linear-gradient(to bottom,transparent,rgba(10,13,20,0.97));pointer-events:none"></div>
       <div style="text-align:center;padding:20px 16px 8px;background:rgba(10,13,20,0.97)">
-        <div style="font-size:.84rem;color:#475569;margin-bottom:10px">🔒 나머지 댓글은 로그인 후 볼 수 있습니다</div>
-        <a href="#" onclick="goLogin(event)" style="display:inline-flex;align-items:center;gap:6px;padding:8px 20px;border-radius:9px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;font-size:.82rem;font-weight:700;text-decoration:none">무료 회원가입 · 로그인</a>
+        <div style="font-size:.84rem;color:#475569;margin-bottom:10px" data-i18n="detail.comments.gate">🔒 나머지 댓글은 로그인 후 볼 수 있습니다</div>
+        <a href="#" onclick="goLogin(event)" style="display:inline-flex;align-items:center;gap:6px;padding:8px 20px;border-radius:9px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;font-size:.82rem;font-weight:700;text-decoration:none" data-i18n="detail.comments.signup.link">무료 회원가입 · 로그인</a>
       </div>
     </div>
 
     <!-- 빈 상태 -->
     <div id="c-empty" style="display:none;text-align:center;padding:36px;color:#334155">
       <div style="font-size:1.6rem;margin-bottom:8px">💬</div>
-      <div style="font-size:.84rem">아직 댓글이 없습니다. 첫 번째 의견을 남겨보세요!</div>
+      <div style="font-size:.84rem" data-i18n="detail.comments.empty">아직 댓글이 없습니다. 첫 번째 의견을 남겨보세요!</div>
     </div>
 
-    <div style="font-size:.63rem;color:#1e293b;margin-top:14px;text-align:right">커뮤니티 가이드라인을 지켜 건강한 토론 문화를 만들어주세요.</div>
+    <div style="font-size:.63rem;color:#1e293b;margin-top:14px;text-align:right" data-i18n="detail.comments.guidelines">커뮤니티 가이드라인을 지켜 건강한 토론 문화를 만들어주세요.</div>
   </div>
   </div><!-- /comment-section -->
 
@@ -843,7 +843,7 @@ function generateChartSVG(ticker, cagr, vol, n) {
 }
 
 const PERIOD_DAYS = { '1M': 22, '3M': 65, '6M': 130, '1Y': 252 };
-const PERIOD_LABEL = { '1M': '1개월 수익률 (시뮬레이션)', '3M': '3개월 수익률 (시뮬레이션)', '6M': '6개월 수익률 (시뮬레이션)', '1Y': '1년 수익률 (시뮬레이션)' };
+const PERIOD_LABEL = () => ({ '1M': I18n.t('detail.chart.period.1M'), '3M': I18n.t('detail.chart.period.3M'), '6M': I18n.t('detail.chart.period.6M'), '1Y': I18n.t('detail.chart.period.1Y') });
 
 function switchPeriod(period, el) {
   if (!currentETF) return;
@@ -855,7 +855,7 @@ function switchPeriod(period, el) {
   const pctEl = document.getElementById('chart-pct');
   pctEl.textContent = (res.isUp ? '+' : '') + res.pct + '%';
   pctEl.className = 'chart-pct ' + (res.isUp ? 'ret-pos' : 'ret-neg');
-  document.getElementById('chart-period-label').textContent = PERIOD_LABEL[period];
+  document.getElementById('chart-period-label').textContent = PERIOD_LABEL()[period];
 }
 
 // ── 렌더링 함수들 ──────────────────────────────────
@@ -900,23 +900,23 @@ function renderPage(etf, sectorId) {
   document.getElementById('h-ticker').style.color = '#e2e8f0';
   document.getElementById('h-name').textContent   = etf.name;
   document.getElementById('h-aum').textContent     = fmtAUM(etf.aum);
-  document.getElementById('h-desc').textContent    = supp.desc || '— 해당 ETF의 상세 설명은 준비 중입니다.';
+  document.getElementById('h-desc').textContent    = supp.desc || I18n.t('detail.desc.pending');
   document.getElementById('h-datadate').textContent = '2026-02-26';
   document.getElementById('note-datadate').textContent = '2026-02-26';
 
   const badgesHtml =
     `<span class="badge badge-sector">${sector}</span>` +
     (etf.is_legacy ? '<span class="badge badge-legacy">Legacy</span>' : '<span class="badge badge-active">Active</span>') +
-    (etf.short_history ? '<span class="badge badge-short">짧은연혁 (&lt;3Y)</span>' : '');
+    (etf.short_history ? `<span class="badge badge-short">${I18n.t('detail.short.badge')}</span>` : '');
   document.getElementById('h-badges').innerHTML = badgesHtml;
   updateStarBtn();
 
   // ── Quick Stats ─────────────────────────────────
-  document.getElementById('qs-exp').textContent      = supp.exp      || '데이터 준비 중';
+  document.getElementById('qs-exp').textContent      = supp.exp      || I18n.t('detail.data.pending');
   document.getElementById('qs-inception').textContent = (etf.inception && etf.inception !== '1900-01-01') ? etf.inception : '—';
-  document.getElementById('qs-issuer').textContent   = supp.issuer   || '데이터 준비 중';
-  document.getElementById('qs-bench').textContent    = supp.bench    || '데이터 준비 중';
-  document.getElementById('qs-numh').textContent     = supp.numH !== undefined ? supp.numH.toLocaleString() + '개' : '—';
+  document.getElementById('qs-issuer').textContent   = supp.issuer   || I18n.t('detail.data.pending');
+  document.getElementById('qs-bench').textContent    = supp.bench    || I18n.t('detail.data.pending');
+  document.getElementById('qs-numh').textContent     = supp.numH !== undefined ? I18n.t('detail.numh.format', { n: supp.numH.toLocaleString() }) : '—';
 
   // ── 차트 ────────────────────────────────────────
   const res1Y = generateChartSVG(etf.ticker, etf.cagr, etf.vol, 252);
@@ -930,23 +930,23 @@ function renderPage(etf, sectorId) {
   // ── 기간별 수익률 ───────────────────────────────
   const perf = supp.perf || {};
   const periods = [
-    { key: '1M',     label: '1개월',   ann: false },
-    { key: '3M',     label: '3개월',   ann: false },
-    { key: 'YTD',    label: 'YTD (연초 이후)', ann: false },
-    { key: '1Y',     label: '1년',     ann: false },
-    { key: '3Y_ann', label: '3년 (연환산)',     ann: true },
-    { key: '5Y_ann', label: '5년 (연환산)',     ann: true },
+    { key: '1M',     labelKey: 'detail.perf.period.1M',    ann: false },
+    { key: '3M',     labelKey: 'detail.perf.period.3M',    ann: false },
+    { key: 'YTD',    labelKey: 'detail.perf.period.YTD',   ann: false },
+    { key: '1Y',     labelKey: 'detail.perf.period.1Y',    ann: false },
+    { key: '3Y_ann', labelKey: 'detail.perf.period.3Y_ann',ann: true },
+    { key: '5Y_ann', labelKey: 'detail.perf.period.5Y_ann',ann: true },
   ];
   const perfRows = periods.map(p => {
     const v = perf[p.key];
     const cls = v === undefined ? 'ret-na' : v >= 0 ? 'ret-pos' : 'ret-neg';
     const disp = v === undefined ? '—' : fmtPct(v);
-    const annLabel = p.ann ? '연환산' : '누적';
+    const annLabel = p.ann ? I18n.t('detail.perf.ann') : I18n.t('detail.perf.accumulated');
     return `<tr>
-      <td class="perf-period">${p.label}</td>
+      <td class="perf-period">${I18n.t(p.labelKey)}</td>
       <td class="${cls}">${disp}</td>
       <td style="color:var(--text-muted);font-size:0.75rem">${annLabel}</td>
-      <td style="color:var(--text-muted);font-size:0.73rem">${v !== undefined ? '예시' : '—'}</td>
+      <td style="color:var(--text-muted);font-size:0.73rem">${v !== undefined ? I18n.t('detail.perf.example') : '—'}</td>
     </tr>`;
   }).join('');
   document.getElementById('perf-table-body').innerHTML = perfRows;
@@ -955,7 +955,7 @@ function renderPage(etf, sectorId) {
   const holdings = supp.holdings;
   let holdHtml = '';
   if (!holdings || holdings.length === 0) {
-    holdHtml = '<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:0.85rem">구성종목 데이터 준비 중</div>';
+    holdHtml = `<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:0.85rem">${I18n.t('detail.holdings.empty')}</div>`;
   } else {
     const maxW = Math.max(...holdings.map(h => h[2]));
     holdHtml = holdings.map(([tk, nm, wt], i) =>
@@ -971,8 +971,8 @@ function renderPage(etf, sectorId) {
     ).join('');
     const top10Sum = holdings.reduce((s, h) => s + h[2], 0);
     holdHtml += `<div class="holdings-footer">
-      <span>상위 10개 합계: <strong style="color:#94a3b8">${top10Sum.toFixed(1)}%</strong></span>
-      <span>총 ${(supp.numH || '?').toLocaleString()}개 종목 · 예시 데이터</span>
+      <span>${I18n.t('detail.holdings.sum', { pct: top10Sum.toFixed(1) })}</span>
+      <span>${I18n.t('detail.holdings.total', { n: (supp.numH || '?').toLocaleString() })}</span>
     </div>`;
   }
   document.getElementById('holdings-container').innerHTML = holdHtml;
@@ -980,14 +980,14 @@ function renderPage(etf, sectorId) {
   // ── 분석 지표 ───────────────────────────────────
   const metrics = [
     { label: 'Z-Score', key: 'z_score',   val: etf.short_history ? null : etf.z_score,   fmt: v => fmtNum(v, 2),   gauge: [v => renderGauge(v, -3, 3, '#3b82f6')] },
-    { label: 'RSI (14일)', key: 'rsi',     val: etf.rsi,           fmt: v => fmtNum(v, 0) + '  ', gauge: [v => renderGauge(v, 0, 100, '#f59e0b')] },
+    { label: I18n.t('detail.metric.rsi'), key: 'rsi',     val: etf.rsi,           fmt: v => fmtNum(v, 0) + '  ', gauge: [v => renderGauge(v, 0, 100, '#f59e0b')] },
     { label: '52W Range', key: 'range_52w', val: etf.range_52w,    fmt: v => fmtNum(v, 0) + '%',  gauge: [v => renderGauge(v, 0, 100, '#8b5cf6')] },
-    { label: '200MA 이격', key: 'ma200_pct', val: etf.short_history ? null : etf.ma200_pct, fmt: v => fmtPct(v), gauge: [] },
+    { label: I18n.t('detail.metric.ma200'), key: 'ma200_pct', val: etf.short_history ? null : etf.ma200_pct, fmt: v => fmtPct(v), gauge: [] },
     { label: '52W MDD',   key: 'mdd_52w',  val: etf.short_history ? null : etf.mdd_52w,  fmt: v => fmtPct(v), gauge: [] },
     { label: 'r_Anchor',  key: 'r_anchor', val: etf.r_anchor,      fmt: v => fmtNum(v, 2), gauge: [] },
     { label: 'SMH Corr',  key: 'smh_corr', val: etf.smh_corr,      fmt: v => v !== null && v !== undefined ? fmtNum(v, 2) : '—', gauge: [] },
     { label: 'CAGR',      key: 'cagr',     val: etf.short_history ? null : etf.cagr,     fmt: v => fmtPct(v), gauge: [] },
-    { label: '연환산 변동성', key: 'vol',  val: etf.short_history ? null : etf.vol,      fmt: v => fmtPct(v, 1), gauge: [] },
+    { label: I18n.t('detail.metric.vol'), key: 'vol',  val: etf.short_history ? null : etf.vol,      fmt: v => fmtPct(v, 1), gauge: [] },
     { label: 'Sortino',   key: 'sortino',  val: etf.short_history ? null : etf.sortino,  fmt: v => fmtNum(v, 2), gauge: [] },
   ];
   const metricsHtml = metrics.map(m => {
@@ -1002,17 +1002,17 @@ function renderPage(etf, sectorId) {
 
   // ── 펀드 정보 ───────────────────────────────────
   const infoRows = [
-    { label: 'Rank',      val: etf.rank === 9999 ? '—' : ('#' + etf.rank) },
-    { label: 'AUM',       val: fmtAUM(etf.aum) },
-    { label: '수수료',    val: supp.exp      || '—' },
-    { label: '발행사',    val: supp.issuer   || '—' },
-    { label: '구조',      val: supp.structure || '—' },
-    { label: '배당 방식', val: supp.div      || '—' },
-    { label: '배당 수익률',val: supp.divYield || '—' },
-    { label: '벤치마크',  val: supp.bench    || '—' },
-    { label: '상장일',    val: (etf.inception && etf.inception !== '1900-01-01') ? etf.inception : '—' },
-    { label: '섹터',      val: sector },
-    { label: 'Status',    val: etf.is_legacy ? (etf._user_override ? 'User Legacy' : 'Legacy') : 'Active' },
+    { label: 'Rank',                           val: etf.rank === 9999 ? '—' : ('#' + etf.rank) },
+    { label: 'AUM',                            val: fmtAUM(etf.aum) },
+    { label: I18n.t('detail.info.fee'),        val: supp.exp       || '—' },
+    { label: I18n.t('detail.info.issuer'),     val: supp.issuer    || '—' },
+    { label: I18n.t('detail.info.structure'),  val: supp.structure || '—' },
+    { label: I18n.t('detail.info.div'),        val: supp.div       || '—' },
+    { label: I18n.t('detail.info.divyield'),   val: supp.divYield  || '—' },
+    { label: I18n.t('detail.info.bench'),      val: supp.bench     || '—' },
+    { label: I18n.t('detail.info.inception'),  val: (etf.inception && etf.inception !== '1900-01-01') ? etf.inception : '—' },
+    { label: I18n.t('detail.info.sector'),     val: sector },
+    { label: 'Status',                         val: etf.is_legacy ? (etf._user_override ? 'User Legacy' : 'Legacy') : 'Active' },
   ];
   const infoHtml = infoRows.map(r =>
     `<div class="info-row"><span class="info-label">${r.label}</span><span class="info-value">${r.val}</span></div>`
@@ -1043,7 +1043,7 @@ function renderPage(etf, sectorId) {
 // ── 지표 이력 트렌드 ──────────────────────────────
 const METRIC_CONFIG = {
   zscore:  { label: 'Z-Score',   unit: '',  min: -3,  max: 3,   refs: [-2, -1.5, 0, 1.5, 2],   refColor: { '-2': '#60a5fa', '-1.5': '#93c5fd', '0': '#475569', '1.5': '#fca5a5', '2': '#f87171' }, color: v => v > 1.5 ? '#f87171' : v < -1.5 ? '#60a5fa' : '#94a3b8' },
-  rsi:     { label: 'RSI (14일)', unit: '',  min: 0,   max: 100, refs: [30, 50, 70],            refColor: { '30': '#60a5fa', '50': '#475569', '70': '#f87171' },                                  color: v => v > 70 ? '#f87171' : v < 30 ? '#60a5fa' : '#94a3b8' },
+  rsi:     { label: 'RSI (14D)', unit: '',  min: 0,   max: 100, refs: [30, 50, 70],            refColor: { '30': '#60a5fa', '50': '#475569', '70': '#f87171' },                                  color: v => v > 70 ? '#f87171' : v < 30 ? '#60a5fa' : '#94a3b8' },
   range52w:{ label: '52W Range', unit: '%', min: 0,   max: 100, refs: [20, 50, 80],            refColor: { '20': '#60a5fa', '50': '#475569', '80': '#4ade80' },                                  color: v => v > 80 ? '#4ade80' : v < 20 ? '#60a5fa' : '#94a3b8' },
   mdd:     { label: '52W MDD',   unit: '%', min: -50, max: 0,   refs: [-30, -20, -10],         refColor: { '-30': '#f87171', '-20': '#fca5a5', '-10': '#fcd34d' },                               color: v => v < -20 ? '#f87171' : v < -10 ? '#fbbf24' : '#94a3b8' },
 };
@@ -1128,7 +1128,7 @@ function generateMetricChartSVG(series, metricType, currentVal) {
   const lineColor = currentVal !== null && currentVal !== undefined ? cfg.color(currentVal) : '#94a3b8';
 
   // X labels
-  const xLabels = ['1년 전', '9개월 전', '6개월 전', '3개월 전', '현재'].map((l, i) =>
+  const xLabels = [I18n.t('detail.trend.chart.1y'), I18n.t('detail.trend.chart.9m'), I18n.t('detail.trend.chart.6m'), I18n.t('detail.trend.chart.3m'), I18n.t('detail.trend.chart.now')].map((l, i) =>
     `<text x="${(P.l + (i / 4) * cw).toFixed(1)}" y="${H - 5}" text-anchor="middle" font-size="10" fill="rgba(100,116,139,0.6)" font-family="Inter,sans-serif">${l}</text>`
   ).join('');
 
@@ -1161,7 +1161,7 @@ function renderMetricChart(etf) {
   // Update UI
   const label = document.getElementById('metric-current-label');
   const valEl = document.getElementById('metric-current-val');
-  label.textContent = '현재 ' + cfg.label;
+  label.textContent = I18n.t('detail.trend.current.prefix') + ' ' + cfg.label;
 
   if (currentVal !== null && currentVal !== undefined) {
     const formatted = currentMetricType === 'zscore' || currentMetricType === 'rsi'
@@ -1170,7 +1170,7 @@ function renderMetricChart(etf) {
     valEl.textContent = formatted;
     valEl.style.color = cfg.color(currentVal);
   } else {
-    valEl.textContent = '— (데이터 없음)';
+    valEl.textContent = I18n.t('detail.trend.no_data');
     valEl.style.color = '#334155';
   }
 
@@ -1197,8 +1197,8 @@ fetch('/etf_data.json')
     }
     if (!found) {
       document.getElementById('loading-state').style.display = 'none';
-      document.getElementById('error-title').textContent = '"' + TICKER + '" ETF를 찾을 수 없습니다';
-      document.getElementById('error-msg').textContent   = '티커 심볼을 확인하거나 위 검색창에서 다시 검색해주세요.';
+      document.getElementById('error-title').textContent = '"' + TICKER + '" ' + I18n.t('detail.not.found');
+      document.getElementById('error-msg').textContent   = I18n.t('detail.error.notfound.msg');
       document.getElementById('error-state').style.display = 'flex';
       return;
     }
@@ -1210,11 +1210,14 @@ fetch('/etf_data.json')
     }
     renderPage(found, foundSid);
     I18n.init();
+    document.addEventListener('i18n:ready', () => {
+      if (currentETF) renderPage(currentETF, foundSid);
+    });
   })
   .catch(() => {
     document.getElementById('loading-state').style.display = 'none';
-    document.getElementById('error-title').textContent = '데이터를 불러올 수 없습니다';
-    document.getElementById('error-msg').textContent   = '네트워크 상태를 확인하거나 잠시 후 다시 시도해주세요.';
+    document.getElementById('error-title').textContent = I18n.t('detail.error.load.title');
+    document.getElementById('error-msg').textContent   = I18n.t('detail.error.load.msg');
     document.getElementById('error-state').style.display = 'flex';
   });
 

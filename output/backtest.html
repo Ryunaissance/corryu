@@ -117,15 +117,15 @@ nav{position:fixed;top:3px;left:0;right:0;z-index:100;background:rgba(10,13,20,0
 <nav>
   <div class="nav-i">
     <a href="/index" class="nav-back">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>대시보드
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg><span data-i18n="nav.dashboard">대시보드</span>
     </a>
     <span style="color:#1e293b">/</span>
     <a href="/landing" style="font-size:.95rem;font-weight:900;text-decoration:none"><span class="tg">CORRYU</span></a>
-    <span style="font-size:.82rem;color:var(--t3)">/ 백테스트</span>
+    <span style="font-size:.82rem;color:var(--t3)" data-i18n="bt.breadcrumb">/ 백테스트</span>
     <div style="margin-left:auto;display:flex;align-items:center;gap:14px">
-      <a href="/screener"    class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>스크리너</a>
-      <a href="/correlation" class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="12" cy="16" r="2"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="9" y1="10" x2="11" y2="14"/><line x1="15" y1="10" x2="13" y2="14"/></svg>상관관계</a>
-      <a href="/compare"     class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>비교</a>
+      <a href="/screener"    class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg><span data-i18n="nav.screener">스크리너</span></a>
+      <a href="/correlation" class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="12" cy="16" r="2"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="9" y1="10" x2="11" y2="14"/><line x1="15" y1="10" x2="13" y2="14"/></svg><span data-i18n="nav.correlation">상관관계</span></a>
+      <a href="/compare"     class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span data-i18n="nav.compare">비교</span></a>
     </div>
   </div>
 </nav>
@@ -136,59 +136,59 @@ nav{position:fixed;top:3px;left:0;right:0;z-index:100;background:rgba(10,13,20,0
   <!-- ── 입력 카드 ── -->
   <div>
     <div class="glass input-card">
-      <div class="page-title">포트폴리오 <span class="tg">백테스트</span></div>
-      <div class="page-sub">CORRYU 지표 기반 팩터 모델 시뮬레이션</div>
+      <div class="page-title" data-i18n-html="bt.title">포트폴리오 <span class="tg">백테스트</span></div>
+      <div class="page-sub" data-i18n="bt.sub">CORRYU 지표 기반 팩터 모델 시뮬레이션</div>
 
       <!-- 프리셋 -->
-      <div class="card-title">포트폴리오 프리셋</div>
+      <div class="card-title" data-i18n="bt.card.presets">포트폴리오 프리셋</div>
       <div class="preset-row">
-        <button class="pb" onclick="loadPreset('6040')">📊 60/40 클래식</button>
-        <button class="pb" onclick="loadPreset('allweather')">🌤 올웨더</button>
-        <button class="pb" onclick="loadPreset('golden')">🦋 골든 나비</button>
-        <button class="pb" onclick="loadPreset('tech')">🚀 기술주 집중</button>
-        <button class="pb" onclick="loadPreset('global')">🌏 글로벌 분산</button>
+        <button class="pb" onclick="loadPreset('6040')" data-i18n="bt.preset.6040">📊 60/40 클래식</button>
+        <button class="pb" onclick="loadPreset('allweather')" data-i18n="bt.preset.allweather">🌤 올웨더</button>
+        <button class="pb" onclick="loadPreset('golden')" data-i18n="bt.preset.golden">🦋 골든 나비</button>
+        <button class="pb" onclick="loadPreset('tech')" data-i18n="bt.preset.tech">🚀 기술주 집중</button>
+        <button class="pb" onclick="loadPreset('global')" data-i18n="bt.preset.global">🌏 글로벌 분산</button>
       </div>
 
       <!-- 포트폴리오 행 -->
-      <div class="card-title">포트폴리오 구성</div>
+      <div class="card-title" data-i18n="bt.card.portfolio">포트폴리오 구성</div>
       <div class="port-rows" id="port-rows"></div>
       <button class="add-row-btn" id="add-row-btn" onclick="addRow()">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        종목 추가 (최대 10개)
+        <span data-i18n="bt.add.label">종목 추가 (최대 10개)</span>
       </button>
 
       <!-- 비중 합계 표시 -->
       <div class="weight-sum" style="margin-top:10px">
-        <span style="font-size:.7rem;color:var(--t3);font-weight:700">비중 합계</span>
+        <span style="font-size:.7rem;color:var(--t3);font-weight:700" data-i18n="bt.weight.sum">비중 합계</span>
         <div class="ws-bar"><div class="ws-fill" id="ws-fill" style="width:0%;background:#3b82f6"></div></div>
         <span class="ws-label" id="ws-label" style="color:var(--t3)">0%</span>
       </div>
-      <button style="font-size:.72rem;background:none;border:none;color:#60a5fa;cursor:pointer;font-family:inherit;padding:0 0 10px;font-weight:700" onclick="equalWeight()">균등 배분 적용</button>
+      <button style="font-size:.72rem;background:none;border:none;color:#60a5fa;cursor:pointer;font-family:inherit;padding:0 0 10px;font-weight:700" onclick="equalWeight()" data-i18n="bt.btn.equal">균등 배분 적용</button>
 
       <!-- 설정 -->
-      <div class="card-title">시뮬레이션 설정</div>
+      <div class="card-title" data-i18n="bt.card.settings">시뮬레이션 설정</div>
       <div class="settings-grid">
         <div class="sg-item">
-          <label>기간</label>
+          <label data-i18n="bt.label.period">기간</label>
           <div class="sg-tabs" id="period-tabs">
-            <button class="sg-tab" data-yr="3"  onclick="setPeriod(3)">3년</button>
-            <button class="sg-tab on" data-yr="5" onclick="setPeriod(5)">5년</button>
-            <button class="sg-tab" data-yr="7"  onclick="setPeriod(7)">7년</button>
-            <button class="sg-tab" data-yr="10" onclick="setPeriod(10)">10년</button>
+            <button class="sg-tab" data-yr="3"  onclick="setPeriod(3)"  data-i18n="bt.period.3yr">3년</button>
+            <button class="sg-tab on" data-yr="5" onclick="setPeriod(5)" data-i18n="bt.period.5yr">5년</button>
+            <button class="sg-tab" data-yr="7"  onclick="setPeriod(7)"  data-i18n="bt.period.7yr">7년</button>
+            <button class="sg-tab" data-yr="10" onclick="setPeriod(10)" data-i18n="bt.period.10yr">10년</button>
           </div>
         </div>
         <div class="sg-item">
-          <label>리밸런싱 주기</label>
+          <label data-i18n="bt.label.rebalance">리밸런싱 주기</label>
           <select class="sg-select" id="rebal-sel">
-            <option value="none">없음 (Buy &amp; Hold)</option>
-            <option value="annual" selected>연간</option>
-            <option value="semiannual">반기</option>
-            <option value="quarter">분기</option>
-            <option value="monthly">월</option>
+            <option value="none"       data-i18n="bt.rebal.none">없음 (Buy &amp; Hold)</option>
+            <option value="annual" selected data-i18n="bt.rebal.annual">연간</option>
+            <option value="semiannual" data-i18n="bt.rebal.semiannual">반기</option>
+            <option value="quarter"    data-i18n="bt.rebal.quarter">분기</option>
+            <option value="monthly"    data-i18n="bt.rebal.monthly">월</option>
           </select>
         </div>
         <div class="sg-item">
-          <label>초기 투자금</label>
+          <label data-i18n="bt.label.initial">초기 투자금</label>
           <select class="sg-select" id="init-sel">
             <option value="10000">$10,000</option>
             <option value="100000">$100,000</option>
@@ -196,36 +196,36 @@ nav{position:fixed;top:3px;left:0;right:0;z-index:100;background:rgba(10,13,20,0
           </select>
         </div>
         <div class="sg-item">
-          <label>벤치마크</label>
+          <label data-i18n="bt.label.benchmark">벤치마크</label>
           <select class="sg-select" id="bench-sel">
             <option value="SPY">S&amp;P 500 (SPY)</option>
             <option value="QQQ">NASDAQ 100 (QQQ)</option>
-            <option value="none">없음</option>
+            <option value="none" data-i18n="bt.bench.none">없음</option>
           </select>
         </div>
       </div>
 
       <!-- ── 적립식 투자 ── -->
-      <div class="card-title">적립식 투자</div>
+      <div class="card-title" data-i18n="bt.card.dca">적립식 투자</div>
       <div class="settings-grid" style="margin-bottom:14px">
         <div class="sg-item">
-          <label>적립 주기</label>
+          <label data-i18n="bt.label.dca.freq">적립 주기</label>
           <select class="sg-select" id="dca-freq" onchange="onDcaFreqChange()">
-            <option value="none">없음 (일시납)</option>
-            <option value="monthly">월</option>
-            <option value="quarterly">분기</option>
-            <option value="semiannual">반기</option>
-            <option value="annually">연간</option>
+            <option value="none"       data-i18n="bt.dca.none">없음 (일시납)</option>
+            <option value="monthly"    data-i18n="bt.dca.monthly">월</option>
+            <option value="quarterly"  data-i18n="bt.dca.quarterly">분기</option>
+            <option value="semiannual" data-i18n="bt.dca.semiannual">반기</option>
+            <option value="annually"   data-i18n="bt.dca.annually">연간</option>
           </select>
         </div>
         <div class="sg-item" id="dca-amt-wrap" style="visibility:hidden">
-          <label>적립금 (USD/회)</label>
+          <label data-i18n="bt.label.dca.amount">적립금 (USD/회)</label>
           <input type="number" class="sg-select" id="dca-amt" value="500" min="0" step="100"
                  placeholder="500" style="text-align:right">
         </div>
       </div>
 
-      <button class="run-btn" id="run-btn" onclick="runBacktest()">
+      <button class="run-btn" id="run-btn" onclick="runBacktest()" data-i18n="bt.btn.run">
         ▶ 백테스트 실행
       </button>
       <div class="err-msg" id="err-msg"></div>
@@ -240,30 +240,30 @@ nav{position:fixed;top:3px;left:0;right:0;z-index:100;background:rgba(10,13,20,0
 
     <!-- 누적 수익 차트 -->
     <div class="glass chart-card" id="cum-card">
-      <div class="card-title">누적 수익률</div>
+      <div class="card-title" data-i18n="bt.chart.cumulative">누적 수익률</div>
       <div class="chart-legend" id="cum-legend"></div>
       <div class="chart-wrap" id="cum-chart"></div>
-      <div class="disclaimer">※ CORRYU 팩터 모델 기반 시뮬레이션입니다. 과거 결과는 미래 수익을 보장하지 않습니다.</div>
+      <div class="disclaimer" data-i18n="bt.disclaimer">※ CORRYU 팩터 모델 기반 시뮬레이션입니다. 과거 결과는 미래 수익을 보장하지 않습니다.</div>
     </div>
 
     <!-- 연도별 수익률 차트 -->
     <div class="glass chart-card" id="annual-card" style="margin-bottom:12px">
-      <div class="card-title">연도별 수익률</div>
+      <div class="card-title" data-i18n="bt.chart.annual">연도별 수익률</div>
       <div class="chart-wrap" id="annual-chart"></div>
     </div>
 
     <!-- 포트폴리오 구성 + 공유 -->
     <div class="glass alloc-card">
-      <div class="card-title">포트폴리오 구성</div>
+      <div class="card-title" data-i18n="bt.chart.composition">포트폴리오 구성</div>
       <div class="alloc-bars" id="alloc-bars"></div>
       <div class="share-row">
         <button class="share-btn" id="share-url-btn" onclick="shareURL()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-          링크 복사
+          <span data-i18n="bt.btn.share.link">링크 복사</span>
         </button>
         <button class="share-btn" onclick="shareText()">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          텍스트 복사
+          <span data-i18n="bt.btn.share.text">텍스트 복사</span>
         </button>
       </div>
     </div>
@@ -274,8 +274,8 @@ nav{position:fixed;top:3px;left:0;right:0;z-index:100;background:rgba(10,13,20,0
   <div id="empty-hint" style="display:flex;align-items:center;justify-content:center;min-height:300px;padding:40px">
     <div style="text-align:center;color:var(--t3)">
       <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity=".2" style="margin:0 auto 12px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      <div style="font-size:.92rem">포트폴리오를 구성하고</div>
-      <div style="font-size:.85rem;margin-top:4px">백테스트 실행 버튼을 눌러보세요</div>
+      <div style="font-size:.92rem" data-i18n="bt.empty.line1">포트폴리오를 구성하고</div>
+      <div style="font-size:.85rem;margin-top:4px" data-i18n="bt.empty.line2">백테스트 실행 버튼을 눌러보세요</div>
     </div>
   </div>
 
@@ -324,7 +324,7 @@ function renderRows() {
   const container = document.getElementById('port-rows');
   container.innerHTML = rows.map((r, i) => `
     <div class="port-row" data-id="${r.id}">
-      <input class="ticker-inp" type="text" placeholder="티커 (예: SPY)" value="${r.ticker}"
+      <input class="ticker-inp" type="text" placeholder="${I18n.t('bt.placeholder.ticker')}" value="${r.ticker}"
         oninput="updateRow(${r.id},'ticker',this.value)" onblur="this.value=this.value.toUpperCase()" maxlength="10">
       <div style="position:relative">
         <input class="weight-inp" type="number" placeholder="%" min="0" max="100" step="0.5" value="${r.weight}"
@@ -424,12 +424,12 @@ function runBacktest() {
     const t = r.ticker.trim().toUpperCase();
     const w = parseFloat(r.weight);
     if (!t || !w) continue;
-    if (!allData[t]) { setErr(`"${t}"를 찾을 수 없습니다. 티커를 확인해주세요.`); return; }
+    if (!allData[t]) { setErr(I18n.t('bt.error.notfound', { t })); return; }
     holdings.push({ etf: allData[t], weight: w / 100 });
   }
-  if (holdings.length < 1) { setErr('종목을 1개 이상 추가하세요.'); return; }
+  if (holdings.length < 1) { setErr(I18n.t('bt.error.empty')); return; }
   const totalW = holdings.reduce((s, h) => s + h.weight, 0);
-  if (Math.abs(totalW - 1) > 0.005) { setErr(`비중 합계가 ${(totalW*100).toFixed(1)}%입니다. 100%가 되어야 합니다.`); return; }
+  if (Math.abs(totalW - 1) > 0.005) { setErr(I18n.t('bt.error.weight', { w: (totalW*100).toFixed(1) })); return; }
 
   const initVal     = parseFloat(document.getElementById('init-sel').value);
   const benchTicker = document.getElementById('bench-sel').value;
@@ -559,22 +559,22 @@ function showResults(result) {
 
   // ── 통계 카드 ──
   const alphaCard = stats.alpha != null
-    ? `<div class="stat-card"><div class="stat-label">vs 벤치마크 (α)</div><div class="stat-val ${stats.alpha>=0?'pos':'neg'}">${stats.alpha>=0?'+':''}${stats.alpha.toFixed(1)}%</div><div class="stat-sub">연 초과수익</div></div>` : '';
+    ? `<div class="stat-card"><div class="stat-label">${I18n.t('bt.stat.alpha.label')}</div><div class="stat-val ${stats.alpha>=0?'pos':'neg'}">${stats.alpha>=0?'+':''}${stats.alpha.toFixed(1)}%</div><div class="stat-sub">${I18n.t('bt.stat.alpha.sub')}</div></div>` : '';
 
   const dcaCards = hasDCA ? `
     <div class="stat-card">
-      <div class="stat-label">총 납입금</div>
+      <div class="stat-label">${I18n.t('bt.stat.invested.label')}</div>
       <div class="stat-val mu">$${fmtD(stats.totalInvested)}</div>
-      <div class="stat-sub">초기 + 적립 합산</div>
+      <div class="stat-sub">${I18n.t('bt.stat.invested.sub')}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">총 수익금</div>
+      <div class="stat-label">${I18n.t('bt.stat.profit.label')}</div>
       <div class="stat-val ${stats.totalGain>=0?'pos':'neg'}">${stats.totalGain>=0?'+':''}$${fmtD(Math.abs(stats.totalGain))}</div>
-      <div class="stat-sub">최종 − 납입금</div>
+      <div class="stat-sub">${I18n.t('bt.stat.profit.sub')}</div>
     </div>` : '';
 
   // DCA 없을 때: "총 수익률" 카드는 initVal 기준
-  const retLabel = hasDCA ? '수익률 (납입 대비)' : '총 수익률';
+  const retLabel = hasDCA ? I18n.t('bt.stat.ret.label.dca') : I18n.t('bt.stat.ret.label');
   const retSub   = hasDCA
     ? `$${fmtD(stats.totalInvested)} → $${fmtD(stats.portVal)}`
     : `$${fmtD(stats.initVal)} → $${fmtD(stats.portVal)}`;
@@ -588,28 +588,28 @@ function showResults(result) {
     <div class="stat-card">
       <div class="stat-label">CAGR</div>
       <div class="stat-val ${stats.cagr>=0?'pos':'neg'}">${stats.cagr>=0?'+':''}${stats.cagr.toFixed(1)}%</div>
-      <div class="stat-sub">${hasDCA ? '납입 대비 연환산' : '연평균 수익률'}</div>
+      <div class="stat-sub">${hasDCA ? I18n.t('bt.stat.ret.sub.dca') : I18n.t('bt.stat.ret.sub')}</div>
     </div>
     ${dcaCards}
     <div class="stat-card">
-      <div class="stat-label">변동성</div>
+      <div class="stat-label">${I18n.t('bt.stat.vol.label')}</div>
       <div class="stat-val amb">${stats.vol.toFixed(1)}%</div>
-      <div class="stat-sub">연간 표준편차</div>
+      <div class="stat-sub">${I18n.t('bt.stat.vol.sub')}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">최대 낙폭 (MDD)</div>
+      <div class="stat-label">${I18n.t('bt.stat.mdd.label')}</div>
       <div class="stat-val neg">${stats.mdd.toFixed(1)}%</div>
-      <div class="stat-sub">최대 고점 대비 (월별)</div>
+      <div class="stat-sub">${I18n.t('bt.stat.mdd.sub')}</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Sharpe</div>
       <div class="stat-val ${stats.sharpe>=1?'pos':'mu'}">${stats.sharpe.toFixed(2)}</div>
-      <div class="stat-sub">위험 조정 수익</div>
+      <div class="stat-sub">${I18n.t('bt.stat.sharpe.sub')}</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Sortino</div>
       <div class="stat-val ${stats.sortino>=1.2?'pos':'mu'}">${Math.min(stats.sortino,9.99).toFixed(2)}</div>
-      <div class="stat-sub">하방 위험 조정</div>
+      <div class="stat-sub">${I18n.t('bt.stat.sortino.sub')}</div>
     </div>
     ${alphaCard}`;
 
@@ -630,9 +630,9 @@ function showResults(result) {
 
   // 범례
   const legend = `
-    <div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div>내 포트폴리오</div>
-    ${benchTicker !== 'none' ? `<div class="legend-item"><div class="legend-dot" style="background:#475569;border-top:1px dashed #64748b"></div>${benchTicker} (벤치마크)</div>` : ''}
-    ${hasDCA ? `<div class="legend-item"><div class="legend-dot" style="background:#f59e0b;border-top:1px dashed #f59e0b"></div>납입금 (누적)</div>` : ''}`;
+    <div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div>${I18n.t('bt.legend.port')}</div>
+    ${benchTicker !== 'none' ? `<div class="legend-item"><div class="legend-dot" style="background:#475569;border-top:1px dashed #64748b"></div>${I18n.t('bt.legend.bench', { t: benchTicker })}</div>` : ''}
+    ${hasDCA ? `<div class="legend-item"><div class="legend-dot" style="background:#f59e0b;border-top:1px dashed #f59e0b"></div>${I18n.t('bt.legend.invested')}</div>` : ''}`;
   document.getElementById('cum-legend').innerHTML = legend;
 
   res.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -785,8 +785,8 @@ function shareURL() {
   navigator.clipboard.writeText(buildShareURL()).then(() => {
     const btn = document.getElementById('share-url-btn');
     btn.classList.add('copied');
-    btn.textContent = '✓ 복사됨!';
-    setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg> 링크 복사'; }, 2500);
+    btn.textContent = I18n.t('bt.btn.copied');
+    setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg> ${I18n.t('bt.btn.share.link')}`; }, 2500);
   });
 }
 
@@ -795,7 +795,7 @@ function shareText() {
   const s = lastResult.stats;
   const holdings = lastResult.holdings.map(h => `${h.etf.ticker} ${(h.weight*100).toFixed(0)}%`).join(' + ');
   const text = `📊 CORRYU 백테스트 결과\n포트폴리오: ${holdings}\n기간: ${period}년\n\nCAGR ${s.cagr>=0?'+':''}${s.cagr.toFixed(1)}% | 총수익 ${s.totalRet>=0?'+':''}${s.totalRet.toFixed(1)}%\n변동성 ${s.vol.toFixed(1)}% | MDD ${s.mdd.toFixed(1)}% | Sharpe ${s.sharpe.toFixed(2)}\n\n${buildShareURL()}`;
-  navigator.clipboard.writeText(text).then(() => alert('클립보드에 복사됐습니다!'));
+  navigator.clipboard.writeText(text).then(() => alert(I18n.t('bt.btn.copied')));
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -848,7 +848,12 @@ fetch('/etf_data.json').then(r => r.json()).then(data => {
   setTimeout(() => { lb.style.width = '0'; lb.style.transition = 'none'; }, 400);
   loadFromURL();
   I18n.init();
-}).catch(() => setErr('데이터 로드 실패. 새로고침 해주세요.'));
+}).catch(() => setErr(I18n.t('bt.error.load')));
+
+document.addEventListener('i18n:ready', () => {
+  renderRows();
+  if (lastResult) showResults(lastResult);
+});
 </script>
 </body>
 </html>
