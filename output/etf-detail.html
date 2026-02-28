@@ -812,15 +812,12 @@ let currentChartType = 'line';
 // ── 실가격 히스토리 로드 (Supabase etf_prices) ───────────────
 async function loadPriceHistory(ticker) {
   if (!window._sb) return null;
-  const since = new Date();
-  since.setFullYear(since.getFullYear() - 6);
   const { data, error } = await window._sb
     .from('etf_prices')
     .select('date, open, high, low, close, adj_close')
     .eq('ticker', ticker)
-    .gte('date', since.toISOString().split('T')[0])
     .order('date', { ascending: true })
-    .limit(1600);
+    .limit(10000);  // SPY(1993~) 약 8,300봉 — 상장 이후 전체 이력 커버
   return (!error && data && data.length >= 20) ? data : null;
 }
 
