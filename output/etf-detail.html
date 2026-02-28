@@ -1042,29 +1042,29 @@ async function loadPriceHistory(ticker) {
 
 // ── 기간별 수익률 계산 ──────────────────────────────────────
 function calcPeriodReturn(history, calDays) {
-  const now = history[history.length - 1].adj_close;
+  const now = history[history.length - 1].close;
   const cutDate = new Date();
   cutDate.setDate(cutDate.getDate() - calDays);
   const cutStr = cutDate.toISOString().split('T')[0];
   for (let i = history.length - 2; i >= 0; i--) {
-    if (history[i].date <= cutStr) return (now / history[i].adj_close - 1) * 100;
+    if (history[i].date <= cutStr) return (now / history[i].close - 1) * 100;
   }
   return null;
 }
 function calcYTD(history) {
-  const now = history[history.length - 1].adj_close;
+  const now = history[history.length - 1].close;
   const ytdStr = new Date().getFullYear() + '-01-01';
   const base = history.find(p => p.date >= ytdStr);
-  return base ? (now / base.adj_close - 1) * 100 : null;
+  return base ? (now / base.close - 1) * 100 : null;
 }
 function calcAnnReturn(history, years) {
-  const now = history[history.length - 1].adj_close;
+  const now = history[history.length - 1].close;
   const cutDate = new Date();
   cutDate.setFullYear(cutDate.getFullYear() - years);
   const cutStr = cutDate.toISOString().split('T')[0];
   const base = history.find(p => p.date >= cutStr);
   if (!base) return null;
-  return (Math.pow(now / base.adj_close, 1 / years) - 1) * 100;
+  return (Math.pow(now / base.close, 1 / years) - 1) * 100;
 }
 function updatePerfFromHistory() {
   if (!priceHistory || !currentETF) return;
@@ -1121,10 +1121,10 @@ function initPriceChart(container, data, type) {
     lwSeries.setData(data.map(d => ({ time:d.date, open:d.open??d.close, high:d.high??d.close, low:d.low??d.close, close:d.close })));
   } else {
     lwSeries = lwChart.addAreaSeries({ lineColor:'#4ade80', topColor:'rgba(74,222,128,0.15)', bottomColor:'rgba(74,222,128,0)', lineWidth:2, priceLineVisible:false, crosshairMarkerVisible:true });
-    lwSeries.setData(data.map(d => ({ time:d.date, value:d.adj_close })));
+    lwSeries.setData(data.map(d => ({ time:d.date, value:d.close })));
   }
 
-  const overAdj = type === 'candle' ? data.map(d => d.close) : data.map(d => d.adj_close);
+  const overAdj = data.map(d => d.close);
   ['ma20','ma50','ma200'].forEach(key => {
     if (!activeIndicators[key]) return;
     const cfg = OVERLAY_CONF[key];
@@ -1153,7 +1153,7 @@ function initPriceChart(container, data, type) {
     let toD = null;
     for (let i = data.length - 1; i >= 0; i--) { if (data[i].date <= range.to) { toD = data[i]; break; } }
     if (!fromD || !toD || fromD === toD) return;
-    const ret = (toD.adj_close / fromD.adj_close - 1) * 100;
+    const ret = (toD.close / fromD.close - 1) * 100;
     const pctEl = document.getElementById('chart-pct');
     if (pctEl) { pctEl.textContent = (ret >= 0 ? '+' : '') + ret.toFixed(1) + '%'; pctEl.className = 'chart-pct ' + (ret >= 0 ? 'ret-pos' : 'ret-neg'); }
     const lblEl = document.getElementById('chart-period-label');
@@ -1284,7 +1284,7 @@ function calcBBData(adj, period = 20, mult = 2) {
 }
 function getSubChartData(key) {
   if (!priceHistory) return [];
-  const adj = priceHistory.map(d => d.adj_close);
+  const adj = priceHistory.map(d => d.close);
   if (key === 'volume') {
     return priceHistory.map(d => ({
       time: d.date, value: d.volume ?? 0,
@@ -1379,7 +1379,7 @@ function toggleIndicator(key, enabled) {
   activeIndicators[key] = enabled;
   if (['ma20','ma50','ma200','bb'].includes(key)) {
     if (!lwChart || !priceHistory) return;
-    const overAdj = currentChartType === 'candle' ? priceHistory.map(d => d.close) : priceHistory.map(d => d.adj_close);
+    const overAdj = priceHistory.map(d => d.close);
     if (key === 'bb') {
       ['bbUpper','bbLower','bbMid'].forEach(k => {
         if (overlaySeriesMap[k]) { try { lwChart.removeSeries(overlaySeriesMap[k]); } catch(e) {} delete overlaySeriesMap[k]; }
