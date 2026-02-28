@@ -6,7 +6,10 @@
 <title>ETF 비교 — CORRYU</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/supabase-client.js"></script>
 <script src="/i18n.js"></script>
+<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <style>
 :root {
   --bg-primary: #0a0d14; --bg-card: rgba(18,22,36,0.92);
@@ -177,7 +180,7 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
       </div>
     </div>
     <div class="chart-legend" id="chart-legend"></div>
-    <div style="font-size:0.68rem;color:#2d3748;margin-top:6px;text-align:right" data-i18n="compare.disclaimer">※ CAGR·변동성 기반 시뮬레이션 차트. 실제 가격 데이터가 아닙니다.</div>
+    <div style="font-size:0.68rem;color:#64748b;margin-top:6px;text-align:right">※ 수정주가(adj_close) 기준 기간 누적 수익률</div>
   </div>
 
   <!-- ── 비교 테이블 ── -->
@@ -240,88 +243,37 @@ let customRange = null; // { start: 'YYYY-MM-DD', end: 'YYYY-MM-DD' } | null
 const urlParams = new URLSearchParams(location.search);
 const initTickers = (urlParams.get('tickers') || '').split(',').map(t => t.trim().toUpperCase()).filter(Boolean).slice(0,3);
 
-// ── seededRand ────────────────────────────────────────
-function seededRand(seed) {
-  let s = Math.abs(seed) % 2147483647 || 1;
-  return () => { s = s * 16807 % 2147483647; return (s-1) / 2147483646; };
-}
-function generatePrices(ticker, cagr, vol, n) {
-  const seed = [...ticker].reduce((acc,c,i) => acc + c.charCodeAt(0)*(i*31+7), 42);
-  const rand = seededRand(seed);
-  const mu  = (cagr||10)/100/252, sig = (vol||18)/100/Math.sqrt(252);
-  let prices = [100];
-  for (let i=1; i<n; i++) {
-    let z=0; for(let j=0;j<12;j++) z+=rand(); z-=6;
-    prices.push(prices[i-1]*Math.exp(mu-0.5*sig*sig+sig*z));
+// ── 실가격 히스토리 (Supabase) ────────────────────────
+let lwCompareChart = null;
+let compareSeriesMap = {};      // { ticker: LW series }
+let priceHistoryCache = {};     // { ticker: [{date, adj_close}] }
+
+async function loadCompareHistory(ticker) {
+  if (priceHistoryCache[ticker]) return priceHistoryCache[ticker];
+  if (!window._sb) return null;
+  const { data, error } = await window._sb
+    .from('etf_prices')
+    .select('date, adj_close')
+    .eq('ticker', ticker)
+    .order('date', { ascending: true })
+    .limit(10000);
+  if (!error && data && data.length >= 5) {
+    priceHistoryCache[ticker] = data;
+    return data;
   }
-  return prices;
+  return null;
 }
-
-// ── 다중 차트 SVG ─────────────────────────────────────
-function generateMultiChartSVG(etfs, n) {
-  const MAX_RENDER = 500; // SVG 성능을 위해 최대 렌더링 포인트 제한
-  const series = etfs.map((etf, idx) => {
-    const raw = generatePrices(etf.ticker, etf.cagr, etf.vol, n);
-    let sampled;
-    if (raw.length > MAX_RENDER) {
-      const step = (raw.length-1)/(MAX_RENDER-1);
-      sampled = Array.from({length:MAX_RENDER}, (_,i) => raw[Math.round(i*step)]);
-    } else { sampled = raw; }
-    const base = sampled[0];
-    const prices = sampled.map(p => p/base*100);
-    const pct = ((prices[prices.length-1]/100-1)*100).toFixed(1);
-    return { ticker: etf.ticker, prices, pct, color: ETF_COLORS[idx] };
-  });
-
-  const ns = series[0].prices.length;
-  const allVals = series.flatMap(s => s.prices);
-  const minP = Math.min(...allVals)*0.998, maxP = Math.max(...allVals)*1.002;
-  const rng = maxP-minP||1;
-  const W=700, H=240, P={t:18,r:10,b:30,l:50};
-  const cw=W-P.l-P.r, ch=H-P.t-P.b;
-  const toX = i => P.l+(i/(ns-1))*cw;
-  const toY = p => P.t+ch-((p-minP)/rng)*ch;
-
-  const gridY = [0,0.25,0.5,0.75,1.0].map(f => {
-    const yv=(P.t+ch-f*ch).toFixed(1);
-    const pv=((minP+f*rng)/100-1)*100;
-    return `<line x1="${P.l}" y1="${yv}" x2="${P.l+cw}" y2="${yv}" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-    <text x="${P.l-6}" y="${(+yv+3.5).toFixed(1)}" text-anchor="end" font-size="10" fill="rgba(100,116,139,0.7)" font-family="monospace">${(pv>0?'+':'')+pv.toFixed(0)}%</text>`;
-  }).join('');
-
-  const y100 = toY(100).toFixed(1);
-  const refLine = `<line x1="${P.l}" y1="${y100}" x2="${P.l+cw}" y2="${y100}" stroke="rgba(255,255,255,0.1)" stroke-width="1" stroke-dasharray="3,3"/>`;
-
-  const paths = series.map(s => {
-    const pts = s.prices.map((p,i) => toX(i).toFixed(1)+','+toY(p).toFixed(1));
-    return `<path d="M ${pts.join(' L ')}" stroke="${s.color}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="${toX(ns-1).toFixed(1)}" cy="${toY(s.prices[ns-1]).toFixed(1)}" r="4" fill="${s.color}"/>`;
-  }).join('');
-
-  let xPts;
-  if (customRange) {
-    const s = new Date(customRange.start), e = new Date(customRange.end);
-    const fmt = d => `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}`;
-    const m1 = new Date(s.getTime()+(e-s)/3), m2 = new Date(s.getTime()+(e-s)*2/3);
-    xPts = [fmt(s), fmt(m1), fmt(m2), fmt(e)];
-  } else {
-    xPts = n<=22  ? [I18n.t('chart.ago.4w'),'','',I18n.t('chart.ago.now')]
-         : n<=65  ? [I18n.t('chart.ago.3m'),I18n.t('chart.ago.2m'),I18n.t('chart.ago.1m'),I18n.t('chart.ago.now')]
-         : n<=130 ? [I18n.t('chart.ago.6m'),I18n.t('chart.ago.4m'),I18n.t('chart.ago.2m'),I18n.t('chart.ago.now')]
-         : n<=252 ? [I18n.t('chart.ago.1y'),I18n.t('chart.ago.9m'),I18n.t('chart.ago.3m'),I18n.t('chart.ago.now')]
-         : n<=756 ? [I18n.t('chart.ago.3y'),I18n.t('chart.ago.2y'),I18n.t('chart.ago.1y'),I18n.t('chart.ago.now')]
-         : n<=1260? [I18n.t('chart.ago.5y'),I18n.t('chart.ago.3y'),I18n.t('chart.ago.1y'),I18n.t('chart.ago.now')]
-         : n<=2520? [I18n.t('chart.ago.10y'),I18n.t('chart.ago.6y'),I18n.t('chart.ago.2y'),I18n.t('chart.ago.now')]
-         : n<=3780? [I18n.t('chart.ago.15y'),I18n.t('chart.ago.10y'),I18n.t('chart.ago.5y'),I18n.t('chart.ago.now')]
-         :          [I18n.t('chart.ago.20y'),I18n.t('chart.ago.10y'),I18n.t('chart.ago.5y'),I18n.t('chart.ago.now')];
-  }
-  const xLabels = xPts.map((l,i)=>`<text x="${(P.l+(i/(xPts.length-1))*cw).toFixed(1)}" y="${H-5}" text-anchor="middle" font-size="10" fill="rgba(100,116,139,0.6)" font-family="Inter,sans-serif">${l}</text>`).join('');
-
-  return {
-    svg: `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-  ${gridY}${refLine}${paths}${xLabels}</svg>`,
-    series
-  };
+function getPeriodStartStr() {
+  if (customRange) return customRange.start;
+  const calDays = Math.round((PERIOD_DAYS[currentPeriod] || 252) * 365 / 252);
+  const d = new Date(); d.setDate(d.getDate() - calDays);
+  return d.toISOString().split('T')[0];
+}
+function normalizeSeries(history, fromDate) {
+  const filtered = history.filter(d => d.date >= fromDate);
+  if (filtered.length < 2) return null;
+  const base = filtered[0].adj_close;
+  return filtered.map(d => ({ time: d.date, value: (d.adj_close / base - 1) * 100 }));
 }
 
 // ── 포맷 헬퍼 ─────────────────────────────────────────
@@ -488,26 +440,71 @@ function applyCustomRange() {
   renderChart();
 }
 
-function renderChart() {
+async function renderChart() {
   const container = document.getElementById('chart-container');
   const legend    = document.getElementById('chart-legend');
   checkInceptionError();
+
   if (selectedETFs.length === 0) {
+    if (lwCompareChart) { lwCompareChart.remove(); lwCompareChart = null; compareSeriesMap = {}; }
     container.innerHTML = `<div class="empty-chart"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span style="font-size:0.85rem">${I18n.t('compare.empty.chart')}</span></div>`;
     legend.innerHTML = '';
     return;
   }
-  const n = getChartDays();
-  const { svg, series } = generateMultiChartSVG(selectedETFs, n);
-  container.innerHTML = svg;
-  legend.innerHTML = series.map((s,i) => {
-    const isUp = parseFloat(s.pct) >= 0;
-    return `<div class="legend-item">
-      <div class="legend-dot" style="background:${s.color}"></div>
-      <a href="/etf-detail?ticker=${s.ticker}" class="legend-link"><span class="legend-ticker" style="color:${s.color}">${s.ticker}</span></a>
-      <span class="legend-pct ${isUp?'ret-pos':'ret-neg'}">${isUp?'+':''}${s.pct}%</span>
+
+  // Init LW Chart on first call
+  if (!lwCompareChart) {
+    container.innerHTML = '';
+    lwCompareChart = LightweightCharts.createChart(container, {
+      width:  container.clientWidth,
+      height: 240,
+      layout: { background: { type: 'solid', color: 'transparent' }, textColor: '#94a3b8' },
+      grid:   { vertLines: { color: 'rgba(148,163,184,0.1)' }, horzLines: { color: 'rgba(148,163,184,0.1)' } },
+      rightPriceScale: { borderColor: 'rgba(148,163,184,0.2)' },
+      timeScale: { borderColor: 'rgba(148,163,184,0.2)', timeVisible: false },
+      crosshair: { mode: 1 },
+    });
+    window.addEventListener('resize', () => {
+      if (lwCompareChart) lwCompareChart.applyOptions({ width: container.clientWidth });
+    });
+  }
+
+  // Remove old series
+  Object.values(compareSeriesMap).forEach(s => { try { lwCompareChart.removeSeries(s); } catch(e) {} });
+  compareSeriesMap = {};
+
+  const fromDate = getPeriodStartStr();
+  const today    = new Date().toISOString().split('T')[0];
+
+  // Load all price histories in parallel
+  const histories = await Promise.all(selectedETFs.map(e => loadCompareHistory(e.ticker)));
+
+  legend.innerHTML = '';
+  selectedETFs.forEach((etf, i) => {
+    const history = histories[i];
+    if (!history) return;
+    const normalized = normalizeSeries(history, fromDate);
+    if (!normalized || normalized.length < 2) return;
+
+    const color  = ETF_COLORS[i];
+    const series = lwCompareChart.addLineSeries({ color, lineWidth: 2,
+      priceFormat: { type: 'custom', formatter: v => (v >= 0 ? '+' : '') + v.toFixed(1) + '%' },
+    });
+    series.setData(normalized);
+    compareSeriesMap[etf.ticker] = series;
+
+    const lastPct = normalized[normalized.length - 1].value;
+    const isUp    = lastPct >= 0;
+    legend.innerHTML += `<div class="legend-item">
+      <div class="legend-dot" style="background:${color}"></div>
+      <a href="/etf-detail?ticker=${etf.ticker}" class="legend-link"><span class="legend-ticker" style="color:${color}">${etf.ticker}</span></a>
+      <span class="legend-pct ${isUp ? 'ret-pos' : 'ret-neg'}">${isUp ? '+' : ''}${lastPct.toFixed(1)}%</span>
     </div>`;
-  }).join('');
+  });
+
+  if (Object.keys(compareSeriesMap).length > 0) {
+    lwCompareChart.timeScale().setVisibleRange({ from: fromDate, to: today });
+  }
 }
 
 // ── 비교 테이블 렌더링 ───────────────────────────────
@@ -575,8 +572,8 @@ function renderTable() {
   </table>`;
 }
 
-function renderAll() {
-  renderChart();
+async function renderAll() {
+  await renderChart();
   renderTable();
 }
 
