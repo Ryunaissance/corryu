@@ -3,6 +3,7 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/", "destination": "/landing" },
-    { "source": "/dashboard", "destination": "/index" }
+    { "source": "/dashboard", "destination": "/index" },
+    { "source": "/etf/:ticker", "destination": "/etf-detail?ticker=:ticker" }
   ]
 }
