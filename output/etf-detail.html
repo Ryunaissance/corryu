@@ -9,6 +9,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/supabase-client.js"></script>
 <script src="/i18n.js"></script>
+<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <style>
 /* ── 댓글 공통 스타일 ─────────────────────────────── */
 .c-sort-btn{padding:4px 10px;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);color:#64748b;font-size:.72rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
@@ -241,9 +242,24 @@ nav {
   font-size: 1.5rem; font-weight: 900; letter-spacing: -0.03em;
 }
 .chart-period-label { font-size: 0.75rem; color: var(--text-muted); }
-.chart-container { width: 100%; height: 220px; overflow: hidden; }
+.chart-container { width: 100%; height: 300px; overflow: hidden; position: relative; }
 .chart-disclaimer {
   font-size: 0.68rem; color: #2d3748; margin-top: 6px; text-align: right;
+}
+.chart-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.chart-type-btn {
+  padding: 4px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700;
+  border: 1px solid transparent; cursor: pointer; background: rgba(255,255,255,0.04);
+  color: var(--text-muted); transition: all 0.15s; font-family: inherit;
+}
+.chart-type-btn.active { background: rgba(59,130,246,0.15); color: #60a5fa; border-color: rgba(59,130,246,0.3); }
+.chart-type-btn:hover:not(.active) { color: var(--text-primary); background: rgba(255,255,255,0.07); }
+#price-tooltip {
+  position: absolute; display: none; pointer-events: none; z-index: 10;
+  background: rgba(10,18,35,0.93); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px; padding: 8px 12px; font-size: 0.78rem; color: #e2e8f0;
+  font-family: 'Inter', monospace; line-height: 1.8; white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
 
 /* ── 성과 테이블 ── */
@@ -455,23 +471,26 @@ nav {
         <!-- 차트 카드 -->
         <div class="glass card">
           <div class="card-title" data-i18n="detail.chart.title">가격 차트</div>
-          <div class="chart-tabs">
-            <button class="chart-tab" onclick="switchPeriod('1M',this)" data-i18n="detail.chart.tab.1M">1개월</button>
-            <button class="chart-tab" onclick="switchPeriod('3M',this)" data-i18n="detail.chart.tab.3M">3개월</button>
-            <button class="chart-tab" onclick="switchPeriod('6M',this)" data-i18n="detail.chart.tab.6M">6개월</button>
-            <button class="chart-tab active" onclick="switchPeriod('1Y',this)" data-i18n="detail.chart.tab.1Y">1년</button>
+          <div class="chart-toolbar">
+            <div style="display:flex;gap:4px">
+              <button class="chart-type-btn active" data-type="line" onclick="setChartType('line')">라인</button>
+              <button class="chart-type-btn" data-type="candle" onclick="setChartType('candle')">캔들</button>
+            </div>
+            <span style="font-size:0.68rem;color:#334155">스크롤 확대/축소 &nbsp;·&nbsp; 드래그 이동</span>
           </div>
           <div class="chart-stat">
             <div>
               <div class="chart-pct" id="chart-pct">—</div>
-              <div class="chart-period-label" id="chart-period-label">1년 수익률</div>
+              <div class="chart-period-label" id="chart-period-label">표시 구간 수익률</div>
             </div>
             <div style="text-align:right;font-size:0.75rem;color:var(--text-muted)">
               CAGR <span id="chart-cagr" style="font-weight:700;color:#94a3b8">—</span>
               &nbsp;·&nbsp; Vol <span id="chart-vol" style="font-weight:700;color:#94a3b8">—</span>
             </div>
           </div>
-          <div class="chart-container" id="chart-container"></div>
+          <div class="chart-container" id="chart-container">
+            <div id="price-tooltip"></div>
+          </div>
         </div>
 
         <!-- 기간별 수익률 카드 -->
@@ -786,7 +805,9 @@ function generatePrices(ticker, cagr, vol, n) {
 
 let currentETF = null;
 let priceHistory = null;
-let currentChartPeriod = '1Y';
+let lwChart = null;
+let lwSeries = null;
+let currentChartType = 'line';
 
 // ── 실가격 히스토리 로드 (Supabase etf_prices) ───────────────
 async function loadPriceHistory(ticker) {
@@ -795,7 +816,7 @@ async function loadPriceHistory(ticker) {
   since.setFullYear(since.getFullYear() - 6);
   const { data, error } = await window._sb
     .from('etf_prices')
-    .select('date, adj_close')
+    .select('date, open, high, low, close, adj_close')
     .eq('ticker', ticker)
     .gte('date', since.toISOString().split('T')[0])
     .order('date', { ascending: true })
@@ -860,68 +881,132 @@ function updatePerfFromHistory() {
   }).join('');
 }
 
-// ── 실가격 차트 SVG 빌드 ────────────────────────────────────
-function buildChartFromPrices(prices, period) {
-  const N = prices.length;
-  if (N < 2) return null;
-  const W = 700, H = 200;
-  const P = { t: 18, r: 10, b: 30, l: 50 };
-  const cw = W - P.l - P.r, ch = H - P.t - P.b;
-  const minP = Math.min(...prices) * 0.998;
-  const maxP = Math.max(...prices) * 1.002;
-  const rng  = maxP - minP || 1;
-  const toX  = i => P.l + (i / (N - 1)) * cw;
-  const toY  = p => P.t + ch - ((p - minP) / rng) * ch;
-  const pts  = prices.map((p, i) => toX(i).toFixed(1) + ',' + toY(p).toFixed(1));
-  const line = 'M ' + pts.join(' L ');
-  const area = line + ' L ' + toX(N-1).toFixed(1) + ',' + (P.t+ch) + ' L ' + P.l + ',' + (P.t+ch) + ' Z';
-  const isUp = prices[N-1] >= prices[0];
-  const col  = isUp ? '#4ade80' : '#f87171';
-  const pct  = ((prices[N-1] / prices[0] - 1) * 100).toFixed(1);
-  const gridY = [0, 0.25, 0.5, 0.75, 1.0].map(f => {
-    const yv = (P.t + ch - f * ch).toFixed(1);
-    const pv = ((minP + f * rng) / prices[0] - 1) * 100;
-    const lbl = (pv > 0 ? '+' : '') + pv.toFixed(0) + '%';
-    return `<line x1="${P.l}" y1="${yv}" x2="${P.l+cw}" y2="${yv}" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-    <text x="${P.l-6}" y="${(+yv+3.5).toFixed(1)}" text-anchor="end" font-size="10" fill="rgba(100,116,139,0.7)" font-family="monospace">${lbl}</text>`;
-  }).join('');
-  const xPts = period === '1M' ? ['4주 전','3주 전','2주 전','1주 전','현재']
-             : period === '3M' ? ['3개월 전','2개월 전','1개월 전','현재','']
-             : period === '6M' ? ['6개월 전','4개월 전','2개월 전','현재','']
-             :                   ['1년 전','9개월 전','6개월 전','3개월 전','현재'];
-  const gridX = xPts.map((lbl, i) =>
-    `<text x="${(P.l + (i / (xPts.length - 1)) * cw).toFixed(1)}" y="${H-5}" text-anchor="middle" font-size="10" fill="rgba(100,116,139,0.6)" font-family="Inter,sans-serif">${lbl}</text>`
-  ).join('');
-  return {
-    svg: `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-  <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${col}" stop-opacity="0.18"/><stop offset="100%" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
-  ${gridY}${gridX}
-  <path d="${area}" fill="url(#ag)"/>
-  <path d="${line}" stroke="${col}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="${P.l}" cy="${toY(prices[0]).toFixed(1)}" r="3" fill="${col}" opacity="0.5"/>
-  <circle cx="${toX(N-1).toFixed(1)}" cy="${toY(prices[N-1]).toFixed(1)}" r="4" fill="${col}"/></svg>`,
-    pct, isUp
-  };
+// ── Lightweight Charts 기반 인터랙티브 차트 ─────────────────
+function initPriceChart(container, data, type) {
+  if (!container || !data || data.length < 2) return;
+  // 기존 차트 제거 (tooltip div 제외)
+  if (lwChart) { try { lwChart.remove(); } catch(e) {} lwChart = null; lwSeries = null; }
+
+  lwChart = LightweightCharts.createChart(container, {
+    width:  container.clientWidth,
+    height: container.clientHeight || 300,
+    layout: {
+      background: { type: 'solid', color: 'transparent' },
+      textColor: '#64748b',
+      fontFamily: "'Inter', monospace",
+      fontSize: 11,
+    },
+    grid: {
+      vertLines: { color: 'rgba(255,255,255,0.04)' },
+      horzLines: { color: 'rgba(255,255,255,0.04)' },
+    },
+    crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+    rightPriceScale: { borderColor: 'rgba(255,255,255,0.08)' },
+    timeScale: { borderColor: 'rgba(255,255,255,0.08)', timeVisible: false },
+    handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true },
+    handleScale: { mouseWheel: true, pinch: true },
+  });
+
+  if (type === 'candle') {
+    lwSeries = lwChart.addCandlestickSeries({
+      upColor: '#4ade80', downColor: '#f87171',
+      borderUpColor: '#4ade80', borderDownColor: '#f87171',
+      wickUpColor: '#4ade80', wickDownColor: '#f87171',
+    });
+    lwSeries.setData(data.map(d => ({
+      time:  d.date,
+      open:  d.open  ?? d.adj_close,
+      high:  d.high  ?? d.adj_close,
+      low:   d.low   ?? d.adj_close,
+      close: d.adj_close,
+    })));
+  } else {
+    lwSeries = lwChart.addAreaSeries({
+      lineColor: '#4ade80',
+      topColor: 'rgba(74,222,128,0.15)',
+      bottomColor: 'rgba(74,222,128,0)',
+      lineWidth: 2,
+      priceLineVisible: false,
+      crosshairMarkerVisible: true,
+    });
+    lwSeries.setData(data.map(d => ({ time: d.date, value: d.adj_close })));
+  }
+
+  // 초기 뷰: 최근 1년
+  const lastDate = data[data.length - 1].date;
+  const oneYAgo  = new Date(lastDate);
+  oneYAgo.setFullYear(oneYAgo.getFullYear() - 1);
+  const fromStr = oneYAgo.toISOString().split('T')[0];
+  if (data.some(d => d.date <= fromStr)) {
+    lwChart.timeScale().setVisibleRange({ from: fromStr, to: lastDate });
+  } else {
+    lwChart.timeScale().fitContent();
+  }
+
+  // 표시 구간 수익률 동적 업데이트
+  function updateRangeReturn() {
+    const range = lwChart.timeScale().getVisibleRange();
+    if (!range) return;
+    const fromD = data.find(d => d.date >= range.from);
+    let toD = null;
+    for (let i = data.length - 1; i >= 0; i--) { if (data[i].date <= range.to) { toD = data[i]; break; } }
+    if (!fromD || !toD || fromD === toD) return;
+    const ret = (toD.adj_close / fromD.adj_close - 1) * 100;
+    const pctEl = document.getElementById('chart-pct');
+    if (pctEl) {
+      pctEl.textContent = (ret >= 0 ? '+' : '') + ret.toFixed(1) + '%';
+      pctEl.className = 'chart-pct ' + (ret >= 0 ? 'ret-pos' : 'ret-neg');
+    }
+    const lblEl = document.getElementById('chart-period-label');
+    if (lblEl) lblEl.textContent = fromD.date + ' ~ ' + toD.date;
+  }
+  lwChart.timeScale().subscribeVisibleTimeRangeChange(updateRangeReturn);
+  setTimeout(updateRangeReturn, 80);
+
+  // 마우스 오버 툴팁 (OHLC)
+  const tooltip = document.getElementById('price-tooltip');
+  lwChart.subscribeCrosshairMove(param => {
+    if (!tooltip) return;
+    if (!param.time || !param.point || !lwSeries || !param.seriesData.get(lwSeries)) {
+      tooltip.style.display = 'none';
+      return;
+    }
+    const pt = param.seriesData.get(lwSeries);
+    let html;
+    if (type === 'candle') {
+      const up = pt.close >= pt.open;
+      const c  = up ? '#4ade80' : '#f87171';
+      html = `<div style="color:#475569;font-size:0.7rem;margin-bottom:3px">${param.time}</div>
+        <table style="border-spacing:0 2px">
+          <tr><td style="color:#475569;padding-right:10px">O</td><td style="color:${c};font-weight:700">${pt.open.toFixed(2)}</td></tr>
+          <tr><td style="color:#475569;padding-right:10px">H</td><td style="color:#4ade80">${pt.high.toFixed(2)}</td></tr>
+          <tr><td style="color:#475569;padding-right:10px">L</td><td style="color:#f87171">${pt.low.toFixed(2)}</td></tr>
+          <tr><td style="color:#475569;padding-right:10px">C</td><td style="color:${c};font-weight:700">${pt.close.toFixed(2)}</td></tr>
+        </table>`;
+    } else {
+      html = `<div style="color:#475569;font-size:0.7rem;margin-bottom:2px">${param.time}</div>
+        <div style="color:#4ade80;font-weight:800;font-size:1rem">${pt.value.toFixed(2)}</div>`;
+    }
+    tooltip.innerHTML = html;
+    tooltip.style.display = 'block';
+    let x = param.point.x + 14;
+    let y = Math.max(4, param.point.y - 10);
+    if (x + 140 > container.clientWidth) x = param.point.x - 144;
+    tooltip.style.left = x + 'px';
+    tooltip.style.top  = y + 'px';
+  });
+
+  // 창 크기 대응
+  const ro = new ResizeObserver(() => {
+    if (lwChart) lwChart.applyOptions({ width: container.clientWidth });
+  });
+  ro.observe(container);
 }
-function sliceByPeriod(history, period) {
-  const days = { '1M': 30, '3M': 91, '6M': 183, '1Y': 365 };
-  const cutDate = new Date();
-  cutDate.setDate(cutDate.getDate() - days[period]);
-  const cutStr = cutDate.toISOString().split('T')[0];
-  return history.filter(p => p.date >= cutStr);
-}
-function updateChartFromHistory(period) {
-  currentChartPeriod = period;
-  if (!priceHistory) return;
-  const slice = sliceByPeriod(priceHistory, period);
-  if (slice.length < 2) return;
-  const res = buildChartFromPrices(slice.map(p => p.adj_close), period);
-  if (!res) return;
-  document.getElementById('chart-container').innerHTML = res.svg;
-  const pctEl = document.getElementById('chart-pct');
-  pctEl.textContent = (res.isUp ? '+' : '') + res.pct + '%';
-  pctEl.className = 'chart-pct ' + (res.isUp ? 'ret-pos' : 'ret-neg');
-  document.getElementById('chart-period-label').textContent = PERIOD_LABEL()[period];
+
+function setChartType(type) {
+  currentChartType = type;
+  document.querySelectorAll('.chart-type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === type));
+  if (priceHistory) initPriceChart(document.getElementById('chart-container'), priceHistory, type);
 }
 
 // ── 지표 시계열 계산 (실데이터 기반) ────────────────────────
@@ -1035,26 +1120,6 @@ function generateChartSVG(ticker, cagr, vol, n) {
   };
 }
 
-const PERIOD_DAYS = { '1M': 22, '3M': 65, '6M': 130, '1Y': 252 };
-const PERIOD_LABEL = () => ({ '1M': I18n.t('detail.chart.period.1M'), '3M': I18n.t('detail.chart.period.3M'), '6M': I18n.t('detail.chart.period.6M'), '1Y': I18n.t('detail.chart.period.1Y') });
-
-function switchPeriod(period, el) {
-  if (!currentETF) return;
-  document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  if (priceHistory) {
-    updateChartFromHistory(period);
-  } else {
-    const n = PERIOD_DAYS[period];
-    const res = generateChartSVG(currentETF.ticker, currentETF.cagr, currentETF.vol, n);
-    document.getElementById('chart-container').innerHTML = res.svg;
-    const pctEl = document.getElementById('chart-pct');
-    pctEl.textContent = (res.isUp ? '+' : '') + res.pct + '%';
-    pctEl.className = 'chart-pct ' + (res.isUp ? 'ret-pos' : 'ret-neg');
-    document.getElementById('chart-period-label').textContent = PERIOD_LABEL()[period];
-  }
-}
-
 // ── 렌더링 함수들 ──────────────────────────────────
 function fmtAUM(v) {
   if (!v) return '—';
@@ -1116,15 +1181,7 @@ function renderPage(etf, sectorId) {
   document.getElementById('qs-numh').textContent     = supp.numH !== undefined ? I18n.t('detail.numh.format', { n: supp.numH.toLocaleString() }) : '—';
 
   // ── 차트 ────────────────────────────────────────
-  if (priceHistory) {
-    updateChartFromHistory(currentChartPeriod);
-  } else {
-    const res1Y = generateChartSVG(etf.ticker, etf.cagr, etf.vol, 252);
-    document.getElementById('chart-container').innerHTML = res1Y.svg;
-    const pctEl = document.getElementById('chart-pct');
-    pctEl.textContent = (res1Y.isUp ? '+' : '') + res1Y.pct + '%';
-    pctEl.className   = 'chart-pct ' + (res1Y.isUp ? 'ret-pos' : 'ret-neg');
-  }
+  if (priceHistory) initPriceChart(document.getElementById('chart-container'), priceHistory, currentChartType);
   document.getElementById('chart-cagr').textContent = fmtPct(etf.cagr);
   document.getElementById('chart-vol').textContent  = fmtPct(etf.vol);
 
@@ -1413,7 +1470,7 @@ fetch('/etf_data.json')
     loadPriceHistory(found.ticker).then(hist => {
       if (hist) {
         priceHistory = hist;
-        updateChartFromHistory(currentChartPeriod);
+        initPriceChart(document.getElementById('chart-container'), hist, currentChartType);
         updatePerfFromHistory();
         if (currentETFForMetric) renderMetricChart(currentETFForMetric);
       }
@@ -1423,7 +1480,7 @@ fetch('/etf_data.json')
       if (currentETF) {
         renderPage(currentETF, foundSid);
         if (priceHistory) {
-          updateChartFromHistory(currentChartPeriod);
+          initPriceChart(document.getElementById('chart-container'), priceHistory, currentChartType);
           updatePerfFromHistory();
           if (currentETFForMetric) renderMetricChart(currentETFForMetric);
         }
