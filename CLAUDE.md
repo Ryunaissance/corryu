@@ -64,6 +64,21 @@ Pass 3   일간 상관계수 폴백
 
 ---
 
+## 스모크 테스트
+
+외부 데이터(Supabase) 없이 실행 가능. AI 수정 후 항상 실행할 것.
+
+```bash
+python tests/test_smoke.py
+```
+
+커버 범위 (39개 테스트, ~0.01초):
+- **config 무결성**: 섹터 ID 형식, 앵커 역방향 매핑, 오버라이드 유효성, 슈퍼섹터 일관성
+- **키워드 분류**: SQQQ→S22, IBIT→S21, GLD→S18, Goldman Sachs→NOT S18 (exclude_if), 단기채→NOT S22
+- **지표 수식**: Z-score 부호, RSI 범위(0~100)/경계, MDD 부호, 52w 레인지 0·50·100%
+
+---
+
 ## 빌드 파이프라인
 
 ```bash
