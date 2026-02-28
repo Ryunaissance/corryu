@@ -2,6 +2,7 @@
 CORRYU ETF Dashboard - 레거시 ETF 판별 엔진
 자동 규칙 + 수동 오버라이드
 """
+from typing import Any
 import numpy as np
 import pandas as pd
 
@@ -13,9 +14,9 @@ from config import (
 )
 
 
-def assess_sector_legacy(sector_id, sector_tickers, classification,
-                         df_corr_monthly, df_corr_daily,
-                         scraped, perf_stats, df_price):
+def assess_sector_legacy(sector_id: str, sector_tickers: set[str], classification: dict[str, Any],
+                         df_corr_monthly: pd.DataFrame, df_corr_daily: pd.DataFrame,
+                         scraped: dict[str, Any], perf_stats: dict[str, Any], df_price: pd.DataFrame) -> dict[str, dict[str, Any]]:
     """단일 섹터의 레거시 ETF를 판별
 
     Returns:
@@ -76,9 +77,9 @@ def assess_sector_legacy(sector_id, sector_tickers, classification,
     return results
 
 
-def assess_all_legacy(sector_members, classification,
-                      df_corr_monthly, df_corr_daily,
-                      scraped, perf_stats, df_price):
+def assess_all_legacy(sector_members: dict[str, set[str]], classification: dict[str, Any],
+                      df_corr_monthly: pd.DataFrame, df_corr_daily: pd.DataFrame,
+                      scraped: dict[str, Any], perf_stats: dict[str, Any], df_price: pd.DataFrame) -> dict[str, dict[str, Any]]:
     """전체 섹터에 대해 레거시 판별 실행
 
     Returns:

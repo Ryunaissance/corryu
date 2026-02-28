@@ -9,6 +9,8 @@ import json
 import os
 import subprocess
 import sys
+from typing import Any
+import pandas as pd
 
 from config import SECTOR_DEFS, SUPER_SECTOR_DEFS, ASSET_CLASSES, MY_PORTFOLIO, OUTPUT_DIR
 from data_loader import load_all, load_expense_ratios, get_all_tickers, get_fullname, get_market_cap, get_rank
@@ -18,7 +20,7 @@ from legacy import assess_all_legacy
 from metrics import compute_etf_metrics, compute_sector_stats
 
 
-def build_sector_meta(sector_members, all_etf_data):
+def build_sector_meta(sector_members: dict[str, set[str]], all_etf_data: dict[str, list[dict[str, Any]]]) -> dict[str, Any]:
     """섹터별 메타 정보 JSON 생성"""
     meta = {}
     for sid, sdef in SECTOR_DEFS.items():
@@ -36,9 +38,9 @@ def build_sector_meta(sector_members, all_etf_data):
     return meta
 
 
-def build_all_etf_data(sector_members, classification, legacy_results,
-                       df_price, perf_stats, scraped,
-                       df_corr_monthly, df_corr_daily, expense_ratios=None):
+def build_all_etf_data(sector_members: dict[str, set[str]], classification: dict[str, Any], legacy_results: dict[str, Any],
+                       df_price: pd.DataFrame, perf_stats: dict[str, Any], scraped: dict[str, Any],
+                       df_corr_monthly: pd.DataFrame, df_corr_daily: pd.DataFrame, expense_ratios: dict[str, float] | None = None) -> dict[str, list[dict[str, Any]]]:
     """전체 섹터별 ETF 데이터 JSON 생성"""
     all_data = {}
 
@@ -62,7 +64,7 @@ def build_all_etf_data(sector_members, classification, legacy_results,
     return all_data
 
 
-def main():
+def main() -> None:
     """메인 실행: 데이터 로딩 → 분류 → 레거시 → 지표 → HTML"""
     # 1. 데이터 로딩
     df_price, perf_stats, scraped, df_corr_monthly, df_corr_daily = load_all()

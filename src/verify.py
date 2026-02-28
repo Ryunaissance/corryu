@@ -1,10 +1,11 @@
 """
 CORRYU ETF Dashboard - MECE 검증 모듈
 """
+from typing import Any
 from config import SECTOR_DEFS
 
 
-def verify_mece(classification, all_tickers):
+def verify_mece(classification: dict[str, dict[str, Any]], all_tickers: set[str]) -> bool:
     """MECE(Mutually Exclusive, Collectively Exhaustive) 검증
 
     Args:
@@ -66,7 +67,7 @@ def verify_mece(classification, all_tickers):
     return passed
 
 
-def spot_check(classification, scraped):
+def spot_check(classification: dict[str, dict[str, Any]], scraped: dict[str, Any]) -> bool:
     """주요 ETF가 올바른 섹터에 배정되었는지 확인"""
     expected = {
         'VOO': 'S01', 'SPY': 'S01', 'VTI': 'S01',
