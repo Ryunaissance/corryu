@@ -2,6 +2,7 @@
 CORRYU ETF Dashboard - 지표 계산 모듈
 Z-score, 200DMA 이격도, 52주 MDD
 """
+from typing import Any
 import pandas as pd
 import numpy as np
 
@@ -9,7 +10,7 @@ from config import SHORT_HISTORY_CUTOFF
 from data_loader import get_corr_value
 
 
-def compute_z_score(prices):
+def compute_z_score(prices: pd.Series) -> float:
     """200일 이동평균 기반 Z-Score 계산"""
     if len(prices) < 200:
         return 0.0
@@ -20,7 +21,7 @@ def compute_z_score(prices):
     return (prices.iloc[-1] - ma200) / std200
 
 
-def compute_200dma_divergence(prices):
+def compute_200dma_divergence(prices: pd.Series) -> float:
     """200일 이동평균 이격도 (%)"""
     if len(prices) < 200:
         return 0.0
@@ -30,7 +31,7 @@ def compute_200dma_divergence(prices):
     return (prices.iloc[-1] / ma200 - 1) * 100
 
 
-def compute_52w_mdd(prices):
+def compute_52w_mdd(prices: pd.Series) -> float:
     """52주 최고가 대비 현재가 괴리율 (%)"""
     if len(prices) < 10:
         return 0.0
@@ -41,7 +42,7 @@ def compute_52w_mdd(prices):
     return (prices.iloc[-1] / high_52 - 1) * 100
 
 
-def compute_rsi(prices, period=14):
+def compute_rsi(prices: pd.Series, period: int = 14) -> float | None:
     """RSI (Wilder 방식, 기본 14일)
 
     Returns:
@@ -60,7 +61,7 @@ def compute_rsi(prices, period=14):
     return round(float(val), 1) if not pd.isna(val) else None
 
 
-def compute_52w_range_pct(prices):
+def compute_52w_range_pct(prices: pd.Series) -> float | None:
     """52주 레인지 내 위치 (%)
 
     0% = 52주 최저, 100% = 52주 최고
@@ -79,8 +80,9 @@ def compute_52w_range_pct(prices):
     return round(float((current - low) / (high - low) * 100), 1)
 
 
-def compute_etf_metrics(ticker, df_price, perf_stats, scraped, classification,
-                        df_corr_monthly, df_corr_daily, legacy_info):
+def compute_etf_metrics(ticker: str, df_price: pd.DataFrame, perf_stats: dict[str, Any], scraped: dict[str, Any], classification: dict[str, Any],
+                        df_corr_monthly: pd.DataFrame, df_corr_daily: pd.DataFrame, legacy_info: dict[str, Any],
+                        expense_ratios: dict[str, float] | None = None) -> dict[str, Any]:
     """단일 ETF의 모든 대시보드 지표를 계산
 
     Returns:
@@ -129,6 +131,13 @@ def compute_etf_metrics(ticker, df_price, perf_stats, scraped, classification,
     # r_spy (글로벌 참조 상관계수)
     r_spy = get_corr_value('SPY', ticker, df_corr_monthly, df_corr_daily)
 
+    # 수수료 (expense_ratios dict에서 조회, 없으면 None)
+    exp_ratio = None
+    if expense_ratios:
+        v = expense_ratios.get(ticker)
+        if v is not None:
+            exp_ratio = round(float(v), 6)
+
     return {
         'ticker': ticker,
         'name': fullname,
@@ -146,13 +155,14 @@ def compute_etf_metrics(ticker, df_price, perf_stats, scraped, classification,
         'sortino': round(float(p.get('Sortino', 0)), 2),
         'short_history': short_history,
         'inception': inception,
+        'exp_ratio': exp_ratio,
         'is_legacy': leg.get('is_legacy', False),
         'legacy_reasons': leg.get('reasons', []),
         'legacy_detail': leg.get('details', []),
     }
 
 
-def compute_sector_stats(sector_etf_data):
+def compute_sector_stats(sector_etf_data: list[dict[str, Any]]) -> dict[str, Any]:
     """섹터의 요약 통계 계산"""
     if not sector_etf_data:
         return {'count': 0, 'active': 0, 'legacy': 0,

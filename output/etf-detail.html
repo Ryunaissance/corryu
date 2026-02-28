@@ -261,6 +261,44 @@ nav {
   font-family: 'Inter', monospace; line-height: 1.8; white-space: nowrap;
   box-shadow: 0 4px 20px rgba(0,0,0,0.5);
 }
+/* ── 지표 설정 패널 ── */
+.ind-settings-btn {
+  padding: 3px 9px; border-radius: 5px; font-size: 0.73rem; font-weight: 700;
+  border: 1px solid rgba(255,255,255,0.1); cursor: pointer;
+  background: rgba(255,255,255,0.04); color: var(--text-muted);
+  transition: all 0.15s; font-family: inherit;
+}
+.ind-settings-btn.active, .ind-settings-btn:hover {
+  background: rgba(59,130,246,0.15); color: #60a5fa; border-color: rgba(59,130,246,0.3);
+}
+.ind-panel {
+  display: none; margin-bottom: 12px; padding: 10px 14px;
+  background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+}
+.ind-panel.open { display: block; }
+.ind-panel-section { margin-bottom: 9px; }
+.ind-panel-label {
+  font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.07em; color: #475569; margin-bottom: 7px;
+}
+.ind-grid { display: flex; flex-wrap: wrap; gap: 3px 14px; }
+.ind-item {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 0.78rem; color: var(--text-muted);
+  cursor: pointer; user-select: none; padding: 3px 0;
+}
+.ind-item input[type=checkbox] { display: none; }
+.ind-item:has(input:checked) { color: var(--text-primary); }
+.ind-swatch { width: 12px; height: 3px; border-radius: 2px; opacity: 0.4; flex-shrink: 0; transition: opacity 0.15s; }
+.ind-item:has(input:checked) .ind-swatch { opacity: 1; }
+/* Sub-charts */
+.sub-chart-wrap { position: relative; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2px; margin-top: 2px; }
+.sub-chart-label {
+  position: absolute; top: 5px; left: 6px; font-size: 0.62rem; font-weight: 700;
+  color: #475569; pointer-events: none; z-index: 5;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
 
 /* ── 성과 테이블 ── */
 .perf-table { width: 100%; border-collapse: collapse; }
@@ -469,14 +507,39 @@ nav {
       <div>
 
         <!-- 차트 카드 -->
-        <div class="glass card">
+        <div class="glass card" id="chart-card">
           <div class="card-title" data-i18n="detail.chart.title">가격 차트</div>
           <div class="chart-toolbar">
             <div style="display:flex;gap:4px">
               <button class="chart-type-btn active" data-type="line" onclick="setChartType('line')">라인</button>
               <button class="chart-type-btn" data-type="candle" onclick="setChartType('candle')">캔들</button>
             </div>
-            <span style="font-size:0.68rem;color:#334155">스크롤 확대/축소 &nbsp;·&nbsp; 드래그 이동</span>
+            <div style="display:flex;gap:6px;align-items:center">
+              <span style="font-size:0.68rem;color:#334155">스크롤 확대/축소 &nbsp;·&nbsp; 드래그 이동</span>
+              <button class="ind-settings-btn" id="ind-settings-btn" onclick="toggleIndicatorPanel()">⚙ 지표</button>
+            </div>
+          </div>
+          <!-- 지표 설정 패널 -->
+          <div class="ind-panel" id="ind-panel">
+            <div class="ind-panel-section">
+              <div class="ind-panel-label">오버레이</div>
+              <div class="ind-grid">
+                <label class="ind-item"><input type="checkbox" id="ind-ma20" onchange="toggleIndicator('ma20',this.checked)"><span class="ind-swatch" style="background:#f59e0b"></span>MA 20</label>
+                <label class="ind-item"><input type="checkbox" id="ind-ma50" onchange="toggleIndicator('ma50',this.checked)"><span class="ind-swatch" style="background:#3b82f6"></span>MA 50</label>
+                <label class="ind-item"><input type="checkbox" id="ind-ma200" checked onchange="toggleIndicator('ma200',this.checked)"><span class="ind-swatch" style="background:#a78bfa"></span>MA 200</label>
+                <label class="ind-item"><input type="checkbox" id="ind-bb" onchange="toggleIndicator('bb',this.checked)"><span class="ind-swatch" style="background:#60a5fa"></span>볼린저밴드 (20,2)</label>
+              </div>
+            </div>
+            <div class="ind-panel-section" style="margin-bottom:0">
+              <div class="ind-panel-label">서브차트</div>
+              <div class="ind-grid">
+                <label class="ind-item"><input type="checkbox" id="ind-volume" onchange="toggleIndicator('volume',this.checked)"><span class="ind-swatch" style="background:#60a5fa"></span>거래량</label>
+                <label class="ind-item"><input type="checkbox" id="ind-rsi" checked onchange="toggleIndicator('rsi',this.checked)"><span class="ind-swatch" style="background:#f59e0b"></span>RSI (14)</label>
+                <label class="ind-item"><input type="checkbox" id="ind-zscore" checked onchange="toggleIndicator('zscore',this.checked)"><span class="ind-swatch" style="background:#a78bfa"></span>Z-Score</label>
+                <label class="ind-item"><input type="checkbox" id="ind-range52w" onchange="toggleIndicator('range52w',this.checked)"><span class="ind-swatch" style="background:#34d399"></span>52W Range</label>
+                <label class="ind-item"><input type="checkbox" id="ind-mdd" onchange="toggleIndicator('mdd',this.checked)"><span class="ind-swatch" style="background:#f87171"></span>MDD</label>
+              </div>
+            </div>
           </div>
           <div class="chart-stat">
             <div>
@@ -491,6 +554,7 @@ nav {
           <div class="chart-container" id="chart-container">
             <div id="price-tooltip"></div>
           </div>
+          <div id="sub-charts-wrapper"></div>
         </div>
 
         <!-- 기간별 수익률 카드 -->
@@ -514,24 +578,6 @@ nav {
           <div id="holdings-container"></div>
         </div>
 
-        <!-- 지표 이력 트렌드 카드 -->
-        <div class="glass card" id="trend-card">
-          <div class="card-title" data-i18n="detail.trend.title">지표 이력 트렌드</div>
-          <div class="chart-tabs" style="margin-bottom:12px" id="metric-tabs">
-            <button class="chart-tab active" onclick="switchMetric('zscore',this)">Z-Score</button>
-            <button class="chart-tab" onclick="switchMetric('rsi',this)">RSI</button>
-            <button class="chart-tab" onclick="switchMetric('range52w',this)">52W Range</button>
-            <button class="chart-tab" onclick="switchMetric('mdd',this)">MDD</button>
-          </div>
-          <div class="metric-stat-row">
-            <div>
-              <span id="metric-current-label" style="font-size:0.75rem;color:var(--text-muted)" data-i18n="detail.trend.current">현재 Z-Score</span>
-              <span class="metric-current-val" id="metric-current-val">—</span>
-            </div>
-            <div class="metric-ref-dots" id="metric-ref-legend"></div>
-          </div>
-          <div class="chart-container" id="metric-chart-container"></div>
-        </div>
 
       </div>
 
@@ -901,340 +947,6 @@ function goToTicker() {
   if (val) location.href = '/etf-detail?ticker=' + encodeURIComponent(val);
 }
 
-// ── Seeded 차트 생성 ─────────────────────────────
-function seededRand(seed) {
-  let s = Math.abs(seed) % 2147483647 || 1;
-  return () => { s = s * 16807 % 2147483647; return (s - 1) / 2147483646; };
-}
-function generatePrices(ticker, cagr, vol, n) {
-  const seed = [...ticker].reduce((acc, c, i) => acc + c.charCodeAt(0) * (i * 31 + 7), 42);
-  const rand = seededRand(seed);
-  const mu  = (cagr || 10) / 100 / 252;
-  const sig = (vol  || 18) / 100 / Math.sqrt(252);
-  let prices = [100];
-  for (let i = 1; i < n; i++) {
-    // 12-sample CLT approximation of normal distribution
-    let z = 0;
-    for (let j = 0; j < 12; j++) z += rand();
-    z = (z - 6);
-    prices.push(prices[i - 1] * Math.exp(mu - 0.5 * sig * sig + sig * z));
-  }
-  return prices;
-}
-
-let currentETF = null;
-let priceHistory = null;
-let lwChart = null;
-let lwSeries = null;
-let currentChartType = 'line';
-
-// ── 실가격 히스토리 로드 (Supabase etf_prices) ───────────────
-async function loadPriceHistory(ticker) {
-  if (!window._sb) return null;
-  const { data, error } = await window._sb
-    .from('etf_prices')
-    .select('date, open, high, low, close, adj_close')
-    .eq('ticker', ticker)
-    .order('date', { ascending: true })
-    .limit(10000);  // SPY(1993~) 약 8,300봉 — 상장 이후 전체 이력 커버
-  return (!error && data && data.length >= 20) ? data : null;
-}
-
-// ── 기간별 수익률 계산 ──────────────────────────────────────
-function calcPeriodReturn(history, calDays) {
-  const now = history[history.length - 1].adj_close;
-  const cutDate = new Date();
-  cutDate.setDate(cutDate.getDate() - calDays);
-  const cutStr = cutDate.toISOString().split('T')[0];
-  for (let i = history.length - 2; i >= 0; i--) {
-    if (history[i].date <= cutStr) return (now / history[i].adj_close - 1) * 100;
-  }
-  return null;
-}
-function calcYTD(history) {
-  const now = history[history.length - 1].adj_close;
-  const ytdStr = new Date().getFullYear() + '-01-01';
-  const base = history.find(p => p.date >= ytdStr);
-  return base ? (now / base.adj_close - 1) * 100 : null;
-}
-function calcAnnReturn(history, years) {
-  const now = history[history.length - 1].adj_close;
-  const cutDate = new Date();
-  cutDate.setFullYear(cutDate.getFullYear() - years);
-  const cutStr = cutDate.toISOString().split('T')[0];
-  const base = history.find(p => p.date >= cutStr);
-  if (!base) return null;
-  return (Math.pow(now / base.adj_close, 1 / years) - 1) * 100;
-}
-function updatePerfFromHistory() {
-  if (!priceHistory || !currentETF) return;
-  const h = priceHistory;
-  const ret = {
-    '1M':     calcPeriodReturn(h, 30),
-    '3M':     calcPeriodReturn(h, 91),
-    'YTD':    calcYTD(h),
-    '1Y':     calcPeriodReturn(h, 365),
-    '3Y_ann': calcAnnReturn(h, 3),
-    '5Y_ann': calcAnnReturn(h, 5),
-  };
-  const periods = [
-    { key: '1M',     labelKey: 'detail.perf.period.1M',    ann: false },
-    { key: '3M',     labelKey: 'detail.perf.period.3M',    ann: false },
-    { key: 'YTD',    labelKey: 'detail.perf.period.YTD',   ann: false },
-    { key: '1Y',     labelKey: 'detail.perf.period.1Y',    ann: false },
-    { key: '3Y_ann', labelKey: 'detail.perf.period.3Y_ann',ann: true },
-    { key: '5Y_ann', labelKey: 'detail.perf.period.5Y_ann',ann: true },
-  ];
-  document.getElementById('perf-table-body').innerHTML = periods.map(p => {
-    const v = ret[p.key];
-    const cls = v === null ? 'ret-na' : v >= 0 ? 'ret-pos' : 'ret-neg';
-    const annLabel = p.ann ? I18n.t('detail.perf.ann') : I18n.t('detail.perf.accumulated');
-    return `<tr>
-      <td class="perf-period">${I18n.t(p.labelKey)}</td>
-      <td class="${cls}">${v === null ? '—' : fmtPct(v)}</td>
-      <td style="color:var(--text-muted);font-size:0.75rem">${annLabel}</td>
-    </tr>`;
-  }).join('');
-}
-
-// ── Lightweight Charts 기반 인터랙티브 차트 ─────────────────
-function initPriceChart(container, data, type) {
-  if (!container || !data || data.length < 2) return;
-  // 기존 차트 제거 (tooltip div 제외)
-  if (lwChart) { try { lwChart.remove(); } catch(e) {} lwChart = null; lwSeries = null; }
-
-  lwChart = LightweightCharts.createChart(container, {
-    width:  container.clientWidth,
-    height: container.clientHeight || 300,
-    layout: {
-      background: { type: 'solid', color: 'transparent' },
-      textColor: '#64748b',
-      fontFamily: "'Inter', monospace",
-      fontSize: 11,
-    },
-    grid: {
-      vertLines: { color: 'rgba(255,255,255,0.04)' },
-      horzLines: { color: 'rgba(255,255,255,0.04)' },
-    },
-    crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
-    rightPriceScale: { borderColor: 'rgba(255,255,255,0.08)' },
-    timeScale: { borderColor: 'rgba(255,255,255,0.08)', timeVisible: false },
-    handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true },
-    handleScale: { mouseWheel: true, pinch: true },
-  });
-
-  if (type === 'candle') {
-    lwSeries = lwChart.addCandlestickSeries({
-      upColor: '#4ade80', downColor: '#f87171',
-      borderUpColor: '#4ade80', borderDownColor: '#f87171',
-      wickUpColor: '#4ade80', wickDownColor: '#f87171',
-    });
-    lwSeries.setData(data.map(d => ({
-      time:  d.date,
-      open:  d.open  ?? d.close,
-      high:  d.high  ?? d.close,
-      low:   d.low   ?? d.close,
-      close: d.close,          // 원시 close — open과 동일 척도여야 상승/하락 색이 정확
-    })));
-  } else {
-    lwSeries = lwChart.addAreaSeries({
-      lineColor: '#4ade80',
-      topColor: 'rgba(74,222,128,0.15)',
-      bottomColor: 'rgba(74,222,128,0)',
-      lineWidth: 2,
-      priceLineVisible: false,
-      crosshairMarkerVisible: true,
-    });
-    lwSeries.setData(data.map(d => ({ time: d.date, value: d.adj_close })));
-  }
-
-  // 초기 뷰: 최근 1년
-  const lastDate = data[data.length - 1].date;
-  const oneYAgo  = new Date(lastDate);
-  oneYAgo.setFullYear(oneYAgo.getFullYear() - 1);
-  const fromStr = oneYAgo.toISOString().split('T')[0];
-  if (data.some(d => d.date <= fromStr)) {
-    lwChart.timeScale().setVisibleRange({ from: fromStr, to: lastDate });
-  } else {
-    lwChart.timeScale().fitContent();
-  }
-
-  // 표시 구간 수익률 동적 업데이트
-  function updateRangeReturn() {
-    const range = lwChart.timeScale().getVisibleRange();
-    if (!range) return;
-    const fromD = data.find(d => d.date >= range.from);
-    let toD = null;
-    for (let i = data.length - 1; i >= 0; i--) { if (data[i].date <= range.to) { toD = data[i]; break; } }
-    if (!fromD || !toD || fromD === toD) return;
-    const ret = (toD.adj_close / fromD.adj_close - 1) * 100;
-    const pctEl = document.getElementById('chart-pct');
-    if (pctEl) {
-      pctEl.textContent = (ret >= 0 ? '+' : '') + ret.toFixed(1) + '%';
-      pctEl.className = 'chart-pct ' + (ret >= 0 ? 'ret-pos' : 'ret-neg');
-    }
-    const lblEl = document.getElementById('chart-period-label');
-    if (lblEl) lblEl.textContent = fromD.date + ' ~ ' + toD.date;
-  }
-  lwChart.timeScale().subscribeVisibleTimeRangeChange(updateRangeReturn);
-  setTimeout(updateRangeReturn, 80);
-
-  // 마우스 오버 툴팁 (OHLC)
-  const tooltip = document.getElementById('price-tooltip');
-  lwChart.subscribeCrosshairMove(param => {
-    if (!tooltip) return;
-    if (!param.time || !param.point || !lwSeries || !param.seriesData.get(lwSeries)) {
-      tooltip.style.display = 'none';
-      return;
-    }
-    const pt = param.seriesData.get(lwSeries);
-    let html;
-    if (type === 'candle') {
-      const up = pt.close >= pt.open;
-      const c  = up ? '#4ade80' : '#f87171';
-      html = `<div style="color:#475569;font-size:0.7rem;margin-bottom:3px">${param.time}</div>
-        <table style="border-spacing:0 2px">
-          <tr><td style="color:#475569;padding-right:10px">O</td><td style="color:${c};font-weight:700">${pt.open.toFixed(2)}</td></tr>
-          <tr><td style="color:#475569;padding-right:10px">H</td><td style="color:#4ade80">${pt.high.toFixed(2)}</td></tr>
-          <tr><td style="color:#475569;padding-right:10px">L</td><td style="color:#f87171">${pt.low.toFixed(2)}</td></tr>
-          <tr><td style="color:#475569;padding-right:10px">C</td><td style="color:${c};font-weight:700">${pt.close.toFixed(2)}</td></tr>
-        </table>`;
-    } else {
-      html = `<div style="color:#475569;font-size:0.7rem;margin-bottom:2px">${param.time}</div>
-        <div style="color:#4ade80;font-weight:800;font-size:1rem">${pt.value.toFixed(2)}</div>`;
-    }
-    tooltip.innerHTML = html;
-    tooltip.style.display = 'block';
-    let x = param.point.x + 14;
-    let y = Math.max(4, param.point.y - 10);
-    if (x + 140 > container.clientWidth) x = param.point.x - 144;
-    tooltip.style.left = x + 'px';
-    tooltip.style.top  = y + 'px';
-  });
-
-  // 창 크기 대응
-  const ro = new ResizeObserver(() => {
-    if (lwChart) lwChart.applyOptions({ width: container.clientWidth });
-  });
-  ro.observe(container);
-}
-
-function setChartType(type) {
-  currentChartType = type;
-  document.querySelectorAll('.chart-type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === type));
-  if (priceHistory) initPriceChart(document.getElementById('chart-container'), priceHistory, type);
-}
-
-// ── 지표 시계열 계산 (실데이터 기반) ────────────────────────
-// Z-Score: (price - MA200) / std200  (metrics.py compute_z_score 동일 방식)
-function calcZScoreSeries(adj) {
-  const w = 200, s = [];
-  for (let i = w - 1; i < adj.length; i++) {
-    const sl = adj.slice(i - w + 1, i + 1);
-    const mean = sl.reduce((a, b) => a + b, 0) / w;
-    const std  = Math.sqrt(sl.reduce((a, b) => a + (b - mean) ** 2, 0) / w);
-    s.push(std === 0 ? 0 : (adj[i] - mean) / std);
-  }
-  return s;
-}
-// RSI(14): Wilder EWM  (metrics.py compute_rsi 동일 방식)
-function calcRSISeries(adj, period = 14) {
-  if (adj.length < period + 1) return [];
-  const gains = [], losses = [];
-  for (let i = 1; i < adj.length; i++) {
-    const d = adj[i] - adj[i - 1];
-    gains.push(Math.max(0, d));
-    losses.push(Math.max(0, -d));
-  }
-  const alpha = 1 / period;
-  let sumG = 0, sumL = 0;
-  for (let i = 0; i < period; i++) { sumG += gains[i]; sumL += losses[i]; }
-  let avgG = sumG / period, avgL = sumL / period;
-  const s = [avgL === 0 ? 100 : 100 - 100 / (1 + avgG / avgL)];
-  for (let i = period; i < gains.length; i++) {
-    avgG = avgG * (1 - alpha) + gains[i] * alpha;
-    avgL = avgL * (1 - alpha) + losses[i] * alpha;
-    s.push(avgL === 0 ? 100 : 100 - 100 / (1 + avgG / avgL));
-  }
-  return s;
-}
-// 52W Range  (metrics.py compute_52w_range_pct 동일 방식)
-function calc52WRangeSeries(adj) {
-  const w = 252, s = [];
-  for (let i = w - 1; i < adj.length; i++) {
-    const sl = adj.slice(i - w + 1, i + 1);
-    const lo = Math.min(...sl), hi = Math.max(...sl);
-    s.push(hi === lo ? 50 : (adj[i] - lo) / (hi - lo) * 100);
-  }
-  return s;
-}
-// MDD (52W): 52주 고점 대비 현재가 괴리율  (metrics.py compute_52w_mdd 동일 방식)
-function calcMDDSeries(adj) {
-  const w = 252, s = [];
-  for (let i = w - 1; i < adj.length; i++) {
-    const hi = Math.max(...adj.slice(i - w + 1, i + 1));
-    s.push((adj[i] / hi - 1) * 100);
-  }
-  return s;
-}
-function calcMetricSeries(adj, metricType) {
-  let s;
-  if      (metricType === 'zscore')   s = calcZScoreSeries(adj);
-  else if (metricType === 'rsi')      s = calcRSISeries(adj);
-  else if (metricType === 'range52w') s = calc52WRangeSeries(adj);
-  else if (metricType === 'mdd')      s = calcMDDSeries(adj);
-  else return [];
-  return s.slice(-252);
-}
-
-function generateChartSVG(ticker, cagr, vol, n) {
-  const prices = generatePrices(ticker, cagr, vol, n);
-  const N = prices.length;
-  const W = 700, H = 200;
-  const P = { t: 18, r: 10, b: 30, l: 50 };
-  const cw = W - P.l - P.r, ch = H - P.t - P.b;
-
-  const minP = Math.min(...prices) * 0.998;
-  const maxP = Math.max(...prices) * 1.002;
-  const rng  = maxP - minP || 1;
-  const toX  = i => P.l + (i / (N - 1)) * cw;
-  const toY  = p => P.t + ch - ((p - minP) / rng) * ch;
-
-  const pts = prices.map((p, i) => toX(i).toFixed(1) + ',' + toY(p).toFixed(1));
-  const line = 'M ' + pts.join(' L ');
-  const area = line + ' L ' + toX(N-1).toFixed(1) + ',' + (P.t+ch) + ' L ' + P.l + ',' + (P.t+ch) + ' Z';
-  const isUp = prices[N-1] >= prices[0];
-  const col  = isUp ? '#4ade80' : '#f87171';
-  const pct  = ((prices[N-1] / prices[0] - 1) * 100).toFixed(1);
-
-  const gridY = [0, 0.25, 0.5, 0.75, 1.0].map(f => {
-    const yv  = (P.t + ch - f * ch).toFixed(1);
-    const pv  = ((minP + f * rng) / prices[0] - 1) * 100;
-    const lbl = (pv > 0 ? '+' : '') + pv.toFixed(0) + '%';
-    return `<line x1="${P.l}" y1="${yv}" x2="${P.l+cw}" y2="${yv}" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-    <text x="${P.l-6}" y="${(+yv+3.5).toFixed(1)}" text-anchor="end" font-size="10" fill="rgba(100,116,139,0.7)" font-family="monospace">${lbl}</text>`;
-  }).join('');
-
-  const xPts = n <= 22 ? ['4주 전','3주 전','2주 전','1주 전','현재']
-             : n <= 65 ? ['3개월 전','2개월 전','1개월 전','현재','']
-             : n <= 130? ['6개월 전','4개월 전','2개월 전','현재','']
-             :           ['1년 전','9개월 전','6개월 전','3개월 전','현재'];
-  const gridX = xPts.map((lbl, i) => {
-    const xv = (P.l + (i / (xPts.length - 1)) * cw).toFixed(1);
-    return `<text x="${xv}" y="${H-5}" text-anchor="middle" font-size="10" fill="rgba(100,116,139,0.6)" font-family="Inter,sans-serif">${lbl}</text>`;
-  }).join('');
-
-  return {
-    svg: `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-  <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${col}" stop-opacity="0.18"/><stop offset="100%" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
-  ${gridY}${gridX}
-  <path d="${area}" fill="url(#ag)"/>
-  <path d="${line}" stroke="${col}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="${P.l}" cy="${toY(prices[0]).toFixed(1)}" r="3" fill="${col}" opacity="0.5"/>
-  <circle cx="${(P.l+cw).toFixed(1)}" cy="${toY(prices[N-1]).toFixed(1)}" r="4" fill="${col}"/>
-</svg>`, pct, isUp
-  };
-}
 
 // ── 렌더링 함수들 ──────────────────────────────────
 function fmtAUM(v) {
@@ -1249,6 +961,12 @@ function fmtPct(v, dec=1) {
 function fmtNum(v, dec=2) {
   if (v === null || v === undefined) return '—';
   return v.toFixed(dec);
+}
+function fmtExpRatio(v) {
+  if (v === null || v === undefined) return '';
+  // v는 소수 형식 (예: 0.0003 → "0.03%")
+  const pct = v * 100;
+  return pct < 0.01 ? pct.toFixed(4) + '%' : pct.toFixed(2) + '%';
 }
 function metricColor(key, val) {
   if (val === null || val === undefined) return 'val-neutral';
@@ -1290,7 +1008,7 @@ function renderPage(etf, sectorId) {
   updateStarBtn();
 
   // ── Quick Stats ─────────────────────────────────
-  document.getElementById('qs-exp').textContent      = supp.exp      || I18n.t('detail.data.pending');
+  document.getElementById('qs-exp').textContent      = supp.exp      || fmtExpRatio(etf.exp_ratio) || I18n.t('detail.data.pending');
   document.getElementById('qs-inception').textContent = (etf.inception && etf.inception !== '1900-01-01') ? etf.inception : '—';
   document.getElementById('qs-issuer').textContent   = supp.issuer   || inferIssuer(etf.name) || I18n.t('detail.data.pending');
   document.getElementById('qs-bench').textContent    = supp.bench    || I18n.t('detail.data.pending');
@@ -1376,7 +1094,7 @@ function renderPage(etf, sectorId) {
   const infoRows = [
     { label: 'Rank',                           val: etf.rank === 9999 ? '—' : ('#' + etf.rank) },
     { label: 'AUM',                            val: fmtAUM(etf.aum) },
-    { label: I18n.t('detail.info.fee'),        val: supp.exp       || '—' },
+    { label: I18n.t('detail.info.fee'),        val: supp.exp       || fmtExpRatio(etf.exp_ratio) || '—' },
     { label: I18n.t('detail.info.issuer'),     val: supp.issuer    || inferIssuer(etf.name) || '—' },
     { label: I18n.t('detail.info.structure'),  val: supp.structure || '—' },
     { label: I18n.t('detail.info.div'),        val: supp.div       || '—' },
@@ -1395,169 +1113,18 @@ function renderPage(etf, sectorId) {
   const compareLink = document.getElementById('compare-hero-link');
   if (compareLink) compareLink.href = '/compare?tickers=' + encodeURIComponent(etf.ticker);
 
-  // ── 지표 이력 트렌드 초기화 ──
-  // short_history ETF는 Z-Score 탭 비활성화하고 RSI로 기본 설정
-  if (etf.short_history) {
-    currentMetricType = 'rsi';
-    document.querySelectorAll('#metric-tabs .chart-tab').forEach((t, i) => {
-      t.classList.remove('active');
-      if (i === 0) { t.style.opacity = '0.3'; t.style.pointerEvents = 'none'; t.title = '짧은연혁 ETF — Z-Score 없음'; }
-      if (i === 1) t.classList.add('active');
-    });
-  }
-  renderMetricChart(etf);
+  // ── 서브차트 초기화 ──
+  // short_history ETF는 Z-Score 없음 — zscore 서브차트 비활성화
+  if (etf.short_history) activeIndicators.zscore = false;
+  const zchk = document.getElementById('ind-zscore');
+  if (zchk) zchk.checked = activeIndicators.zscore;
+  buildSubCharts();
 
   // 페이지 표시
   document.getElementById('loading-state').style.display = 'none';
   document.getElementById('page-content').style.display = 'block';
 }
 
-// ── 지표 이력 트렌드 ──────────────────────────────
-const METRIC_CONFIG = {
-  zscore:  { label: 'Z-Score',   unit: '',  min: -3,  max: 3,   refs: [-2, -1.5, 0, 1.5, 2],   refColor: { '-2': '#60a5fa', '-1.5': '#93c5fd', '0': '#475569', '1.5': '#fca5a5', '2': '#f87171' }, color: v => v > 1.5 ? '#f87171' : v < -1.5 ? '#60a5fa' : '#94a3b8' },
-  rsi:     { label: 'RSI (14D)', unit: '',  min: 0,   max: 100, refs: [30, 50, 70],            refColor: { '30': '#60a5fa', '50': '#475569', '70': '#f87171' },                                  color: v => v > 70 ? '#f87171' : v < 30 ? '#60a5fa' : '#94a3b8' },
-  range52w:{ label: '52W Range', unit: '%', min: 0,   max: 100, refs: [20, 50, 80],            refColor: { '20': '#60a5fa', '50': '#475569', '80': '#4ade80' },                                  color: v => v > 80 ? '#4ade80' : v < 20 ? '#60a5fa' : '#94a3b8' },
-  mdd:     { label: '52W MDD',   unit: '%', min: -50, max: 0,   refs: [-30, -20, -10],         refColor: { '-30': '#f87171', '-20': '#fca5a5', '-10': '#fcd34d' },                               color: v => v < -20 ? '#f87171' : v < -10 ? '#fbbf24' : '#94a3b8' },
-};
-
-let currentMetricType = 'zscore';
-let currentETFForMetric = null;
-
-function genMetricSeries(ticker, metricType, n = 252) {
-  const baseSeed = [...ticker].reduce((a,c,i) => a + c.charCodeAt(0)*(i*13+5), 77);
-  const offsets  = { zscore: 1000, rsi: 2000, range52w: 3000, mdd: 4000 };
-  const rand = seededRand(baseSeed + offsets[metricType]);
-
-  if (metricType === 'zscore') {
-    let z = (rand() - 0.5) * 3;
-    const s = [z];
-    for (let i = 1; i < n; i++) {
-      let noise = 0; for (let j = 0; j < 6; j++) noise += rand() - 0.5;
-      z = z * 0.96 + noise * 0.22;
-      z = Math.max(-3, Math.min(3, z));
-      s.push(z);
-    }
-    return s;
-  }
-  if (metricType === 'rsi') {
-    let v = 30 + rand() * 40;
-    const s = [v];
-    for (let i = 1; i < n; i++) {
-      let noise = 0; for (let j = 0; j < 4; j++) noise += rand() - 0.5;
-      v = v * 0.91 + 50 * 0.09 + noise * 6;
-      v = Math.max(10, Math.min(90, v));
-      s.push(v);
-    }
-    return s;
-  }
-  if (metricType === 'range52w') {
-    let v = 20 + rand() * 60;
-    const s = [v];
-    for (let i = 1; i < n; i++) {
-      let noise = 0; for (let j = 0; j < 4; j++) noise += rand() - 0.5;
-      v = v * 0.97 + 50 * 0.03 + noise * 4;
-      v = Math.max(0, Math.min(100, v));
-      s.push(v);
-    }
-    return s;
-  }
-  if (metricType === 'mdd') {
-    let v = -5 - rand() * 15;
-    const s = [v];
-    for (let i = 1; i < n; i++) {
-      let noise = 0; for (let j = 0; j < 4; j++) noise += rand() - 0.5;
-      v = v * 0.96 + (-10) * 0.04 + noise * 1.8;
-      v = Math.min(0, Math.max(-50, v));
-      s.push(v);
-    }
-    return s;
-  }
-  return [];
-}
-
-function generateMetricChartSVG(series, metricType, currentVal) {
-  const cfg = METRIC_CONFIG[metricType];
-  const N = series.length;
-  const W = 700, H = 200;
-  const P = { t: 18, r: 10, b: 30, l: 50 };
-  const cw = W - P.l - P.r, ch = H - P.t - P.b;
-  const rng = cfg.max - cfg.min;
-  const toX = i => P.l + (i / (N - 1)) * cw;
-  const toY = v => P.t + ch - ((v - cfg.min) / rng) * ch;
-
-  // Reference lines
-  const refLines = cfg.refs.map(r => {
-    const yv = toY(r).toFixed(1);
-    const refCol = cfg.refColor[String(r)] || 'rgba(255,255,255,0.08)';
-    const lbl = r + cfg.unit;
-    return `<line x1="${P.l}" y1="${yv}" x2="${P.l + cw}" y2="${yv}" stroke="${refCol}" stroke-opacity="0.3" stroke-width="1" stroke-dasharray="3,3"/>
-    <text x="${P.l - 5}" y="${(+yv + 3.5).toFixed(1)}" text-anchor="end" font-size="10" fill="rgba(100,116,139,0.7)" font-family="monospace">${lbl}</text>`;
-  }).join('');
-
-  // Fill area under the line (subtle)
-  const pts = series.map((v, i) => toX(i).toFixed(1) + ',' + toY(v).toFixed(1));
-  const linePath = 'M ' + pts.join(' L ');
-  const lineColor = currentVal !== null && currentVal !== undefined ? cfg.color(currentVal) : '#94a3b8';
-
-  // X labels
-  const xLabels = [I18n.t('detail.trend.chart.1y'), I18n.t('detail.trend.chart.9m'), I18n.t('detail.trend.chart.6m'), I18n.t('detail.trend.chart.3m'), I18n.t('detail.trend.chart.now')].map((l, i) =>
-    `<text x="${(P.l + (i / 4) * cw).toFixed(1)}" y="${H - 5}" text-anchor="middle" font-size="10" fill="rgba(100,116,139,0.6)" font-family="Inter,sans-serif">${l}</text>`
-  ).join('');
-
-  const lastX = toX(N - 1).toFixed(1);
-  const lastY = toY(series[N - 1]).toFixed(1);
-
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-  ${refLines}${xLabels}
-  <path d="${linePath}" stroke="${lineColor}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="${lastX}" cy="${lastY}" r="4" fill="${lineColor}"/>
-</svg>`;
-}
-
-function switchMetric(type, el) {
-  document.querySelectorAll('#metric-tabs .chart-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  currentMetricType = type;
-  if (currentETFForMetric) renderMetricChart(currentETFForMetric);
-}
-
-function renderMetricChart(etf) {
-  currentETFForMetric = etf;
-  const cfg = METRIC_CONFIG[currentMetricType];
-  const series = priceHistory
-    ? calcMetricSeries(priceHistory.map(p => p.adj_close), currentMetricType)
-    : genMetricSeries(etf.ticker, currentMetricType);
-
-  // Current value from actual ETF data
-  const valMap = { zscore: etf.z_score, rsi: etf.rsi, range52w: etf.range_52w, mdd: etf.mdd_52w };
-  const currentVal = etf.short_history && currentMetricType === 'zscore' ? null : (valMap[currentMetricType] ?? null);
-
-  // Update UI
-  const label = document.getElementById('metric-current-label');
-  const valEl = document.getElementById('metric-current-val');
-  label.textContent = I18n.t('detail.trend.current.prefix') + ' ' + cfg.label;
-
-  if (currentVal !== null && currentVal !== undefined) {
-    const formatted = currentMetricType === 'zscore' || currentMetricType === 'rsi'
-      ? currentVal.toFixed(currentMetricType === 'rsi' ? 0 : 2)
-      : currentVal.toFixed(1) + cfg.unit;
-    valEl.textContent = formatted;
-    valEl.style.color = cfg.color(currentVal);
-  } else {
-    valEl.textContent = I18n.t('detail.trend.no_data');
-    valEl.style.color = '#334155';
-  }
-
-  // Reference legend
-  const legend = document.getElementById('metric-ref-legend');
-  legend.innerHTML = cfg.refs.map(r => {
-    const c = cfg.refColor[String(r)] || '#475569';
-    return `<span class="metric-ref-dot"><span style="display:inline-block;width:20px;height:2px;background:${c};opacity:0.6;border-radius:1px"></span>${r}${cfg.unit}</span>`;
-  }).join('');
-
-  // Chart
-  document.getElementById('metric-chart-container').innerHTML = generateMetricChartSVG(series, currentMetricType, currentVal);
-}
 
 // ── 데이터 로드 ───────────────────────────────────
 fetch('/etf_data.json')
@@ -1588,7 +1155,7 @@ fetch('/etf_data.json')
         priceHistory = hist;
         initPriceChart(document.getElementById('chart-container'), hist, currentChartType);
         updatePerfFromHistory();
-        if (currentETFForMetric) renderMetricChart(currentETFForMetric);
+        buildSubCharts();
       }
     });
     I18n.init();
@@ -1598,7 +1165,7 @@ fetch('/etf_data.json')
         if (priceHistory) {
           initPriceChart(document.getElementById('chart-container'), priceHistory, currentChartType);
           updatePerfFromHistory();
-          if (currentETFForMetric) renderMetricChart(currentETFForMetric);
+          buildSubCharts();
         }
       }
     });

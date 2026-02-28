@@ -4,6 +4,8 @@ CORRYU ETF Dashboard - MECE 섹터 분류 엔진
 """
 import re
 from collections import defaultdict
+from typing import Any
+import pandas as pd
 
 from config import (
     SECTOR_DEFS, SUPER_SECTOR_DEFS, KEYWORD_RULES, CORR_THRESHOLD,
@@ -13,17 +15,17 @@ from config import (
 from data_loader import get_fullname, get_corr_value
 
 
-def _match_keywords(text_lower, keywords):
+def _match_keywords(text_lower: str, keywords: list[str]) -> bool:
     """키워드 리스트 중 하나라도 텍스트에 포함되면 True"""
     return any(kw in text_lower for kw in keywords)
 
 
-def _match_ticker_patterns(ticker, patterns):
+def _match_ticker_patterns(ticker: str, patterns: list[str]) -> bool:
     """티커가 패턴 리스트에 포함되면 True"""
     return ticker in patterns
 
 
-def classify_by_keywords(ticker, fullname):
+def classify_by_keywords(ticker: str, fullname: str) -> str | None:
     """Pass 1: 키워드 기반 분류. 매칭되면 섹터 ID 반환, 아니면 None"""
     fn_lower = fullname.lower()
 
@@ -50,7 +52,7 @@ def classify_by_keywords(ticker, fullname):
     return None
 
 
-def classify_by_correlation(ticker, df_corr_monthly, df_corr_daily, scraped):
+def classify_by_correlation(ticker: str, df_corr_monthly: pd.DataFrame, df_corr_daily: pd.DataFrame, scraped: dict[str, Any]) -> tuple[str, float]:
     """Pass 2 & 3: 상관계수 기반 분류
 
     월간 상관계수 우선, 없으면 일간 fallback.
@@ -97,7 +99,7 @@ def classify_by_correlation(ticker, df_corr_monthly, df_corr_daily, scraped):
         return 'S24', best_corr  # Fallback: 테마/특수목적
 
 
-def classify_all(all_tickers, scraped, df_corr_monthly, df_corr_daily):
+def classify_all(all_tickers: set[str], scraped: dict[str, Any], df_corr_monthly: pd.DataFrame, df_corr_daily: pd.DataFrame) -> dict[str, dict[str, Any]]:
     """전체 ETF를 섹터로 분류
 
     Args:
@@ -109,14 +111,15 @@ def classify_all(all_tickers, scraped, df_corr_monthly, df_corr_daily):
     Returns:
         dict: ticker → {'sector': 섹터ID, 'method': 분류방법, 'r_anchor': 상관계수}
     """
-    classification = {}
-    method_counts = defaultdict(int)
+    classification: dict[str, dict[str, Any]] = {}
+    method_counts: defaultdict[str, int] = defaultdict(int)
 
     for ticker in sorted(all_tickers):
         fullname = get_fullname(ticker, scraped)
 
         # Pass 0: 앵커 ETF는 자기 섹터에 무조건 배정
         # (수동 오버라이드보다 앵커 배정이 우선)
+        sector: str | None = None
         if ticker in ANCHOR_TO_SECTOR:
             sector = ANCHOR_TO_SECTOR[ticker]
             classification[ticker] = {
@@ -168,7 +171,7 @@ def classify_all(all_tickers, scraped, df_corr_monthly, df_corr_daily):
     return classification
 
 
-def get_sector_members(classification):
+def get_sector_members(classification: dict[str, dict[str, Any]]) -> dict[str, set[str]]:
     """분류 결과에서 섹터별 멤버 셋 추출
 
     Returns:
@@ -180,7 +183,7 @@ def get_sector_members(classification):
     return dict(members)
 
 
-def fill_anchor_correlations(classification, sector_members, df_corr_monthly, df_corr_daily):
+def fill_anchor_correlations(classification: dict[str, dict[str, Any]], sector_members: dict[str, set[str]], df_corr_monthly: pd.DataFrame, df_corr_daily: pd.DataFrame) -> None:
     """키워드로 분류된 ETF의 r_anchor를 실제 상관계수로 채움"""
     for sector_id, tickers in sector_members.items():
         anchor = SECTOR_DEFS[sector_id]['anchor']
@@ -193,7 +196,7 @@ def fill_anchor_correlations(classification, sector_members, df_corr_monthly, df
                 classification[ticker]['r_anchor'] = round(r, 4)
 
 
-def fill_super_anchor_correlations(classification, df_corr_monthly, df_corr_daily):
+def fill_super_anchor_correlations(classification: dict[str, dict[str, Any]], df_corr_monthly: pd.DataFrame, df_corr_daily: pd.DataFrame) -> None:
     """슈퍼섹터 소속 ETF의 r_anchor를 슈퍼섹터 앵커(QQQ)로 전면 재계산.
 
     분류 방법(키워드/상관계수)에 관계없이 모든 해당 섹터 ETF에 적용.
