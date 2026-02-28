@@ -1127,55 +1127,73 @@ function renderPage(etf, sectorId) {
 
 
 // ── 데이터 로드 ───────────────────────────────────
-fetch('/etf_data.json')
-  .then(r => { if (!r.ok) throw new Error('fetch failed'); return r.json(); })
-  .then(data => {
-    let found = null, foundSid = null;
-    for (const [sid, etfs] of Object.entries(data.allData || data)) {
-      if (!Array.isArray(etfs)) continue;
-      const e = etfs.find(x => x.ticker === TICKER);
-      if (e) { found = e; foundSid = sid; break; }
+// i18n 먼저 초기화 (fetch 실패 시 에러 메시지가 번역되도록)
+I18n.init();
+let _i18nReady = false;
+document.addEventListener('i18n:ready', () => { _i18nReady = true; });
+
+function _applyEtfData(found, foundSid) {
+  // localStorage 오버라이드 반영 (읽기 전용)
+  const ov = JSON.parse(localStorage.getItem('corryu_user_overrides') || '{}');
+  if (ov[TICKER]) {
+    if ('is_legacy' in ov[TICKER]) found.is_legacy = ov[TICKER].is_legacy;
+    if (ov[TICKER].is_legacy) found._user_override = true;
+  }
+  renderPage(found, foundSid);
+  loadPriceHistory(found.ticker).then(hist => {
+    if (hist) {
+      priceHistory = hist;
+      initPriceChart(document.getElementById('chart-container'), hist, currentChartType);
+      updatePerfFromHistory();
+      buildSubCharts();
     }
-    if (!found) {
-      document.getElementById('loading-state').style.display = 'none';
-      document.getElementById('error-title').textContent = '"' + TICKER + '" ' + I18n.t('detail.not.found');
-      document.getElementById('error-msg').textContent   = I18n.t('detail.error.notfound.msg');
-      document.getElementById('error-state').style.display = 'flex';
-      return;
-    }
-    // localStorage 오버라이드 반영 (읽기 전용)
-    const ov = JSON.parse(localStorage.getItem('corryu_user_overrides') || '{}');
-    if (ov[TICKER]) {
-      if ('is_legacy' in ov[TICKER]) found.is_legacy = ov[TICKER].is_legacy;
-      if (ov[TICKER].is_legacy) found._user_override = true;
-    }
-    renderPage(found, foundSid);
-    loadPriceHistory(found.ticker).then(hist => {
-      if (hist) {
-        priceHistory = hist;
-        initPriceChart(document.getElementById('chart-container'), hist, currentChartType);
+  });
+  document.addEventListener('i18n:ready', () => {
+    if (currentETF) {
+      renderPage(currentETF, foundSid);
+      if (priceHistory) {
+        initPriceChart(document.getElementById('chart-container'), priceHistory, currentChartType);
         updatePerfFromHistory();
         buildSubCharts();
       }
-    });
-    I18n.init();
-    document.addEventListener('i18n:ready', () => {
-      if (currentETF) {
-        renderPage(currentETF, foundSid);
-        if (priceHistory) {
-          initPriceChart(document.getElementById('chart-container'), priceHistory, currentChartType);
-          updatePerfFromHistory();
-          buildSubCharts();
-        }
-      }
-    });
-  })
-  .catch(() => {
-    document.getElementById('loading-state').style.display = 'none';
-    document.getElementById('error-title').textContent = I18n.t('detail.error.load.title');
-    document.getElementById('error-msg').textContent   = I18n.t('detail.error.load.msg');
-    document.getElementById('error-state').style.display = 'flex';
+    }
   });
+}
+
+function _showNotFound() {
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('error-title').textContent = '"' + TICKER + '" ' + I18n.t('detail.not.found');
+  document.getElementById('error-msg').textContent   = I18n.t('detail.error.notfound.msg');
+  document.getElementById('error-state').style.display = 'flex';
+}
+
+function _showLoadError() {
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('error-title').textContent = I18n.t('detail.error.load.title');
+  document.getElementById('error-msg').textContent   = I18n.t('detail.error.load.msg');
+  document.getElementById('error-state').style.display = 'flex';
+}
+
+// 1단계: 티커별 개별 JSON 로드 시도 (빠름 ~500B)
+// 2단계: 실패 시 전체 etf_data.json 폴백
+fetch('/etf/' + TICKER + '.json')
+  .then(r => { if (!r.ok) throw new Error('no per-ticker file'); return r.json(); })
+  .then(d => { _applyEtfData(d.etf, d.sid); })
+  .catch(() =>
+    fetch('/etf_data.json')
+      .then(r => { if (!r.ok) throw new Error('fetch failed'); return r.json(); })
+      .then(data => {
+        let found = null, foundSid = null;
+        for (const [sid, etfs] of Object.entries(data.allData || data)) {
+          if (!Array.isArray(etfs)) continue;
+          const e = etfs.find(x => x.ticker === TICKER);
+          if (e) { found = e; foundSid = sid; break; }
+        }
+        if (!found) { _showNotFound(); return; }
+        _applyEtfData(found, foundSid);
+      })
+      .catch(_showLoadError)
+  );
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 💬 댓글 시스템
