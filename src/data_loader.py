@@ -2,6 +2,7 @@
 CORRYU ETF Dashboard - 데이터 로딩 모듈
 pkl/csv 파일에서 데이터를 로드하고 검증
 """
+import os
 import pickle
 import pandas as pd
 from config import DATA_PROCESSED, DATA_SCRAPED, CORR_MONTHLY_CSV, CORR_DAILY_CSV
@@ -41,6 +42,19 @@ def load_corr_daily():
 def get_all_tickers(df_corr_daily):
     """상관계수 매트릭스에서 인덱스 티커(^GSPC 등) 제외한 전체 ETF 티커셋 반환"""
     return {t for t in df_corr_daily.columns if not t.startswith('^')}
+
+
+def load_expense_ratios():
+    """수수료 데이터 로드 (Dict[ticker → float], 없는 경우 빈 dict 반환)
+
+    yfinance에서 수집한 annualReportExpenseRatio / totalExpenseRatio 값.
+    소수점 형식 (예: 0.0003 = 0.03%).
+    """
+    path = f'{DATA_SCRAPED}/expense_ratios.pkl'
+    if not os.path.exists(path):
+        return {}
+    with open(path, 'rb') as f:
+        return pickle.load(f)
 
 
 def load_all():

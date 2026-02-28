@@ -11,7 +11,7 @@ import subprocess
 import sys
 
 from config import SECTOR_DEFS, SUPER_SECTOR_DEFS, ASSET_CLASSES, MY_PORTFOLIO, OUTPUT_DIR
-from data_loader import load_all, get_all_tickers, get_fullname, get_market_cap, get_rank
+from data_loader import load_all, load_expense_ratios, get_all_tickers, get_fullname, get_market_cap, get_rank
 from classify import classify_all, get_sector_members, fill_anchor_correlations, fill_super_anchor_correlations
 from verify import verify_mece, spot_check
 from legacy import assess_all_legacy
@@ -38,7 +38,7 @@ def build_sector_meta(sector_members, all_etf_data):
 
 def build_all_etf_data(sector_members, classification, legacy_results,
                        df_price, perf_stats, scraped,
-                       df_corr_monthly, df_corr_daily):
+                       df_corr_monthly, df_corr_daily, expense_ratios=None):
     """전체 섹터별 ETF 데이터 JSON 생성"""
     all_data = {}
 
@@ -49,7 +49,8 @@ def build_all_etf_data(sector_members, classification, legacy_results,
         for ticker in tickers:
             etf_info = compute_etf_metrics(
                 ticker, df_price, perf_stats, scraped, classification,
-                df_corr_monthly, df_corr_daily, legacy_results
+                df_corr_monthly, df_corr_daily, legacy_results,
+                expense_ratios=expense_ratios
             )
             etf_info['mine'] = 1 if ticker in MY_PORTFOLIO else 0
             etf_list.append(etf_info)
@@ -91,10 +92,13 @@ def main():
 
     # 5. 전체 ETF 데이터 생성
     print("\n대시보드 데이터 생성 중...")
+    expense_ratios = load_expense_ratios()
+    print(f"  수수료 데이터: {len(expense_ratios)}개 티커")
     all_etf_data = build_all_etf_data(
         sector_members, classification, legacy_results,
         df_price, perf_stats, scraped,
-        df_corr_monthly, df_corr_daily
+        df_corr_monthly, df_corr_daily,
+        expense_ratios=expense_ratios
     )
 
     # 6. 섹터 메타 생성

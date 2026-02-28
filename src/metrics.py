@@ -80,7 +80,8 @@ def compute_52w_range_pct(prices):
 
 
 def compute_etf_metrics(ticker, df_price, perf_stats, scraped, classification,
-                        df_corr_monthly, df_corr_daily, legacy_info):
+                        df_corr_monthly, df_corr_daily, legacy_info,
+                        expense_ratios=None):
     """단일 ETF의 모든 대시보드 지표를 계산
 
     Returns:
@@ -129,6 +130,13 @@ def compute_etf_metrics(ticker, df_price, perf_stats, scraped, classification,
     # r_spy (글로벌 참조 상관계수)
     r_spy = get_corr_value('SPY', ticker, df_corr_monthly, df_corr_daily)
 
+    # 수수료 (expense_ratios dict에서 조회, 없으면 None)
+    exp_ratio = None
+    if expense_ratios:
+        v = expense_ratios.get(ticker)
+        if v is not None:
+            exp_ratio = round(float(v), 6)
+
     return {
         'ticker': ticker,
         'name': fullname,
@@ -146,6 +154,7 @@ def compute_etf_metrics(ticker, df_price, perf_stats, scraped, classification,
         'sortino': round(float(p.get('Sortino', 0)), 2),
         'short_history': short_history,
         'inception': inception,
+        'exp_ratio': exp_ratio,
         'is_legacy': leg.get('is_legacy', False),
         'legacy_reasons': leg.get('reasons', []),
         'legacy_detail': leg.get('details', []),
