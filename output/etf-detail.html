@@ -1028,16 +1028,36 @@ const SUBCHART_CONF = {
   mdd:      { label:'MDD',       height:80,  color:'#f87171', refs:[{v:-10,c:'rgba(251,191,36,0.45)'},{v:-20,c:'rgba(248,113,113,0.45)'}] },
 };
 
-// ── 실가격 히스토리 로드 (Supabase etf_prices) ───────────────
+// ── 실가격 히스토리 로드 (/api/yf 프록시 → 상장일부터 전체 이력) ───────
 async function loadPriceHistory(ticker) {
-  if (!window._sb) return null;
-  const { data, error } = await window._sb
-    .from('etf_prices')
-    .select('date, open, high, low, close, adj_close, volume')
-    .eq('ticker', ticker)
-    .order('date', { ascending: true })
-    .limit(10000);
-  return (!error && data && data.length >= 20) ? data : null;
+  try {
+    const r = await fetch(`/api/yf?ticker=${encodeURIComponent(ticker)}&range=max&interval=1d`);
+    if (!r.ok) return null;
+    const json = await r.json();
+    const result = json?.chart?.result?.[0];
+    if (!result) return null;
+    const ts    = result.timestamp || [];
+    const quote = result.indicators?.quote?.[0] || {};
+    const adjArr = result.indicators?.adjclose?.[0]?.adjclose || [];
+    if (ts.length < 20) return null;
+    return ts.map((t, i) => {
+      const d = new Date(t * 1000);
+      const yyyy = d.getUTCFullYear();
+      const mm   = String(d.getUTCMonth() + 1).padStart(2, '0');
+      const dd   = String(d.getUTCDate()).padStart(2, '0');
+      return {
+        date:      `${yyyy}-${mm}-${dd}`,
+        open:      quote.open?.[i]   ?? null,
+        high:      quote.high?.[i]   ?? null,
+        low:       quote.low?.[i]    ?? null,
+        close:     quote.close?.[i]  ?? null,
+        adj_close: adjArr[i]         ?? quote.close?.[i] ?? null,
+        volume:    quote.volume?.[i] ?? 0,
+      };
+    }).filter(d => d.close != null);
+  } catch(e) {
+    return null;
+  }
 }
 
 // ── 기간별 수익률 계산 ──────────────────────────────────────
