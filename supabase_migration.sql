@@ -145,8 +145,22 @@ create or replace view ticker_likes_weekly as
   group by ticker;
 
 
--- ── 8. 확인 쿼리 ──────────────────────────────────────────────────
+-- ── 8. portfolios (포트폴리오 서버 저장) ─────────────────────────
+create table if not exists portfolios (
+  user_id    uuid        primary key references auth.users(id) on delete cascade,
+  rows       jsonb       not null default '[]',
+  updated_at timestamptz not null default now()
+);
+
+alter table portfolios enable row level security;
+
+create policy "portfolios_own_read"   on portfolios for select to authenticated using (auth.uid() = user_id);
+create policy "portfolios_own_insert" on portfolios for insert to authenticated with check (auth.uid() = user_id);
+create policy "portfolios_own_update" on portfolios for update to authenticated using (auth.uid() = user_id);
+
+
+-- ── 9. 확인 쿼리 ──────────────────────────────────────────────────
 select tablename, rowsecurity
 from pg_tables
 where schemaname = 'public'
-  and tablename in ('profiles', 'comments', 'comment_votes', 'ticker_likes');
+  and tablename in ('profiles', 'comments', 'comment_votes', 'ticker_likes', 'portfolios');

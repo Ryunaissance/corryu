@@ -6,6 +6,8 @@
 <title>포트폴리오 빌더 — CORRYU</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/supabase-client.js"></script>
 <script src="/i18n.js"></script>
 <style>
 :root {
@@ -201,7 +203,6 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
       </div>
       <a href="/login?redirect=/portfolio" class="btn-primary">로그인하기</a>
       <a href="/login?redirect=/portfolio#signup" class="btn-secondary">무료 계정 만들기</a>
-      <div class="gate-footnote">로컬 저장(쿠키·localStorage)은 브라우저 초기화 시 데이터가 유실될 수 있습니다.</div>
     </div>
   </div>
 
@@ -388,24 +389,23 @@ function clearSummary() {
   document.getElementById('weight-bars').innerHTML = '';
 }
 
-// ── 저장 / 불러오기 (서버 연동 전 임시: localStorage) ──
-// NOTE: 실제 서버 저장은 Supabase 연동 후 구현 예정
+// ── 저장 / 불러오기 (Supabase 서버 저장) ──────────────
 async function savePortfolio() {
   const user = await getSupabaseUser();
   if (!user) return;
-  // 서버 저장 예정 — 현재는 localStorage에 임시 저장
-  const key = 'corryu_portfolio_' + (user.email || 'user');
-  localStorage.setItem(key, JSON.stringify(rows));
+  const { error } = await window._sb.from('portfolios')
+    .upsert({ user_id: user.id, rows: rows }, { onConflict: 'user_id' });
+  if (error) { showToast('저장 실패: ' + error.message, 'error'); return; }
   showToast('포트폴리오가 저장되었습니다.', 'success');
 }
 async function loadSavedPortfolio() {
   const user = await getSupabaseUser();
   if (!user) return;
-  const key = 'corryu_portfolio_' + (user.email || 'user');
-  try {
-    const saved = JSON.parse(localStorage.getItem(key) || 'null');
-    if (saved && Array.isArray(saved) && saved.length) rows = saved;
-  } catch {}
+  const { data, error } = await window._sb.from('portfolios')
+    .select('rows').eq('user_id', user.id).maybeSingle();
+  if (!error && data && Array.isArray(data.rows) && data.rows.length) {
+    rows = data.rows;
+  }
   renderRows();
 }
 
