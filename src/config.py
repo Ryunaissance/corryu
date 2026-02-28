@@ -3,6 +3,7 @@ CORRYU ETF Dashboard - 전역 설정 모듈
 섹터 정의, 앵커 매핑, 분류 임계값, 레거시 규칙, 수동 오버라이드
 """
 import os
+from typing import Any
 
 # ── 경로 ─────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -27,7 +28,7 @@ PROTECT_EQUITIES = {        # 비주식 앵커에 끌려가면 안 되는 핵심
 }
 
 # ── 자산군 정의 ──────────────────────────────────────
-ASSET_CLASSES = {
+ASSET_CLASSES: dict[str, dict[str, Any]] = {
     'EQUITY':      {'name': '주식',     'name_en': 'Equity',       'icon': '📈', 'order': 1},
     'FIXED_INCOME':{'name': '채권',     'name_en': 'Fixed Income', 'icon': '🛡️', 'order': 2},
     'REAL_ASSETS': {'name': '실물자산', 'name_en': 'Real Assets',  'icon': '🏗️', 'order': 3},
@@ -37,7 +38,7 @@ ASSET_CLASSES = {
 
 # ── 슈퍼섹터 정의 ────────────────────────────────────
 # 그래프상 한 덩어리로 뭉치는 섹터들을 상위 그룹으로 묶음
-SUPER_SECTOR_DEFS = {
+SUPER_SECTOR_DEFS: dict[str, dict[str, Any]] = {
     'EQUITY_MARKET': {
         'name':        '주식 시장',
         'name_en':     'Equity Market',
@@ -49,7 +50,7 @@ SUPER_SECTOR_DEFS = {
 }
 
 # ── 섹터 정의 (24개) ─────────────────────────────────
-SECTOR_DEFS = {
+SECTOR_DEFS: dict[str, dict[str, Any]] = {
     # --- EQUITY (13개) ---
     # super_sector 있는 7개: 그래프상 한 클러스터 → 주식 시장 슈퍼섹터
     'S01': {'name': 'US 대형주 종합',   'name_en': 'US Large Cap',           'anchor': 'VOO',  'asset_class': 'EQUITY',       'icon': '🇺🇸', 'super_sector': 'EQUITY_MARKET'},
@@ -83,7 +84,7 @@ SECTOR_DEFS = {
 }
 
 # 앵커 → 섹터 역방향 매핑
-ANCHOR_TO_SECTOR = {v['anchor']: k for k, v in SECTOR_DEFS.items() if v['anchor']}
+ANCHOR_TO_SECTOR: dict[str, str] = {v['anchor']: k for k, v in SECTOR_DEFS.items() if v['anchor']}
 
 # ── 키워드 분류 규칙 (Pass 1) ────────────────────────
 
@@ -95,7 +96,7 @@ SHORT_TERM_BOND_WORDS = [
     'cash reserve',
 ]
 
-KEYWORD_RULES = {
+KEYWORD_RULES: dict[str, dict[str, Any]] = {
     # 인버스/숏 (S22) - 단기채 키워드가 포함되어 있으면 제외
     'S22': {
         'keywords': ['inverse', ' bear ', 'proshares short', 'proshares ultrashort',
@@ -178,7 +179,7 @@ LEGACY_NEAR_DUPLICATE_TOP_N = 20       # 중복 체크 대상 (섹터 내 AUM �
 # ── 수동 섹터 오버라이드 ────────────────────────────────
 # 키워드/상관계수 자동 분류 결과를 무시하고 강제로 특정 섹터에 배정
 # 형식: 'TICKER': 'S##'
-MANUAL_SECTOR_OVERRIDES = {
+MANUAL_SECTOR_OVERRIDES: dict[str, str] = {
     'NLR': 'S19',   # VanEck Uranium & Nuclear ETF → 에너지/원자재 (XLE 앵커)
     'URA': 'S19',   # Global X Uranium ETF → 에너지/원자재
     'URNM': 'S19',  # Sprott Uranium Miners ETF → 에너지/원자재
@@ -188,7 +189,7 @@ MANUAL_SECTOR_OVERRIDES = {
 }
 
 # ── 수동 레거시 오버라이드 (기존 LEGACY_TICKERS 이관) ─
-MANUAL_LEGACY_OVERRIDES = {
+MANUAL_LEGACY_OVERRIDES: dict[str, str] = {
     # -- 금/귀금속 섹터 (GLD 중복) --
     'IAU': 'GLD와 상관계수 매우 높음',
     'SLV': 'GLD와 상관계수 매우 높음',

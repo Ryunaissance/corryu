@@ -111,14 +111,15 @@ def classify_all(all_tickers: set[str], scraped: dict[str, Any], df_corr_monthly
     Returns:
         dict: ticker → {'sector': 섹터ID, 'method': 분류방법, 'r_anchor': 상관계수}
     """
-    classification = {}
-    method_counts = defaultdict(int)
+    classification: dict[str, dict[str, Any]] = {}
+    method_counts: defaultdict[str, int] = defaultdict(int)
 
     for ticker in sorted(all_tickers):
         fullname = get_fullname(ticker, scraped)
 
         # Pass 0: 앵커 ETF는 자기 섹터에 무조건 배정
         # (수동 오버라이드보다 앵커 배정이 우선)
+        sector: str | None = None
         if ticker in ANCHOR_TO_SECTOR:
             sector = ANCHOR_TO_SECTOR[ticker]
             classification[ticker] = {
