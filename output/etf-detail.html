@@ -454,7 +454,7 @@ nav {
 
         <!-- 차트 카드 -->
         <div class="glass card">
-          <div class="card-title" data-i18n="detail.chart.title">시뮬레이션 가격 차트</div>
+          <div class="card-title" data-i18n="detail.chart.title">가격 차트</div>
           <div class="chart-tabs">
             <button class="chart-tab" onclick="switchPeriod('1M',this)" data-i18n="detail.chart.tab.1M">1개월</button>
             <button class="chart-tab" onclick="switchPeriod('3M',this)" data-i18n="detail.chart.tab.3M">3개월</button>
@@ -464,7 +464,7 @@ nav {
           <div class="chart-stat">
             <div>
               <div class="chart-pct" id="chart-pct">—</div>
-              <div class="chart-period-label" id="chart-period-label">1년 수익률 (시뮬레이션)</div>
+              <div class="chart-period-label" id="chart-period-label">1년 수익률</div>
             </div>
             <div style="text-align:right;font-size:0.75rem;color:var(--text-muted)">
               CAGR <span id="chart-cagr" style="font-weight:700;color:#94a3b8">—</span>
@@ -472,9 +472,6 @@ nav {
             </div>
           </div>
           <div class="chart-container" id="chart-container"></div>
-          <div class="chart-disclaimer" data-i18n="detail.chart.disclaimer">
-            ※ CAGR·변동성 기반 시뮬레이션 차트입니다. 실제 가격 데이터가 아닙니다.
-          </div>
         </div>
 
         <!-- 기간별 수익률 카드 -->
@@ -486,14 +483,10 @@ nav {
                 <th data-i18n="detail.perf.period">기간</th>
                 <th data-i18n="detail.perf.return">수익률</th>
                 <th data-i18n="detail.perf.ann">연환산</th>
-                <th data-i18n="detail.perf.note">비고</th>
               </tr>
             </thead>
             <tbody id="perf-table-body"></tbody>
           </table>
-          <div style="margin-top:10px;font-size:0.7rem;color:#334155" data-i18n="detail.perf.disclaimer">
-            ※ 기간별 수익률은 예시 데이터입니다. 실제 수익률은 출처에 따라 다를 수 있습니다.
-          </div>
         </div>
 
         <!-- 상위 구성종목 카드 -->
@@ -504,7 +497,7 @@ nav {
 
         <!-- 지표 이력 트렌드 카드 -->
         <div class="glass card" id="trend-card">
-          <div class="card-title" data-i18n="detail.trend.title">지표 이력 트렌드 (1년 시뮬레이션)</div>
+          <div class="card-title" data-i18n="detail.trend.title">지표 이력 트렌드</div>
           <div class="chart-tabs" style="margin-bottom:12px" id="metric-tabs">
             <button class="chart-tab active" onclick="switchMetric('zscore',this)">Z-Score</button>
             <button class="chart-tab" onclick="switchMetric('rsi',this)">RSI</button>
@@ -519,7 +512,6 @@ nav {
             <div class="metric-ref-dots" id="metric-ref-legend"></div>
           </div>
           <div class="chart-container" id="metric-chart-container"></div>
-          <div class="chart-disclaimer" data-i18n="detail.trend.disclaimer">※ 과거 1년 지표 시뮬레이션 데이터입니다. 실제 이력과 다를 수 있습니다.</div>
         </div>
 
       </div>
@@ -793,6 +785,207 @@ function generatePrices(ticker, cagr, vol, n) {
 }
 
 let currentETF = null;
+let priceHistory = null;
+let currentChartPeriod = '1Y';
+
+// ── 실가격 히스토리 로드 (Supabase etf_prices) ───────────────
+async function loadPriceHistory(ticker) {
+  if (!window._sb) return null;
+  const since = new Date();
+  since.setFullYear(since.getFullYear() - 6);
+  const { data, error } = await window._sb
+    .from('etf_prices')
+    .select('date, adj_close')
+    .eq('ticker', ticker)
+    .gte('date', since.toISOString().split('T')[0])
+    .order('date', { ascending: true })
+    .limit(1600);
+  return (!error && data && data.length >= 20) ? data : null;
+}
+
+// ── 기간별 수익률 계산 ──────────────────────────────────────
+function calcPeriodReturn(history, calDays) {
+  const now = history[history.length - 1].adj_close;
+  const cutDate = new Date();
+  cutDate.setDate(cutDate.getDate() - calDays);
+  const cutStr = cutDate.toISOString().split('T')[0];
+  for (let i = history.length - 2; i >= 0; i--) {
+    if (history[i].date <= cutStr) return (now / history[i].adj_close - 1) * 100;
+  }
+  return null;
+}
+function calcYTD(history) {
+  const now = history[history.length - 1].adj_close;
+  const ytdStr = new Date().getFullYear() + '-01-01';
+  const base = history.find(p => p.date >= ytdStr);
+  return base ? (now / base.adj_close - 1) * 100 : null;
+}
+function calcAnnReturn(history, years) {
+  const now = history[history.length - 1].adj_close;
+  const cutDate = new Date();
+  cutDate.setFullYear(cutDate.getFullYear() - years);
+  const cutStr = cutDate.toISOString().split('T')[0];
+  const base = history.find(p => p.date >= cutStr);
+  if (!base) return null;
+  return (Math.pow(now / base.adj_close, 1 / years) - 1) * 100;
+}
+function updatePerfFromHistory() {
+  if (!priceHistory || !currentETF) return;
+  const h = priceHistory;
+  const ret = {
+    '1M':     calcPeriodReturn(h, 30),
+    '3M':     calcPeriodReturn(h, 91),
+    'YTD':    calcYTD(h),
+    '1Y':     calcPeriodReturn(h, 365),
+    '3Y_ann': calcAnnReturn(h, 3),
+    '5Y_ann': calcAnnReturn(h, 5),
+  };
+  const periods = [
+    { key: '1M',     labelKey: 'detail.perf.period.1M',    ann: false },
+    { key: '3M',     labelKey: 'detail.perf.period.3M',    ann: false },
+    { key: 'YTD',    labelKey: 'detail.perf.period.YTD',   ann: false },
+    { key: '1Y',     labelKey: 'detail.perf.period.1Y',    ann: false },
+    { key: '3Y_ann', labelKey: 'detail.perf.period.3Y_ann',ann: true },
+    { key: '5Y_ann', labelKey: 'detail.perf.period.5Y_ann',ann: true },
+  ];
+  document.getElementById('perf-table-body').innerHTML = periods.map(p => {
+    const v = ret[p.key];
+    const cls = v === null ? 'ret-na' : v >= 0 ? 'ret-pos' : 'ret-neg';
+    const annLabel = p.ann ? I18n.t('detail.perf.ann') : I18n.t('detail.perf.accumulated');
+    return `<tr>
+      <td class="perf-period">${I18n.t(p.labelKey)}</td>
+      <td class="${cls}">${v === null ? '—' : fmtPct(v)}</td>
+      <td style="color:var(--text-muted);font-size:0.75rem">${annLabel}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── 실가격 차트 SVG 빌드 ────────────────────────────────────
+function buildChartFromPrices(prices, period) {
+  const N = prices.length;
+  if (N < 2) return null;
+  const W = 700, H = 200;
+  const P = { t: 18, r: 10, b: 30, l: 50 };
+  const cw = W - P.l - P.r, ch = H - P.t - P.b;
+  const minP = Math.min(...prices) * 0.998;
+  const maxP = Math.max(...prices) * 1.002;
+  const rng  = maxP - minP || 1;
+  const toX  = i => P.l + (i / (N - 1)) * cw;
+  const toY  = p => P.t + ch - ((p - minP) / rng) * ch;
+  const pts  = prices.map((p, i) => toX(i).toFixed(1) + ',' + toY(p).toFixed(1));
+  const line = 'M ' + pts.join(' L ');
+  const area = line + ' L ' + toX(N-1).toFixed(1) + ',' + (P.t+ch) + ' L ' + P.l + ',' + (P.t+ch) + ' Z';
+  const isUp = prices[N-1] >= prices[0];
+  const col  = isUp ? '#4ade80' : '#f87171';
+  const pct  = ((prices[N-1] / prices[0] - 1) * 100).toFixed(1);
+  const gridY = [0, 0.25, 0.5, 0.75, 1.0].map(f => {
+    const yv = (P.t + ch - f * ch).toFixed(1);
+    const pv = ((minP + f * rng) / prices[0] - 1) * 100;
+    const lbl = (pv > 0 ? '+' : '') + pv.toFixed(0) + '%';
+    return `<line x1="${P.l}" y1="${yv}" x2="${P.l+cw}" y2="${yv}" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+    <text x="${P.l-6}" y="${(+yv+3.5).toFixed(1)}" text-anchor="end" font-size="10" fill="rgba(100,116,139,0.7)" font-family="monospace">${lbl}</text>`;
+  }).join('');
+  const xPts = period === '1M' ? ['4주 전','3주 전','2주 전','1주 전','현재']
+             : period === '3M' ? ['3개월 전','2개월 전','1개월 전','현재','']
+             : period === '6M' ? ['6개월 전','4개월 전','2개월 전','현재','']
+             :                   ['1년 전','9개월 전','6개월 전','3개월 전','현재'];
+  const gridX = xPts.map((lbl, i) =>
+    `<text x="${(P.l + (i / (xPts.length - 1)) * cw).toFixed(1)}" y="${H-5}" text-anchor="middle" font-size="10" fill="rgba(100,116,139,0.6)" font-family="Inter,sans-serif">${lbl}</text>`
+  ).join('');
+  return {
+    svg: `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${col}" stop-opacity="0.18"/><stop offset="100%" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
+  ${gridY}${gridX}
+  <path d="${area}" fill="url(#ag)"/>
+  <path d="${line}" stroke="${col}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="${P.l}" cy="${toY(prices[0]).toFixed(1)}" r="3" fill="${col}" opacity="0.5"/>
+  <circle cx="${toX(N-1).toFixed(1)}" cy="${toY(prices[N-1]).toFixed(1)}" r="4" fill="${col}"/></svg>`,
+    pct, isUp
+  };
+}
+function sliceByPeriod(history, period) {
+  const days = { '1M': 30, '3M': 91, '6M': 183, '1Y': 365 };
+  const cutDate = new Date();
+  cutDate.setDate(cutDate.getDate() - days[period]);
+  const cutStr = cutDate.toISOString().split('T')[0];
+  return history.filter(p => p.date >= cutStr);
+}
+function updateChartFromHistory(period) {
+  currentChartPeriod = period;
+  if (!priceHistory) return;
+  const slice = sliceByPeriod(priceHistory, period);
+  if (slice.length < 2) return;
+  const res = buildChartFromPrices(slice.map(p => p.adj_close), period);
+  if (!res) return;
+  document.getElementById('chart-container').innerHTML = res.svg;
+  const pctEl = document.getElementById('chart-pct');
+  pctEl.textContent = (res.isUp ? '+' : '') + res.pct + '%';
+  pctEl.className = 'chart-pct ' + (res.isUp ? 'ret-pos' : 'ret-neg');
+  document.getElementById('chart-period-label').textContent = PERIOD_LABEL()[period];
+}
+
+// ── 지표 시계열 계산 (실데이터 기반) ────────────────────────
+// Z-Score: (price - MA200) / std200  (metrics.py compute_z_score 동일 방식)
+function calcZScoreSeries(adj) {
+  const w = 200, s = [];
+  for (let i = w - 1; i < adj.length; i++) {
+    const sl = adj.slice(i - w + 1, i + 1);
+    const mean = sl.reduce((a, b) => a + b, 0) / w;
+    const std  = Math.sqrt(sl.reduce((a, b) => a + (b - mean) ** 2, 0) / w);
+    s.push(std === 0 ? 0 : (adj[i] - mean) / std);
+  }
+  return s;
+}
+// RSI(14): Wilder EWM  (metrics.py compute_rsi 동일 방식)
+function calcRSISeries(adj, period = 14) {
+  if (adj.length < period + 1) return [];
+  const gains = [], losses = [];
+  for (let i = 1; i < adj.length; i++) {
+    const d = adj[i] - adj[i - 1];
+    gains.push(Math.max(0, d));
+    losses.push(Math.max(0, -d));
+  }
+  const alpha = 1 / period;
+  let sumG = 0, sumL = 0;
+  for (let i = 0; i < period; i++) { sumG += gains[i]; sumL += losses[i]; }
+  let avgG = sumG / period, avgL = sumL / period;
+  const s = [avgL === 0 ? 100 : 100 - 100 / (1 + avgG / avgL)];
+  for (let i = period; i < gains.length; i++) {
+    avgG = avgG * (1 - alpha) + gains[i] * alpha;
+    avgL = avgL * (1 - alpha) + losses[i] * alpha;
+    s.push(avgL === 0 ? 100 : 100 - 100 / (1 + avgG / avgL));
+  }
+  return s;
+}
+// 52W Range  (metrics.py compute_52w_range_pct 동일 방식)
+function calc52WRangeSeries(adj) {
+  const w = 252, s = [];
+  for (let i = w - 1; i < adj.length; i++) {
+    const sl = adj.slice(i - w + 1, i + 1);
+    const lo = Math.min(...sl), hi = Math.max(...sl);
+    s.push(hi === lo ? 50 : (adj[i] - lo) / (hi - lo) * 100);
+  }
+  return s;
+}
+// MDD (52W): 52주 고점 대비 현재가 괴리율  (metrics.py compute_52w_mdd 동일 방식)
+function calcMDDSeries(adj) {
+  const w = 252, s = [];
+  for (let i = w - 1; i < adj.length; i++) {
+    const hi = Math.max(...adj.slice(i - w + 1, i + 1));
+    s.push((adj[i] / hi - 1) * 100);
+  }
+  return s;
+}
+function calcMetricSeries(adj, metricType) {
+  let s;
+  if      (metricType === 'zscore')   s = calcZScoreSeries(adj);
+  else if (metricType === 'rsi')      s = calcRSISeries(adj);
+  else if (metricType === 'range52w') s = calc52WRangeSeries(adj);
+  else if (metricType === 'mdd')      s = calcMDDSeries(adj);
+  else return [];
+  return s.slice(-252);
+}
+
 function generateChartSVG(ticker, cagr, vol, n) {
   const prices = generatePrices(ticker, cagr, vol, n);
   const N = prices.length;
@@ -849,13 +1042,17 @@ function switchPeriod(period, el) {
   if (!currentETF) return;
   document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
-  const n = PERIOD_DAYS[period];
-  const res = generateChartSVG(currentETF.ticker, currentETF.cagr, currentETF.vol, n);
-  document.getElementById('chart-container').innerHTML = res.svg;
-  const pctEl = document.getElementById('chart-pct');
-  pctEl.textContent = (res.isUp ? '+' : '') + res.pct + '%';
-  pctEl.className = 'chart-pct ' + (res.isUp ? 'ret-pos' : 'ret-neg');
-  document.getElementById('chart-period-label').textContent = PERIOD_LABEL()[period];
+  if (priceHistory) {
+    updateChartFromHistory(period);
+  } else {
+    const n = PERIOD_DAYS[period];
+    const res = generateChartSVG(currentETF.ticker, currentETF.cagr, currentETF.vol, n);
+    document.getElementById('chart-container').innerHTML = res.svg;
+    const pctEl = document.getElementById('chart-pct');
+    pctEl.textContent = (res.isUp ? '+' : '') + res.pct + '%';
+    pctEl.className = 'chart-pct ' + (res.isUp ? 'ret-pos' : 'ret-neg');
+    document.getElementById('chart-period-label').textContent = PERIOD_LABEL()[period];
+  }
 }
 
 // ── 렌더링 함수들 ──────────────────────────────────
@@ -919,37 +1116,39 @@ function renderPage(etf, sectorId) {
   document.getElementById('qs-numh').textContent     = supp.numH !== undefined ? I18n.t('detail.numh.format', { n: supp.numH.toLocaleString() }) : '—';
 
   // ── 차트 ────────────────────────────────────────
-  const res1Y = generateChartSVG(etf.ticker, etf.cagr, etf.vol, 252);
-  document.getElementById('chart-container').innerHTML = res1Y.svg;
-  const pctEl = document.getElementById('chart-pct');
-  pctEl.textContent = (res1Y.isUp ? '+' : '') + res1Y.pct + '%';
-  pctEl.className   = 'chart-pct ' + (res1Y.isUp ? 'ret-pos' : 'ret-neg');
+  if (priceHistory) {
+    updateChartFromHistory(currentChartPeriod);
+  } else {
+    const res1Y = generateChartSVG(etf.ticker, etf.cagr, etf.vol, 252);
+    document.getElementById('chart-container').innerHTML = res1Y.svg;
+    const pctEl = document.getElementById('chart-pct');
+    pctEl.textContent = (res1Y.isUp ? '+' : '') + res1Y.pct + '%';
+    pctEl.className   = 'chart-pct ' + (res1Y.isUp ? 'ret-pos' : 'ret-neg');
+  }
   document.getElementById('chart-cagr').textContent = fmtPct(etf.cagr);
   document.getElementById('chart-vol').textContent  = fmtPct(etf.vol);
 
-  // ── 기간별 수익률 ───────────────────────────────
-  const perf = supp.perf || {};
-  const periods = [
-    { key: '1M',     labelKey: 'detail.perf.period.1M',    ann: false },
-    { key: '3M',     labelKey: 'detail.perf.period.3M',    ann: false },
-    { key: 'YTD',    labelKey: 'detail.perf.period.YTD',   ann: false },
-    { key: '1Y',     labelKey: 'detail.perf.period.1Y',    ann: false },
-    { key: '3Y_ann', labelKey: 'detail.perf.period.3Y_ann',ann: true },
-    { key: '5Y_ann', labelKey: 'detail.perf.period.5Y_ann',ann: true },
-  ];
-  const perfRows = periods.map(p => {
-    const v = perf[p.key];
-    const cls = v === undefined ? 'ret-na' : v >= 0 ? 'ret-pos' : 'ret-neg';
-    const disp = v === undefined ? '—' : fmtPct(v);
-    const annLabel = p.ann ? I18n.t('detail.perf.ann') : I18n.t('detail.perf.accumulated');
-    return `<tr>
-      <td class="perf-period">${I18n.t(p.labelKey)}</td>
-      <td class="${cls}">${disp}</td>
-      <td style="color:var(--text-muted);font-size:0.75rem">${annLabel}</td>
-      <td style="color:var(--text-muted);font-size:0.73rem">${v !== undefined ? I18n.t('detail.perf.example') : '—'}</td>
-    </tr>`;
-  }).join('');
-  document.getElementById('perf-table-body').innerHTML = perfRows;
+  // ── 기간별 수익률 (실데이터 로드 후 updatePerfFromHistory()로 갱신) ──
+  if (priceHistory) {
+    updatePerfFromHistory();
+  } else {
+    const perfPeriods = [
+      { key: '1M',     labelKey: 'detail.perf.period.1M',    ann: false },
+      { key: '3M',     labelKey: 'detail.perf.period.3M',    ann: false },
+      { key: 'YTD',    labelKey: 'detail.perf.period.YTD',   ann: false },
+      { key: '1Y',     labelKey: 'detail.perf.period.1Y',    ann: false },
+      { key: '3Y_ann', labelKey: 'detail.perf.period.3Y_ann',ann: true },
+      { key: '5Y_ann', labelKey: 'detail.perf.period.5Y_ann',ann: true },
+    ];
+    document.getElementById('perf-table-body').innerHTML = perfPeriods.map(p => {
+      const annLabel = p.ann ? I18n.t('detail.perf.ann') : I18n.t('detail.perf.accumulated');
+      return `<tr>
+        <td class="perf-period">${I18n.t(p.labelKey)}</td>
+        <td class="ret-na">—</td>
+        <td style="color:var(--text-muted);font-size:0.75rem">${annLabel}</td>
+      </tr>`;
+    }).join('');
+  }
 
   // ── 상위 구성종목 ───────────────────────────────
   const holdings = supp.holdings;
@@ -1152,7 +1351,9 @@ function switchMetric(type, el) {
 function renderMetricChart(etf) {
   currentETFForMetric = etf;
   const cfg = METRIC_CONFIG[currentMetricType];
-  const series = genMetricSeries(etf.ticker, currentMetricType);
+  const series = priceHistory
+    ? calcMetricSeries(priceHistory.map(p => p.adj_close), currentMetricType)
+    : genMetricSeries(etf.ticker, currentMetricType);
 
   // Current value from actual ETF data
   const valMap = { zscore: etf.z_score, rsi: etf.rsi, range52w: etf.range_52w, mdd: etf.mdd_52w };
@@ -1209,9 +1410,24 @@ fetch('/etf_data.json')
       if (ov[TICKER].is_legacy) found._user_override = true;
     }
     renderPage(found, foundSid);
+    loadPriceHistory(found.ticker).then(hist => {
+      if (hist) {
+        priceHistory = hist;
+        updateChartFromHistory(currentChartPeriod);
+        updatePerfFromHistory();
+        if (currentETFForMetric) renderMetricChart(currentETFForMetric);
+      }
+    });
     I18n.init();
     document.addEventListener('i18n:ready', () => {
-      if (currentETF) renderPage(currentETF, foundSid);
+      if (currentETF) {
+        renderPage(currentETF, foundSid);
+        if (priceHistory) {
+          updateChartFromHistory(currentChartPeriod);
+          updatePerfFromHistory();
+          if (currentETFForMetric) renderMetricChart(currentETFForMetric);
+        }
+      }
     });
   })
   .catch(() => {
