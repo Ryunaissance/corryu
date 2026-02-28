@@ -1174,9 +1174,10 @@ function _showLoadError() {
   document.getElementById('error-state').style.display = 'flex';
 }
 
-// 1단계: 티커별 개별 JSON 로드 시도 (빠름 ~500B)
+// 1단계: 티커별 개별 JSON 로드 시도 (빠름 ~400B)
 // 2단계: 실패 시 전체 etf_data.json 폴백
-fetch('/etf/' + TICKER + '.json')
+// ※ /etf-data/ 경로 사용 — /etf/:ticker rewrite 충돌 방지
+fetch('/etf-data/' + TICKER + '.json')
   .then(r => { if (!r.ok) throw new Error('no per-ticker file'); return r.json(); })
   .then(d => { _applyEtfData(d.etf, d.sid); })
   .catch(() =>

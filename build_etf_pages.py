@@ -1,9 +1,10 @@
 """build_etf_pages.py — ETF별 개별 JSON 파일 배치 생성
 
 output/etf_data.json 에서 각 티커의 데이터를 추출해
-output/etf/{TICKER}.json 파일을 생성합니다.
+output/etf-data/{TICKER}.json 파일을 생성합니다.
 
-etf-detail.html 이 625KB 전체 JSON 대신 500B짜리 개별 파일을 먼저 로드하게 됩니다.
+etf-detail.html 이 625KB 전체 JSON 대신 ~400B짜리 개별 파일을 먼저 로드하게 됩니다.
+경로를 /etf-data/ 로 분리해 vercel.json 의 /etf/:ticker rewrite 충돌을 방지합니다.
 
 Usage:
     python3 build_etf_pages.py
@@ -16,7 +17,7 @@ from datetime import datetime
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 ETF_DATA_PATH = os.path.join(ROOT, 'output', 'etf_data.json')
-ETF_DIR = os.path.join(ROOT, 'output', 'etf')
+ETF_DIR = os.path.join(ROOT, 'output', 'etf-data')
 
 
 def build_etf_pages():
@@ -42,7 +43,7 @@ def build_etf_pages():
                 json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
             count += 1
 
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] 완료: {count}개 ETF JSON 생성 → output/etf/")
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] 완료: {count}개 ETF JSON 생성 → output/etf-data/")
     return count
 
 
