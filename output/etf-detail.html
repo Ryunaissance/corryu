@@ -735,6 +735,125 @@ const SUPP = {
             perf:{'1M':3.4,'3M':8.2,'YTD':13.1,'1Y':32.4,'3Y_ann':16.8,'5Y_ann':20.4} },
 };
 
+// ── ETF 이름 첫 단어(브랜드)로 발행사 추론 ─────────────────
+// ETF 명명 규칙: 맨 처음 단어 = 발행사 브랜드
+const _ISSUER_PREFIX = {
+  // ── 대형 (100개+) ────────────────────────────────────
+  'iShares':        'BlackRock (iShares)',
+  'Ishares':        'BlackRock (iShares)',
+  'Invesco':        'Invesco',
+  'SPDR':           'State Street Global Advisors',
+  'Vanguard':       'Vanguard',
+  'WisdomTree':     'WisdomTree',
+  'Wisdomtree':     'WisdomTree',
+  'ProShares':      'ProShares',
+  'Proshares':      'ProShares',
+  'First':          'First Trust',       // "First Trust ..."
+  'FT':             'First Trust',       // "FT Cboe Vest ..."
+  'Global':         'Global X (Mirae Asset)', // "Global X ..."
+  'VanEck':         'VanEck',
+  'Vaneck':         'VanEck',
+  'Fidelity':       'Fidelity Investments',
+  'JPMorgan':       'JPMorgan Asset Management',
+  'Jpmorgan':       'JPMorgan Asset Management',
+  'Direxion':       'Direxion',
+  'Schwab':         'Charles Schwab',
+  // ── 중형 (20~99개) ───────────────────────────────────
+  'Avantis':        'Avantis Investors',
+  'Dimensional':    'Dimensional Fund Advisors',
+  'Goldman':        'Goldman Sachs Asset Management',
+  'Franklin':       'Franklin Templeton',
+  'Xtrackers':      'DWS (Xtrackers)',
+  'Nuveen':         'Nuveen',
+  'ALPS':           'ALPS Advisors',
+  'AdvisorShares':  'AdvisorShares',
+  'Roundhill':      'Roundhill Investments',
+  'Daily':          'Roundhill Investments',   // "Daily 2X ..." (Roundhill)
+  'YieldMax':       'YieldMax',
+  'Yieldmax':       'YieldMax',
+  'MicroSectors':    'REX Shares (MicroSectors)',
+  'MicroSectors\u2122':  'REX Shares (MicroSectors)', // MicroSectors™
+  'MicroSectorsTM':  'REX Shares (MicroSectors)',
+  'MicroSectorsTM':  'REX Shares (MicroSectors)', // MicroSectorsTM (without ™)
+  'Microsectors':    'REX Shares (MicroSectors)',
+  'U.S.':            'US Global Investors',            // "U.S. Global Jets ETF" 등
+  'ALPS/CoreCommodity': 'ALPS Advisors',               // "ALPS/CoreCommodity Natural Resources"
+  'Pacer':          'Pacer Financial',
+  'The':            'State Street Global Advisors', // "The ... Select Sector SPDR"
+  'Amplify':        'Amplify ETFs',
+  'NEOS':           'NEOS Investment Management',
+  'Neos':           'NEOS Investment Management',
+  // ── 소형 (10~19개) ───────────────────────────────────
+  'Tema':           'Tema ETFs',
+  'VictoryShares':  'VictoryShares',
+  'Victoryshares':  'VictoryShares',
+  'Themes':         'Themes ETFs',
+  'KraneShares':    'KraneShares',
+  'ARK':            'ARK Investment Management',
+  'PIMCO':          'PIMCO',
+  'T.':             'T. Rowe Price',             // "T. Rowe Price ..."
+  'Innovator':      'Innovator Capital Management',
+  'Macquarie':      'Macquarie Asset Management',
+  'abrdn':          'abrdn',
+  'Sprott':         'Sprott Asset Management',
+  'Volatility':     'Volatility Shares',
+  'Teucrium':       'Teucrium Trading',
+  'American':       'American Century Investments',
+  'Strive':         'Strive Asset Management',
+  'Harbor':         'Harbor Capital Advisors',
+  'GraniteShares':  'GraniteShares',
+  'Putnam':         'Franklin Templeton',
+  'Janus':          'Janus Henderson',
+  'Grayscale':      'Grayscale Investments',
+  'Bitwise':        'Bitwise Asset Management',
+  'Defiance':       'Defiance ETFs',
+  'CoinShares':     'CoinShares',
+  // ── 소수 (1~9개) ─────────────────────────────────────
+  'Robo':           'ROBO Global',
+  'BNY':            'BNY Mellon',
+  'Zacks':          'Zacks Investment Management',
+  'RiverFront':     'RiverFront Investment Group',
+  'VistaShares':    'VistaShares',
+  'Eaton':          'Eaton Vance',
+  '2x':             'Volatility Shares',
+  '-1x':            'Volatility Shares',
+  'One':            'Volatility Shares',        // "One+One S&P 500 and Bitcoin ETF"
+  'Davis':          'Davis Advisors',
+  'ClearBridge':    'ClearBridge Investments',
+  'Tortoise':       'Tortoise Capital',
+  'USCF':           'USCF Investments',
+  'Alerian':        'SS&C (Alerian)',
+  'United':         'United States Commodity Funds',
+  'State':          'State Street Global Advisors',
+  'Principal':      'Principal Global Investors',
+  'US':             'US Global Investors',
+  'Transatlantic':  'Transatlantic Capital',
+  'Point':          'Point Bridge Capital',
+  'Barclays':       'Barclays',
+  'Procure':        'Procure Asset Management',
+  "Barron's":       'ALPS Advisors',
+  'Cambria':        'Cambria Investment Management',
+  'Western':        'Franklin Templeton',
+  'UBS':            'UBS',
+  'Select':         'State Street Global Advisors',
+  'Listed':         'Teucrium',               // "Listed Funds Trust / Teucrium"
+  'Solana':         'REX Shares',
+  '21Shares':       '21Shares',
+  '21shares':       '21Shares',
+  'Fortuna':        'Fortuna Funds',
+};
+function inferIssuer(name) {
+  if (!name) return '';
+  const w = name.trim().split(/\s+/);
+  // "T. Rowe Price" — 첫 단어가 "T."이면 두 번째 단어로 보완
+  if (w[0] === 'T.' && w[1] === 'Rowe') return 'T. Rowe Price';
+  // "Goldman Sachs" — 발행사로 표기
+  if (w[0] === 'Goldman' && w[1] === 'Sachs') return 'Goldman Sachs Asset Management';
+  // "BNY Mellon" — 발행사로 표기
+  if (w[0] === 'BNY' && w[1] === 'Mellon') return 'BNY Mellon';
+  return _ISSUER_PREFIX[w[0]] || '';
+}
+
 // 섹터 ID → 이름 매핑 (간소화)
 const SECTOR_NAMES = {
   S01:'📈 US 대형주',S02:'💻 테크놀로지',S03:'🏥 헬스케어',S04:'🏦 금융',S05:'🛍️ 경기소비재',
@@ -812,15 +931,12 @@ let currentChartType = 'line';
 // ── 실가격 히스토리 로드 (Supabase etf_prices) ───────────────
 async function loadPriceHistory(ticker) {
   if (!window._sb) return null;
-  const since = new Date();
-  since.setFullYear(since.getFullYear() - 6);
   const { data, error } = await window._sb
     .from('etf_prices')
     .select('date, open, high, low, close, adj_close')
     .eq('ticker', ticker)
-    .gte('date', since.toISOString().split('T')[0])
     .order('date', { ascending: true })
-    .limit(1600);
+    .limit(10000);  // SPY(1993~) 약 8,300봉 — 상장 이후 전체 이력 커버
   return (!error && data && data.length >= 20) ? data : null;
 }
 
@@ -915,10 +1031,10 @@ function initPriceChart(container, data, type) {
     });
     lwSeries.setData(data.map(d => ({
       time:  d.date,
-      open:  d.open  ?? d.adj_close,
-      high:  d.high  ?? d.adj_close,
-      low:   d.low   ?? d.adj_close,
-      close: d.adj_close,
+      open:  d.open  ?? d.close,
+      high:  d.high  ?? d.close,
+      low:   d.low   ?? d.close,
+      close: d.close,          // 원시 close — open과 동일 척도여야 상승/하락 색이 정확
     })));
   } else {
     lwSeries = lwChart.addAreaSeries({
@@ -1176,7 +1292,7 @@ function renderPage(etf, sectorId) {
   // ── Quick Stats ─────────────────────────────────
   document.getElementById('qs-exp').textContent      = supp.exp      || I18n.t('detail.data.pending');
   document.getElementById('qs-inception').textContent = (etf.inception && etf.inception !== '1900-01-01') ? etf.inception : '—';
-  document.getElementById('qs-issuer').textContent   = supp.issuer   || I18n.t('detail.data.pending');
+  document.getElementById('qs-issuer').textContent   = supp.issuer   || inferIssuer(etf.name) || I18n.t('detail.data.pending');
   document.getElementById('qs-bench').textContent    = supp.bench    || I18n.t('detail.data.pending');
   document.getElementById('qs-numh').textContent     = supp.numH !== undefined ? I18n.t('detail.numh.format', { n: supp.numH.toLocaleString() }) : '—';
 
@@ -1261,7 +1377,7 @@ function renderPage(etf, sectorId) {
     { label: 'Rank',                           val: etf.rank === 9999 ? '—' : ('#' + etf.rank) },
     { label: 'AUM',                            val: fmtAUM(etf.aum) },
     { label: I18n.t('detail.info.fee'),        val: supp.exp       || '—' },
-    { label: I18n.t('detail.info.issuer'),     val: supp.issuer    || '—' },
+    { label: I18n.t('detail.info.issuer'),     val: supp.issuer    || inferIssuer(etf.name) || '—' },
     { label: I18n.t('detail.info.structure'),  val: supp.structure || '—' },
     { label: I18n.t('detail.info.div'),        val: supp.div       || '—' },
     { label: I18n.t('detail.info.divyield'),   val: supp.divYield  || '—' },
