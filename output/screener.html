@@ -66,7 +66,7 @@ table.rt tbody tr:last-child{border-bottom:none}
 table.rt tbody td{padding:9px 12px;font-size:.82rem;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
 .t-ticker{color:#60a5fa;text-decoration:none;font-weight:800;font-size:.86rem}
 .t-ticker:hover{text-decoration:underline}
-.t-name{color:var(--t2);font-weight:500;font-size:.78rem;max-width:200px;overflow:hidden;text-overflow:ellipsis}
+.t-name{color:var(--t2);font-weight:500;font-size:.78rem;white-space:nowrap}
 .stag{padding:2px 7px;border-radius:4px;font-size:.65rem;font-weight:800;background:rgba(255,255,255,0.05);color:var(--t3);white-space:nowrap}
 .pos{color:#4ade80}.neg{color:#f87171}.amb{color:#f59e0b}.mu{color:var(--t3)}
 .z-hi{color:#f87171}.z-lo{color:#60a5fa}.z-mid{color:var(--t2)}
@@ -236,11 +236,11 @@ const SECTOR_SHORT = {
 
 // 프리셋 정의
 const PRESETS = {
-  all:       { cagrMin:'', cagrMax:'', volMin:'', volMax:'', zMin:'', zMax:'', sortinoMin:'', aum:'0', legacy:true, short:false, sectors:[] },
-  oversold:  { cagrMin:'', cagrMax:'', volMin:'', volMax:'', zMin:'-4', zMax:'-1.5', sortinoMin:'', aum:'0', legacy:true, short:true,  sectors:[] },
-  momentum:  { cagrMin:'10', cagrMax:'', volMin:'', volMax:'', zMin:'0.5', zMax:'4', sortinoMin:'1.0', aum:'100000000', legacy:true, short:true,  sectors:[] },
-  lowvol:    { cagrMin:'0',  cagrMax:'', volMin:'', volMax:'18', zMin:'', zMax:'', sortinoMin:'0.8', aum:'0', legacy:true, short:false, sectors:[] },
-  highreturn:{ cagrMin:'20', cagrMax:'', volMin:'', volMax:'', zMin:'', zMax:'', sortinoMin:'1.5', aum:'100000000', legacy:true, short:true,  sectors:[] },
+  all:       { cagrMin:'', cagrMax:'', volMin:'', volMax:'', zMin:'', zMax:'', sortinoMin:'', aum:'0', legacy:true, short:false, sectors:[], sort:'sortino', sortDir:-1 },
+  oversold:  { cagrMin:'', cagrMax:'', volMin:'', volMax:'', zMin:'-4', zMax:'-1.5', sortinoMin:'', aum:'0', legacy:true, short:true,  sectors:[], sort:'z_score', sortDir:1 },
+  momentum:  { cagrMin:'10', cagrMax:'', volMin:'', volMax:'', zMin:'0.5', zMax:'4', sortinoMin:'1.0', aum:'100000000', legacy:true, short:true,  sectors:[], sort:'z_score', sortDir:-1 },
+  lowvol:    { cagrMin:'0',  cagrMax:'', volMin:'', volMax:'18', zMin:'', zMax:'', sortinoMin:'0.8', aum:'0', legacy:true, short:false, sectors:[], sort:'vol', sortDir:1 },
+  highreturn:{ cagrMin:'20', cagrMax:'', volMin:'', volMax:'', zMin:'', zMax:'', sortinoMin:'1.5', aum:'100000000', legacy:true, short:true,  sectors:[], sort:'cagr', sortDir:-1 },
 };
 
 // ── 상태 ──────────────────────────────────────────────────────────────
@@ -296,6 +296,16 @@ function applyPreset(key) {
   document.getElementById('f-aum').value         = p.aum;
   document.getElementById('f-legacy').checked    = p.legacy;
   document.getElementById('f-short').checked     = p.short;
+  // 정렬 적용
+  if (p.sort) {
+    sortCol = p.sort;
+    sortDir = p.sortDir || -1;
+    document.querySelectorAll('th[data-col]').forEach(th => {
+      th.classList.toggle('sort-on', th.dataset.col === sortCol);
+      const arr = th.querySelector('.arr');
+      if (arr) arr.textContent = th.dataset.col === sortCol ? (sortDir === -1 ? '↓' : '↑') : '↕';
+    });
+  }
   // 섹터 초기화
   selSectors.clear();
   document.querySelectorAll('.sc').forEach(b => b.classList.remove('on'));
