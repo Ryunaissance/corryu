@@ -596,14 +596,15 @@ async function loadProfile(user) {
   currentUser = user;
 
   // 프로필 로드
-  const profile = await CorryuAuth.getProfile(currentUser.id);
-  const nick  = profile?.nickname || currentUser.email?.split('@')[0] || '사용자';
-  const email = currentUser.email || '—';
-  const joined    = fmtDate(currentUser.created_at);
-  const lastLogin = fmtDate(currentUser.last_sign_in_at);
+  var profile = null;
+  try { profile = await CorryuAuth.getProfile(currentUser.id); } catch(e) {}
+  var nick  = (profile && profile.nickname) || (currentUser.email ? currentUser.email.split('@')[0] : '사용자');
+  var email = currentUser.email || '—';
+  var joined    = fmtDate(currentUser.created_at);
+  var lastLogin = fmtDate(currentUser.last_sign_in_at);
 
   // 아바타
-  const ac = document.getElementById('avatar-circle');
+  var ac = document.getElementById('avatar-circle');
   ac.textContent   = nick.charAt(0).toUpperCase();
   ac.style.background = nickColor(nick);
   ac.style.color      = '#fff';
@@ -620,7 +621,7 @@ async function loadProfile(user) {
   document.getElementById('loading-screen').style.display  = 'none';
   document.getElementById('profile-content').style.display = 'block';
 
-  await I18n.init();
+  try { await I18n.init(); } catch(e) {}
 }
 
 function showUnauth() {
@@ -628,34 +629,26 @@ function showUnauth() {
   document.getElementById('unauth-screen').style.display  = 'flex';
 }
 
-(function init() {
+(async function init() {
   // Supabase 미연결
   if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured || !_sb) {
     showUnauth();
     return;
   }
 
-  // onAuthStateChange로 세션 감지 (getSession보다 안정적)
-  let handled = false;
-  const fallbackTimer = setTimeout(() => {
-    if (!handled) { handled = true; showUnauth(); }
-  }, 5000);
-
-  _sb.auth.onAuthStateChange(async (event, session) => {
-    if (handled && event !== 'SIGNED_OUT') return;
-
-    if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
-      handled = true;
-      clearTimeout(fallbackTimer);
-      if (session?.user) {
-        await loadProfile(session.user);
-      } else {
-        showUnauth();
-      }
-    } else if (event === 'SIGNED_OUT') {
-      window.location.href = '/login';
+  try {
+    // getSession()은 Supabase 내부 초기화 완료를 기다린 후 세션 반환
+    var result = await _sb.auth.getSession();
+    var session = result && result.data ? result.data.session : null;
+    if (!session || !session.user) {
+      showUnauth();
+      return;
     }
-  });
+    await loadProfile(session.user);
+  } catch(e) {
+    console.error('[CORRYU] profile init error:', e);
+    showUnauth();
+  }
 })();
 </script>
 </body>
