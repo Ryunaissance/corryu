@@ -58,6 +58,19 @@ def load_expense_ratios() -> dict[str, float]:
         return pickle.load(f)
 
 
+def load_dividend_yields() -> dict[str, float]:
+    """배당수익률 데이터 로드 (Dict[ticker → float], 없는 경우 빈 dict 반환)
+
+    yfinance에서 수집한 dividendYield 값.
+    소수점 형식 (예: 0.0275 = 2.75%).
+    """
+    path = f'{DATA_SCRAPED}/dividend_yields.pkl'
+    if not os.path.exists(path):
+        return {}
+    with open(path, 'rb') as f:
+        return pickle.load(f)
+
+
 def load_all() -> tuple[pd.DataFrame, dict[str, dict[str, Any]], dict[str, dict[str, Any]], pd.DataFrame, pd.DataFrame]:
     """모든 데이터를 한 번에 로드하여 반환
 

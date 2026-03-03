@@ -82,7 +82,8 @@ def compute_52w_range_pct(prices: pd.Series) -> float | None:
 
 def compute_etf_metrics(ticker: str, df_price: pd.DataFrame, perf_stats: dict[str, Any], scraped: dict[str, Any], classification: dict[str, Any],
                         df_corr_monthly: pd.DataFrame, df_corr_daily: pd.DataFrame, legacy_info: dict[str, Any],
-                        expense_ratios: dict[str, float] | None = None) -> dict[str, Any]:
+                        expense_ratios: dict[str, float] | None = None,
+                        dividend_yields: dict[str, float] | None = None) -> dict[str, Any]:
     """단일 ETF의 모든 대시보드 지표를 계산
 
     Returns:
@@ -138,6 +139,13 @@ def compute_etf_metrics(ticker: str, df_price: pd.DataFrame, perf_stats: dict[st
         if v is not None:
             exp_ratio = round(float(v), 6)
 
+    # 배당수익률 (dividend_yields dict에서 조회, 없으면 None)
+    div_yield = None
+    if dividend_yields:
+        v = dividend_yields.get(ticker)
+        if v is not None:
+            div_yield = round(float(v) * 100, 2)  # 소수 → 퍼센트 (0.0275 → 2.75)
+
     return {
         'ticker': ticker,
         'name': fullname,
@@ -156,6 +164,7 @@ def compute_etf_metrics(ticker: str, df_price: pd.DataFrame, perf_stats: dict[st
         'short_history': short_history,
         'inception': inception,
         'exp_ratio': exp_ratio,
+        'div_yield': div_yield,
         'is_legacy': leg.get('is_legacy', False),
         'legacy_reasons': leg.get('reasons', []),
         'legacy_detail': leg.get('details', []),

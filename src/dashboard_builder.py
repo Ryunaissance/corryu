@@ -13,7 +13,7 @@ from typing import Any
 import pandas as pd
 
 from config import SECTOR_DEFS, SUPER_SECTOR_DEFS, ASSET_CLASSES, MY_PORTFOLIO, OUTPUT_DIR
-from data_loader import load_all, load_expense_ratios, get_all_tickers, get_fullname, get_market_cap, get_rank
+from data_loader import load_all, load_expense_ratios, load_dividend_yields, get_all_tickers, get_fullname, get_market_cap, get_rank
 from classify import classify_all, get_sector_members, fill_anchor_correlations, fill_super_anchor_correlations
 from verify import verify_mece, spot_check
 from legacy import assess_all_legacy
@@ -40,7 +40,9 @@ def build_sector_meta(sector_members: dict[str, set[str]], all_etf_data: dict[st
 
 def build_all_etf_data(sector_members: dict[str, set[str]], classification: dict[str, Any], legacy_results: dict[str, Any],
                        df_price: pd.DataFrame, perf_stats: dict[str, Any], scraped: dict[str, Any],
-                       df_corr_monthly: pd.DataFrame, df_corr_daily: pd.DataFrame, expense_ratios: dict[str, float] | None = None) -> dict[str, list[dict[str, Any]]]:
+                       df_corr_monthly: pd.DataFrame, df_corr_daily: pd.DataFrame,
+                       expense_ratios: dict[str, float] | None = None,
+                       dividend_yields: dict[str, float] | None = None) -> dict[str, list[dict[str, Any]]]:
     """전체 섹터별 ETF 데이터 JSON 생성"""
     all_data = {}
 
@@ -52,7 +54,8 @@ def build_all_etf_data(sector_members: dict[str, set[str]], classification: dict
             etf_info = compute_etf_metrics(
                 ticker, df_price, perf_stats, scraped, classification,
                 df_corr_monthly, df_corr_daily, legacy_results,
-                expense_ratios=expense_ratios
+                expense_ratios=expense_ratios,
+                dividend_yields=dividend_yields
             )
             etf_info['mine'] = 1 if ticker in MY_PORTFOLIO else 0
             etf_list.append(etf_info)
@@ -96,11 +99,14 @@ def main() -> None:
     print("\n대시보드 데이터 생성 중...")
     expense_ratios = load_expense_ratios()
     print(f"  수수료 데이터: {len(expense_ratios)}개 티커")
+    dividend_yields = load_dividend_yields()
+    print(f"  배당수익률 데이터: {len(dividend_yields)}개 티커")
     all_etf_data = build_all_etf_data(
         sector_members, classification, legacy_results,
         df_price, perf_stats, scraped,
         df_corr_monthly, df_corr_daily,
-        expense_ratios=expense_ratios
+        expense_ratios=expense_ratios,
+        dividend_yields=dividend_yields
     )
 
     # 6. 섹터 메타 생성
