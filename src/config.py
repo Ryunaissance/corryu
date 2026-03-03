@@ -16,6 +16,10 @@ CORR_DAILY_CSV = os.path.join(BASE_DIR, 'correlation_matrix.csv')
 # ── 내 보유 종목 ──────────────────────────────────────
 MY_PORTFOLIO = ['PEY', 'HYG', 'GBTC', 'GLD', 'VNQ', 'UYR', 'XLE']
 
+# ── 관리자 계정 ──────────────────────────────────────
+# 레거시 처리가 보이는 계정 (이메일 기반, Supabase app_metadata.role='admin'도 지원)
+ADMIN_EMAILS: set[str] = set()  # 예: {'admin@example.com'}
+
 # ── 분류 임계값 ──────────────────────────────────────
 CORR_THRESHOLD = 0.55       # Pass 2 상관계수 최소 기준
 PROTECT_EQUITIES = {        # 비주식 앵커에 끌려가면 안 되는 핵심 주식 ETF

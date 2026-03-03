@@ -15,7 +15,7 @@ from datetime import datetime
 ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(ROOT, 'src'))
 
-from config import SECTOR_DEFS, SUPER_SECTOR_DEFS, ASSET_CLASSES, MY_PORTFOLIO, OUTPUT_DIR
+from config import SECTOR_DEFS, SUPER_SECTOR_DEFS, ASSET_CLASSES, MY_PORTFOLIO, OUTPUT_DIR, ADMIN_EMAILS
 
 
 def generate_html(sector_meta):
@@ -46,6 +46,7 @@ def generate_html(sector_meta):
              'color': v['color'], 'sub_sectors': v['sub_sectors']}
          for k, v in SUPER_SECTOR_DEFS.items()}, ensure_ascii=False)
     json_my_portfolio = json.dumps(MY_PORTFOLIO)
+    json_admin_emails = json.dumps(list(ADMIN_EMAILS))
 
     html = f"""<!DOCTYPE html>
 <html lang="ko">
@@ -294,6 +295,8 @@ table.dataTable tbody tr.row-selected {{ background: rgba(59,130,246,0.08) !impo
 </div>
 
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/supabase-client.js"></script>
 <script src="/i18n.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -305,6 +308,42 @@ const acSectors = {json_ac_sectors};
 
 // ── 체크박스 선택 상태 ─────────────────────────────────
 const selectedTickers = new Set();
+
+// ── Admin 권한 감지 ──────────────────────────────────
+const _adminEmails = new Set({json_admin_emails});
+let _isAdmin = false;
+
+async function detectAdmin() {{
+    if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) return false;
+    try {{
+        const user = await CorryuAuth.getUser();
+        if (!user) return false;
+        if (user.app_metadata && user.app_metadata.role === 'admin') return true;
+        if (user.email && _adminEmails.has(user.email)) return true;
+        return false;
+    }} catch(e) {{ return false; }}
+}}
+
+function stripLegacyForNonAdmin() {{
+    for (const sid of Object.keys(allData)) {{
+        for (const etf of allData[sid]) {{
+            etf.is_legacy = false;
+            etf.legacy_reasons = [];
+            etf.legacy_detail = [];
+        }}
+    }}
+}}
+
+function applyAdminUI(isAdmin) {{
+    _isAdmin = isAdmin;
+    if (!isAdmin) {{
+        $('#filterLegacy').closest('label').hide();
+        $('#fab-btn-legacy, #fab-btn-unlegacy').hide();
+        $('#btn-undo, #btn-reset, #sync-status').hide();
+        var $ll = $('#hdr-legacy-label');
+        if ($ll.length) $ll.hide();
+    }}
+}}
 
 // ── localStorage 레거시 오버라이드 ───────────────────
 const USER_OVERRIDES_KEY = 'corryu_user_overrides';
@@ -593,21 +632,21 @@ function renderSummary() {{
         let totalLegacy = metas.reduce((s,m) => s+(m.legacy||0), 0);
         html += '<div class="stat-card"><div class="stat-value text-white">' + totalCount + '</div><div class="stat-label">ETFs</div></div>';
         html += '<div class="stat-card"><div class="stat-value text-green-400">' + totalActive + '</div><div class="stat-label">Active</div></div>';
-        html += '<div class="stat-card"><div class="stat-value text-red-400">' + totalLegacy + '</div><div class="stat-label">Legacy</div></div>';
+        if (_isAdmin) html += '<div class="stat-card"><div class="stat-value text-red-400">' + totalLegacy + '</div><div class="stat-label">Legacy</div></div>';
     }} else if (sec && sec.startsWith('SS_')) {{
         let ssId = sec.slice(3);
         let ssMeta = getSuperSectorMeta(ssId);
         let ss = superSectorDefs[ssId] || {{}};
         html += '<div class="stat-card"><div class="stat-value text-white">' + ssMeta.count + '</div><div class="stat-label">ETFs</div></div>';
         html += '<div class="stat-card"><div class="stat-value text-green-400">' + ssMeta.active + '</div><div class="stat-label">Active</div></div>';
-        html += '<div class="stat-card"><div class="stat-value text-red-400">' + ssMeta.legacy + '</div><div class="stat-label">Legacy</div></div>';
+        if (_isAdmin) html += '<div class="stat-card"><div class="stat-value text-red-400">' + ssMeta.legacy + '</div><div class="stat-label">Legacy</div></div>';
         html += '<div class="stat-card" style="min-width:120px"><div class="stat-value text-yellow-300 text-sm">' + (ss.anchor||'—') + '</div><div class="stat-label">Anchor</div></div>';
     }} else {{
         let meta = sectorMeta[sec] || {{}};
         let sd = sectorDefs[sec] || {{}};
         html += '<div class="stat-card"><div class="stat-value text-white">' + (meta.count||0) + '</div><div class="stat-label">ETFs</div></div>';
         html += '<div class="stat-card"><div class="stat-value text-green-400">' + (meta.active||0) + '</div><div class="stat-label">Active</div></div>';
-        html += '<div class="stat-card"><div class="stat-value text-red-400">' + (meta.legacy||0) + '</div><div class="stat-label">Legacy</div></div>';
+        if (_isAdmin) html += '<div class="stat-card"><div class="stat-value text-red-400">' + (meta.legacy||0) + '</div><div class="stat-label">Legacy</div></div>';
         html += '<div class="stat-card"><div class="stat-value text-blue-300">' + (meta.avg_cagr > 0 ? '+' : '') + (meta.avg_cagr||0).toFixed(1) + '%</div><div class="stat-label">Avg CAGR</div></div>';
         html += '<div class="stat-card"><div class="stat-value text-gray-300">' + (meta.avg_vol||0).toFixed(1) + '%</div><div class="stat-label">Avg Vol</div></div>';
         html += '<div class="stat-card"><div class="stat-value text-purple-400">' + (meta.avg_sortino||0).toFixed(2) + '</div><div class="stat-label">Avg Sortino</div></div>';
@@ -953,7 +992,7 @@ function initDashboard() {{
 
     // ── FAB 액션 ─────────────────────────────────────
     function applyLegacyAction(setLegacy) {{
-        if (selectedTickers.size === 0) return;
+        if (!_isAdmin || selectedTickers.size === 0) return;
         pushUndo();
         let ov = getUserOverrides();
         selectedTickers.forEach(function(ticker) {{
@@ -1219,38 +1258,46 @@ $(document).ready(function() {{
             sectorMeta = d.sectorMeta;
             allData = d.allData;
             snapshotOriginalLegacy(); // 빌드 기본값 스냅샷 (undo 기준점)
-            // 다기기 동기화: 원격 오버라이드 로드 시도 (서버사이드 PAT)
-            let ov = getUserOverrides();
-            const localTs = parseInt(localStorage.getItem('corryu_overrides_ts') || '0');
-            setSyncStatus('busy');
-            const remoteOv = await fetchRemoteOverrides();
-            if (remoteOv && remoteOv._meta) {{
-                if (remoteOv._meta.ts > localTs) {{
-                    // 원격이 더 최신 → 로컬에 적용
-                    const {{ _meta, ...cleanOv }} = remoteOv;
-                    ov = cleanOv;
-                    localStorage.setItem(USER_OVERRIDES_KEY, JSON.stringify(ov));
-                    localStorage.setItem('corryu_overrides_ts', String(remoteOv._meta.ts));
-                    setSyncStatus('ok');
-                    showToast('다른 기기의 설정을 불러왔습니다 (' + Object.keys(ov).length + '종목)', 3500);
-                }} else if (localTs > remoteOv._meta.ts && Object.keys(ov).length) {{
-                    // 로컬이 더 최신 → 원격에 푸시
+
+            // Admin 감지
+            const isAdmin = await detectAdmin();
+            applyAdminUI(isAdmin);
+
+            if (isAdmin) {{
+                // Admin: 오버라이드 & 동기화 로직
+                let ov = getUserOverrides();
+                const localTs = parseInt(localStorage.getItem('corryu_overrides_ts') || '0');
+                setSyncStatus('busy');
+                const remoteOv = await fetchRemoteOverrides();
+                if (remoteOv && remoteOv._meta) {{
+                    if (remoteOv._meta.ts > localTs) {{
+                        const {{ _meta, ...cleanOv }} = remoteOv;
+                        ov = cleanOv;
+                        localStorage.setItem(USER_OVERRIDES_KEY, JSON.stringify(ov));
+                        localStorage.setItem('corryu_overrides_ts', String(remoteOv._meta.ts));
+                        setSyncStatus('ok');
+                        showToast('다른 기기의 설정을 불러왔습니다 (' + Object.keys(ov).length + '종목)', 3500);
+                    }} else if (localTs > remoteOv._meta.ts && Object.keys(ov).length) {{
+                        pushRemoteOverrides(ov);
+                    }} else {{
+                        setSyncStatus('ok');
+                    }}
+                }} else if (!remoteOv && Object.keys(ov).length) {{
                     pushRemoteOverrides(ov);
                 }} else {{
                     setSyncStatus('ok');
                 }}
-            }} else if (!remoteOv && Object.keys(ov).length) {{
-                // 원격 파일 없음 + 로컬 데이터 있음 → 원격에 업로드
-                pushRemoteOverrides(ov);
+                if (Object.keys(ov).length) applyOverridesToData(ov);
             }} else {{
-                setSyncStatus('ok');
+                // 비Admin: 레거시 상태 제거 — 모든 ETF가 Active로 표시
+                stripLegacyForNonAdmin();
             }}
-            if (Object.keys(ov).length) applyOverridesToData(ov);
+
             applySmhCorr();           // localStorage SMH 상관계수 적용
             recalcSectorMeta();       // 오버라이드 반영해 카운트 갱신
             await I18n.init();        // i18n 초기화 (저장된 언어 로드)
             initDashboard();
-            setInterval(pollRemoteSync, 30000);
+            if (isAdmin) setInterval(pollRemoteSync, 30000);
 
             // 언어 전환 시 탭·섹터명 즉시 재렌더링
             document.addEventListener('i18n:ready', function() {{
