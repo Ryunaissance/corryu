@@ -1680,7 +1680,7 @@ $(document).ready(function() {
   }
 
   window._navLogout = async function() {
-    await CorryuAuth.signOut();
+    try { await CorryuAuth.signOut(); } catch(e) { console.warn('[CORRYU] logout error:', e); }
     window.location.reload();
   };
 

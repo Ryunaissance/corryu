@@ -88,7 +88,19 @@ window.CorryuAuth = {
 
   async signOut() {
     if (!_sb) return;
-    await _sb.auth.signOut();
+    try {
+      await _sb.auth.signOut();
+    } catch(e) {
+      console.warn('[CORRYU] signOut API 실패:', e.message);
+    }
+    // API 실패 시에도 로컬 세션 강제 정리
+    try {
+      for (const key of Object.keys(localStorage)) {
+        if (key.startsWith('sb-') && key.endsWith('-auth-token')) {
+          localStorage.removeItem(key);
+        }
+      }
+    } catch(e) { /* private browsing 등 */ }
   },
 
   onAuthChange(callback) {
