@@ -2,10 +2,14 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0d14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>CORRYU — 글로벌 ETF 분석 대시보드</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="/responsive.css" rel="stylesheet">
 <script src="/i18n.js"></script>
 <style>
 :root {
@@ -278,6 +282,7 @@ footer {
 /* ── 반응형 ── */
 @media (max-width: 768px) {
   .nav-links { display: none; }
+  .nav-landing-desktop { display: none !important; }
   .stats-inner { grid-template-columns: repeat(2, 1fr); gap: 32px; }
   .stat-num { font-size: 1.9rem; }
   .cta-card { padding: 40px 24px; }
@@ -285,6 +290,9 @@ footer {
 }
 @media (max-width: 480px) {
   .hero-title { font-size: 2.4rem; }
+}
+@media (min-width: 1024px) {
+  .nav-mob-btn { display: none !important; }
 }
 </style>
 </head>
@@ -308,11 +316,24 @@ footer {
       <button id="lang-switcher"
         onclick="I18n.setLocale(I18n.locale()==='ko'?'en':'ko')"
         class="btn-ghost">EN</button>
-      <a href="/login" class="btn-ghost">로그인</a>
-      <a href="/login" class="btn-primary">무료 시작</a>
+      <a href="/login" class="btn-ghost nav-landing-desktop">로그인</a>
+      <a href="/login" class="btn-primary nav-landing-desktop">무료 시작</a>
+      <button id="nav-mob-btn" class="nav-mob-btn" aria-label="메뉴" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
     </div>
   </div>
 </nav>
+<div id="nav-mob-drawer" class="nav-mob-drawer" style="top:62px">
+  <a href="#features"  class="mob-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>기능</a>
+  <a href="#preview"   class="mob-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>미리보기</a>
+  <a href="/index"     class="mob-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>대시보드</a>
+  <div class="mob-drawer-divider"></div>
+  <div class="mob-drawer-bottom">
+    <a href="/login" class="btn-primary" style="text-align:center;flex:1;padding:10px">무료 시작</a>
+  </div>
+</div>
+<div id="nav-mob-overlay" class="nav-mob-overlay" style="top:62px"></div>
 
 <!-- ── Hero ── -->
 <section class="hero">
@@ -533,6 +554,9 @@ footer {
 window.addEventListener('DOMContentLoaded', () => {
   I18n.init();
 });
+</script>
+<script>
+(function(){var btn=document.getElementById('nav-mob-btn'),drawer=document.getElementById('nav-mob-drawer'),overlay=document.getElementById('nav-mob-overlay');if(!btn||!drawer)return;function open(){drawer.classList.add('open');if(overlay)overlay.classList.add('open');document.body.classList.add('mob-menu-open');btn.setAttribute('aria-expanded','true');}function close(){drawer.classList.remove('open');if(overlay)overlay.classList.remove('open');document.body.classList.remove('mob-menu-open');btn.setAttribute('aria-expanded','false');}btn.addEventListener('click',function(){drawer.classList.contains('open')?close():open();});if(overlay)overlay.addEventListener('click',close);drawer.querySelectorAll('a').forEach(function(a){a.addEventListener('click',close);});document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});})();
 </script>
 </body>
 </html>
