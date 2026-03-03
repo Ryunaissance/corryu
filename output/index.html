@@ -83,21 +83,21 @@ table.dataTable tbody tr.row-selected { background: rgba(59,130,246,0.08) !impor
 #fab-btn-clear { background: rgba(255,255,255,0.05); color: #64748b; border: 1px solid rgba(255,255,255,0.08); padding: 7px 10px; }
 #fab-btn-clear:hover { background: rgba(255,255,255,0.1); color: #94a3b8; }
 /* Watchlist FAB */
-#fab-btn-watch   { background: rgba(251,191,36,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); }
-#fab-btn-watch:hover   { background: rgba(251,191,36,0.24); }
+#fab-btn-watch   { background: rgba(244,63,94,0.12); color: #fb7185; border: 1px solid rgba(244,63,94,0.3); }
+#fab-btn-watch:hover   { background: rgba(244,63,94,0.24); }
 #fab-btn-unwatch { background: rgba(100,116,139,0.1);  color: #94a3b8; border: 1px solid rgba(100,116,139,0.2); }
 #fab-btn-unwatch:hover { background: rgba(100,116,139,0.2); }
 /* 관심종목 탭 */
-.watchlist-tab { color: #fbbf24 !important; }
-.watchlist-tab.active { background: rgba(251,191,36,0.15) !important; color: #fbbf24 !important; border-color: rgba(251,191,36,0.45) !important; box-shadow: 0 0 20px rgba(251,191,36,0.2) !important; }
-.watchlist-tab:hover:not(.active) { background: rgba(251,191,36,0.08) !important; }
+.watchlist-tab { color: #fb7185 !important; }
+.watchlist-tab.active { background: rgba(244,63,94,0.15) !important; color: #fb7185 !important; border-color: rgba(244,63,94,0.45) !important; box-shadow: 0 0 20px rgba(244,63,94,0.2) !important; }
+.watchlist-tab:hover:not(.active) { background: rgba(244,63,94,0.08) !important; }
 .wl-count { display: inline-flex; align-items: center; justify-content: center; min-width: 17px; height: 17px; border-radius: 9px; background: rgba(251,191,36,0.2); font-size: 0.68rem; font-weight: 800; padding: 0 4px; margin-left: 3px; vertical-align: middle; }
 /* Star 버튼 */
-.star-btn { background: none; border: none; cursor: pointer; color: #2d3748; font-size: 0.95rem; line-height: 1; transition: color 0.12s, transform 0.12s; padding: 1px 3px; border-radius: 3px; vertical-align: middle; }
-.star-btn:hover   { color: #fbbf24; transform: scale(1.25); }
-.star-btn.starred { color: #fbbf24; }
+.star-btn { background: none; border: none; cursor: pointer; color: #374151; font-size: 0.95rem; line-height: 1; transition: color 0.12s, transform 0.12s; padding: 1px 3px; border-radius: 3px; vertical-align: middle; }
+.star-btn:hover   { color: #fb7185; transform: scale(1.25); }
+.star-btn.starred { color: #f43f5e; }
 /* 관심종목 행 강조 */
-table.dataTable tbody tr.row-watchlist { background: rgba(251,191,36,0.04) !important; }
+table.dataTable tbody tr.row-watchlist { background: rgba(244,63,94,0.04) !important; }
 table.dataTable tbody tr.row-watchlist.row-selected { background: rgba(59,130,246,0.1) !important; }
 
 /* 카테고리 이동 모달 */
@@ -355,8 +355,8 @@ table.dataTable tbody tr.row-watchlist.row-selected { background: rgba(59,130,24
         <div id="fab-label" id="fab-label-div"></div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
             <button class="fab-btn" id="fab-btn-compare" style="background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(59,130,246,0.35)" onclick="openCompare()" data-i18n="index.compare.btn">⇄ 비교하기</button>
-            <button class="fab-btn" id="fab-btn-watch"   data-i18n="btn.watch.add">★ 관심 추가</button>
-            <button class="fab-btn" id="fab-btn-unwatch" data-i18n="btn.watch.remove">☆ 관심 해제</button>
+            <button class="fab-btn" id="fab-btn-watch"   data-i18n="btn.watch.add">♥ 관심 추가</button>
+            <button class="fab-btn" id="fab-btn-unwatch" data-i18n="btn.watch.remove">♡ 관심 해제</button>
             <button class="fab-btn" id="fab-btn-legacy" data-i18n="btn.legacy.mark">레거시 처리</button>
             <button class="fab-btn" id="fab-btn-unlegacy" data-i18n="btn.legacy.unmark">레거시 해제</button>
             <button class="fab-btn" id="fab-btn-move" data-i18n="btn.move">↪ 카테고리 이동</button>
@@ -404,12 +404,14 @@ function openCompare() {
 // ── Admin 권한 감지 ──────────────────────────────────
 const _adminEmails = new Set([]);
 let _isAdmin = false;
+let _isLoggedIn = false;
 
 async function detectAdmin() {
     if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) return false;
     try {
         const user = await CorryuAuth.getUser();
         if (!user) return false;
+        _isLoggedIn = true;
         if (user.app_metadata && user.app_metadata.role === 'admin') return true;
         if (user.email && _adminEmails.has(user.email)) return true;
         return false;
@@ -462,20 +464,21 @@ const sectorDefs = {"S01": {"name": "US 대형주 종합", "name_en": "US Large 
 const superSectorDefs = {"EQUITY_MARKET": {"name": "주식 시장", "name_en": "Equity Market", "anchor": "QQQ", "icon": "🌐", "color": "#3b82f6", "sub_sectors": ["S01", "S02", "S04", "S07", "S09", "S11", "S13"]}};
 // ── 관심종목 / 나의 포트폴리오 (Watchlist) ───────────────
 const WATCHLIST_KEY = 'corryu_watchlist';
-let watchlist = (function() {
-    const saved = localStorage.getItem(WATCHLIST_KEY);
-    // 최초 실행 시 기존 myPortfolio 항목을 초기값으로 마이그레이션
-    const initial = ["PEY", "HYG", "GBTC", "GLD", "VNQ", "UYR", "XLE"];
-    const s = new Set(saved ? JSON.parse(saved) : initial);
-    if (!saved) localStorage.setItem(WATCHLIST_KEY, JSON.stringify([...s]));
-    return s;
-})();
+let watchlist = new Set();
+
+function loadWatchlist() {
+    var saved = localStorage.getItem(WATCHLIST_KEY);
+    var initial = ["PEY", "HYG", "GBTC", "GLD", "VNQ", "UYR", "XLE"];
+    watchlist = new Set(saved ? JSON.parse(saved) : initial);
+    if (!saved) localStorage.setItem(WATCHLIST_KEY, JSON.stringify([...watchlist]));
+}
 
 function saveWatchlist() {
     localStorage.setItem(WATCHLIST_KEY, JSON.stringify([...watchlist]));
 }
 
 function toggleWatchlist(ticker, trEl) {
+    if (!_isLoggedIn) { window.location.href = '/login'; return; }
     if (watchlist.has(ticker)) watchlist.delete(ticker);
     else watchlist.add(ticker);
     saveWatchlist();
@@ -526,10 +529,12 @@ function renderACTabs() {
         let isActive = state.activeAC === ac ? ' active' : '';
         html += '<button class="ac-tab' + isActive + '" data-ac="' + ac + '">' + def.icon + ' ' + sName(def) + '</button>';
     }
-    // 관심종목 탭
-    let wActive = state.activeAC === 'WATCHLIST' ? ' active' : '';
-    let wBadge  = watchlist.size > 0 ? '<span class="wl-count">' + watchlist.size + '</span>' : '';
-    html += '<button class="ac-tab watchlist-tab' + wActive + '" data-ac="WATCHLIST" style="margin-left:8px">' + I18n.t('index.ac.watchlist') + wBadge + '</button>';
+    // 관심종목 탭 (로그인 시에만 표시)
+    if (_isLoggedIn) {
+        let wActive = state.activeAC === 'WATCHLIST' ? ' active' : '';
+        let wBadge  = watchlist.size > 0 ? '<span class="wl-count">' + watchlist.size + '</span>' : '';
+        html += '<button class="ac-tab watchlist-tab' + wActive + '" data-ac="WATCHLIST" style="margin-left:8px">' + I18n.t('index.ac.watchlist') + wBadge + '</button>';
+    }
     $('#acTabs').html(html);
 }
 
@@ -695,7 +700,7 @@ function resetAllOverrides() {
 function renderSectorTabs() {
     // 관심종목 탭에서는 섹터 탭 대신 안내 메시지
     if (state.activeAC === 'WATCHLIST') {
-        $('#secTabs').html('<span style="color:#64748b;font-size:0.82rem;padding:4px 0">★ 관심종목 ' + watchlist.size + '개 · 모든 섹터 포함</span>');
+        $('#secTabs').html('<span style="color:#64748b;font-size:0.82rem;padding:4px 0">♥ 관심종목 ' + watchlist.size + '개 · 모든 섹터 포함</span>');
         $('#subSecTabs').hide();
         return;
     }
@@ -765,7 +770,7 @@ function renderSummary() {
         let wCount  = wlData.length;
         let wActive = wlData.filter(e => !e.is_legacy).length;
         let wLegacy = wlData.filter(e => e.is_legacy).length;
-        html += '<div class="stat-card"><div class="stat-value" style="color:#fbbf24">★ ' + wCount + '</div><div class="stat-label">관심종목</div></div>';
+        html += '<div class="stat-card"><div class="stat-value" style="color:#fb7185">♥ ' + wCount + '</div><div class="stat-label">관심종목</div></div>';
         html += '<div class="stat-card"><div class="stat-value text-green-400">' + wActive + '</div><div class="stat-label">Active</div></div>';
         if (_isAdmin) html += '<div class="stat-card"><div class="stat-value text-red-400">' + wLegacy + '</div><div class="stat-label">Legacy</div></div>';
         $('#summaryCards').html(html);
@@ -986,7 +991,7 @@ function initDashboard() {
                     if (type !== 'display') return d;
                     let isWatched = watchlist.has(d);
                     let cls   = isWatched ? 'text-yellow-400 text-base' : 'text-blue-300';
-                    let star  = '<button class="star-btn' + (isWatched ? ' starred' : '') + '" data-ticker="' + d + '" title="관심종목 추가/제거" onclick="return false">★</button>';
+                    let star  = '<button class="star-btn' + (isWatched ? ' starred' : '') + '" data-ticker="' + d + '" title="관심종목 추가/제거" onclick="return false">♥</button>';
                     let h = star + '<a href="/etf-detail?ticker=' + encodeURIComponent(d) + '" class="' + cls + '" style="text-decoration:none;font-weight:700" title="상세보기">' + d + '</a>';
                     if (row.short_history) h += '<span class="badge-short" title="상장 3년 미만">짧은연혁</span>';
                     return h;
@@ -998,7 +1003,7 @@ function initDashboard() {
                     if (type !== 'display') return d;
                     let h = '<div class="leading-tight">'+d+'</div>';
                     if (watchlist.has(row.ticker)) {
-                        h += '<div class="mt-1"><span class="mine-badge">★ 관심</span></div>';
+                        h += '<div class="mt-1"><span class="mine-badge">♥ 관심</span></div>';
                     }
                     return h;
                 }
@@ -1427,6 +1432,7 @@ function initDashboard() {
 
     // ── FAB: 관심종목 추가/해제 ───────────────────────
     $('#fab-btn-watch').on('click', function() {
+        if (!_isLoggedIn) { window.location.href = '/login'; return; }
         if (selectedTickers.size === 0) return;
         selectedTickers.forEach(ticker => watchlist.add(ticker));
         saveWatchlist();
@@ -1444,10 +1450,11 @@ function initDashboard() {
         $('input.row-cb').prop('checked', false);
         table.rows().every(function() { $(this.node()).removeClass('row-selected'); });
         updateFAB();
-        showToast('★ ' + (watchlist.size) + '개 관심종목 저장됨', 2500);
+        showToast('♥ ' + (watchlist.size) + '개 관심종목 저장됨', 2500);
     });
 
     $('#fab-btn-unwatch').on('click', function() {
+        if (!_isLoggedIn) { window.location.href = '/login'; return; }
         if (selectedTickers.size === 0) return;
         selectedTickers.forEach(ticker => watchlist.delete(ticker));
         saveWatchlist();
@@ -1467,7 +1474,7 @@ function initDashboard() {
         $('input.row-cb').prop('checked', false);
         table.rows().every(function() { $(this.node()).removeClass('row-selected'); });
         updateFAB();
-        showToast('☆ 관심종목에서 제거됨', 2500);
+        showToast('♡ 관심종목에서 제거됨', 2500);
     });
 
     $('#fab-btn-legacy').on('click', function() { applyLegacyAction(true); });
@@ -1536,9 +1543,12 @@ $(document).ready(function() {
             allData = d.allData;
             snapshotOriginalLegacy(); // 빌드 기본값 스냅샷 (undo 기준점)
 
-            // Admin 감지
+            // Admin 감지 (+ _isLoggedIn 설정)
             const isAdmin = await detectAdmin();
             applyAdminUI(isAdmin);
+
+            // 로그인 시에만 관심종목 로드
+            if (_isLoggedIn) loadWatchlist();
 
             if (isAdmin) {
                 // Admin: 오버라이드 & 동기화 로직
