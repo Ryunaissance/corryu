@@ -52,11 +52,15 @@ def generate_html(sector_meta):
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0d14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>CORRYU Master Valuation Dashboard</title>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
 <link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="/responsive.css" rel="stylesheet">
 <style>
 :root {{ --bg-primary: #0a0d14; --bg-card: rgba(20,24,38,0.85); --bg-hover: rgba(59,130,246,0.08); --border: rgba(255,255,255,0.07); --text-primary: #e2e8f0; --text-muted: #64748b; --accent: #3b82f6; --accent-glow: rgba(59,130,246,0.3); }}
 * {{ box-sizing: border-box; }}

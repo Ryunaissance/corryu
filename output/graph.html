@@ -2,7 +2,10 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0d1117">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title data-i18n="graph.title">ETF 상관관계 그래프</title>
   <script src="/i18n.js"></script>
   <script src="https://unpkg.com/force-graph@1.43.5/dist/force-graph.min.js"></script>
@@ -133,6 +136,23 @@
     }
     #home-link:hover { color: #60a5fa; border-color: #60a5fa; }
 
+    /* ── 모바일 패널 토글 ── */
+    #mob-panel-toggle {
+      display: none;
+      position: fixed; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); right: 14px; z-index: 200;
+      width: 44px; height: 44px; border-radius: 12px;
+      background: rgba(13,17,23,0.92); border: 1px solid #60a5fa;
+      color: #60a5fa; cursor: pointer; align-items: center; justify-content: center;
+    }
+    @media (max-width: 767px) {
+      #mob-panel-toggle { display: flex; }
+      #controls { display: none; left: 0; top: 0; right: 0; border-radius: 0; min-width: unset; max-height: 60vh; overflow-y: auto; }
+      #controls.mob-visible { display: block; }
+      #legend { display: none; }
+      #home-link { bottom: calc(14px + env(safe-area-inset-bottom, 0px)); left: 14px; }
+      #hint { display: none; }
+    }
+
     /* ── 에러 화면 ── */
     #error-screen {
       display: none; position: fixed; inset: 0;
@@ -151,6 +171,11 @@
   </style>
 </head>
 <body>
+
+<!-- 모바일 패널 토글 버튼 -->
+<button id="mob-panel-toggle" aria-label="컨트롤 패널 열기">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
 
 <!-- 컨트롤 패널 -->
 <div id="controls">
@@ -639,6 +664,9 @@ I18n.init().then(() => {
     }
   });
 });
+</script>
+<script>
+(function(){var toggle=document.getElementById('mob-panel-toggle'),panel=document.getElementById('controls');if(!toggle||!panel)return;toggle.addEventListener('click',function(){panel.classList.toggle('mob-visible');});})();
 </script>
 </body>
 </html>
