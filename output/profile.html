@@ -552,12 +552,14 @@ async function changePassword() {
 
 // ── 로그아웃 ─────────────────────────────────────────────
 async function signOutCurrent() {
-  await CorryuAuth.signOut();
+  try { await CorryuAuth.signOut(); } catch(e) { console.warn('[CORRYU] signOut error:', e); }
   window.location.href = '/login';
 }
 async function signOutAll() {
   if (!confirm('모든 기기에서 로그아웃하시겠습니까?')) return;
-  await _sb.auth.signOut({ scope: 'global' });
+  try { await _sb.auth.signOut({ scope: 'global' }); } catch(e) { console.warn('[CORRYU] signOut error:', e); }
+  // 로컬 세션도 강제 정리
+  try { for (const k of Object.keys(localStorage)) { if (k.startsWith('sb-') && k.endsWith('-auth-token')) localStorage.removeItem(k); } } catch(e) {}
   window.location.href = '/login';
 }
 
@@ -577,7 +579,7 @@ async function deleteAccount() {
     // profiles 테이블 먼저 삭제
     await _sb.from('profiles').delete().eq('id', currentUser.id);
     // auth 계정 삭제 (RPC 사용 또는 admin API 필요 — 여기서는 로그아웃 후 안내)
-    await CorryuAuth.signOut();
+    try { await CorryuAuth.signOut(); } catch(e) {}
     closeDeleteModal();
     alert('계정 데이터가 삭제 처리 요청되었습니다.\n완전한 삭제는 관리자 승인 후 처리됩니다.');
     window.location.href = '/landing';
@@ -590,20 +592,8 @@ async function deleteAccount() {
 // ── 초기화 ─────────────────────────────────────────────
 let currentUser = null;
 
-(async function init() {
-  // Supabase 미연결
-  if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) {
-    document.getElementById('loading-screen').style.display = 'none';
-    document.getElementById('unauth-screen').style.display  = 'flex';
-    return;
-  }
-
-  currentUser = await CorryuAuth.getUser();
-  if (!currentUser) {
-    document.getElementById('loading-screen').style.display = 'none';
-    document.getElementById('unauth-screen').style.display  = 'flex';
-    return;
-  }
+async function loadProfile(user) {
+  currentUser = user;
 
   // 프로필 로드
   const profile = await CorryuAuth.getProfile(currentUser.id);
@@ -631,6 +621,41 @@ let currentUser = null;
   document.getElementById('profile-content').style.display = 'block';
 
   await I18n.init();
+}
+
+function showUnauth() {
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('unauth-screen').style.display  = 'flex';
+}
+
+(function init() {
+  // Supabase 미연결
+  if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured || !_sb) {
+    showUnauth();
+    return;
+  }
+
+  // onAuthStateChange로 세션 감지 (getSession보다 안정적)
+  let handled = false;
+  const fallbackTimer = setTimeout(() => {
+    if (!handled) { handled = true; showUnauth(); }
+  }, 5000);
+
+  _sb.auth.onAuthStateChange(async (event, session) => {
+    if (handled && event !== 'SIGNED_OUT') return;
+
+    if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+      handled = true;
+      clearTimeout(fallbackTimer);
+      if (session?.user) {
+        await loadProfile(session.user);
+      } else {
+        showUnauth();
+      }
+    } else if (event === 'SIGNED_OUT') {
+      window.location.href = '/login';
+    }
+  });
 })();
 </script>
 </body>
