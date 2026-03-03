@@ -208,6 +208,7 @@ th.sort-on .arr{opacity:1}
             <th onclick="sortBy('cagr')"    data-col="cagr">CAGR<span class="arr">↕</span></th>
             <th onclick="sortBy('vol')"     data-col="vol">변동성<span class="arr">↕</span></th>
             <th onclick="sortBy('sortino')" data-col="sortino">Sortino<span class="arr">↕</span></th>
+            <th onclick="sortBy('div_yield')" data-col="div_yield">배당%<span class="arr">↕</span></th>
             <th onclick="sortBy('z_score')" data-col="z_score">Z-Score<span class="arr">↕</span></th>
             <th onclick="sortBy('rsi')"     data-col="rsi">RSI<span class="arr">↕</span></th>
             <th onclick="sortBy('mdd_52w')" data-col="mdd_52w">MDD<span class="arr">↕</span></th>
@@ -216,7 +217,7 @@ th.sort-on .arr{opacity:1}
           </tr>
         </thead>
         <tbody id="rt-body">
-          <tr class="empty-row"><td colspan="11">데이터 로드 중…</td></tr>
+          <tr class="empty-row"><td colspan="12">데이터 로드 중…</td></tr>
         </tbody>
       </table>
     </div>
@@ -376,7 +377,7 @@ function renderTable(data) {
   document.getElementById('res-count').textContent = data.length;
   const body = document.getElementById('rt-body');
   if (data.length === 0) {
-    body.innerHTML = '<tr class="empty-row"><td colspan="11">조건에 맞는 ETF가 없습니다. 필터를 조정해보세요.</td></tr>';
+    body.innerHTML = '<tr class="empty-row"><td colspan="12">조건에 맞는 ETF가 없습니다. 필터를 조정해보세요.</td></tr>';
     return;
   }
   // 최대 300개만 렌더링
@@ -396,6 +397,7 @@ function renderTable(data) {
       <td class="${cagrC}">${fPct(e.cagr)}</td>
       <td class="amb">${e.vol != null ? e.vol.toFixed(1)+'%' : '—'}</td>
       <td class="${sortC}">${fNum(e.sortino)}</td>
+      <td class="${e.div_yield != null && e.div_yield >= 3 ? 'pos' : e.div_yield != null && e.div_yield >= 1 ? 'pos' : 'mu'}">${e.div_yield != null ? e.div_yield.toFixed(2)+'%' : '—'}</td>
       <td class="${zC}">${isShort || e.z_score==null ? '—' : (e.z_score>0?'+':'')+e.z_score.toFixed(2)}</td>
       <td class="${rsiC}">${e.rsi != null ? Math.round(e.rsi) : '—'}</td>
       <td class="${mddC}">${isShort || e.mdd_52w==null ? '—' : e.mdd_52w.toFixed(1)+'%'}</td>
@@ -443,7 +445,7 @@ fetch('/etf_data.json').then(r => r.json()).then(data => {
   else doFilter();
   I18n.init();
 }).catch(() => {
-  document.getElementById('rt-body').innerHTML = '<tr class="empty-row"><td colspan="11">데이터 로드 실패. 새로고침 해주세요.</td></tr>';
+  document.getElementById('rt-body').innerHTML = '<tr class="empty-row"><td colspan="12">데이터 로드 실패. 새로고침 해주세요.</td></tr>';
 });
 </script>
 </body>

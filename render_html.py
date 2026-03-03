@@ -258,6 +258,7 @@ table.dataTable tbody tr.row-selected {{ background: rgba(59,130,246,0.08) !impo
                     <th data-i18n-title="col.cagr.tip">CAGR</th>
                     <th data-i18n-title="col.vol.tip">Vol</th>
                     <th data-i18n-title="col.sortino.tip">Sortino</th>
+                    <th data-i18n-title="col.divYield.tip">Div%</th>
                     <th data-i18n-title="col.inception.tip">Inception</th>
                     <th data-i18n-title="col.status.tip" style="min-width:80px">Status</th>
                 </tr>
@@ -861,6 +862,12 @@ function initDashboard() {{
                 if(t!=='display') return row.short_history ? -999999 : (d===null?-999999:d);
                 let c = d > 1.2 ? 'text-purple-400 font-bold' : 'text-gray-500';
                 return '<span class="'+c+'">'+d.toFixed(2)+'</span>';
+            }} }},
+            {{ data: 'div_yield', render: function(d,t) {{
+                if(t!=='display') return d==null ? -1 : d;
+                if(d==null) return '<span class="text-gray-600">—</span>';
+                let c = d >= 3 ? 'text-green-400 font-bold' : d >= 1 ? 'text-green-300' : 'text-gray-500';
+                return '<span class="'+c+'">'+d.toFixed(2)+'%</span>';
             }} }},
             {{ data: 'inception', className: 'text-xs text-gray-600', render: function(d, t) {{
                 if(t !== 'display') return d || '';
