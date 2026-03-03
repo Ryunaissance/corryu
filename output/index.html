@@ -144,8 +144,8 @@ table.dataTable tbody tr.row-watchlist.row-selected { background: rgba(59,130,24
 .tooltip-container:hover .tooltip-content { display: block; }
 
 /* ── Fixed Navbar ── */
-.gradient-line { position:fixed; top:0; left:0; right:0; height:3px; z-index:200; background:linear-gradient(90deg,#3b82f6,#8b5cf6,#ec4899,#f59e0b); }
-#main-nav { position:fixed; top:3px; left:0; right:0; z-index:100; background:rgba(10,13,20,0.92); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-bottom:1px solid rgba(255,255,255,0.07); height:54px; display:flex; align-items:center; }
+.gradient-line { position:fixed; top:0; left:0; right:0; height:3px; z-index:1001; background:linear-gradient(90deg,#3b82f6,#8b5cf6,#ec4899,#f59e0b); }
+#main-nav { position:fixed; top:3px; left:0; right:0; z-index:1000; background:rgba(10,13,20,0.92); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-bottom:1px solid rgba(255,255,255,0.07); height:54px; display:flex; align-items:center; }
 .nav-inner { max-width:1536px; margin:0 auto; padding:0 20px; width:100%; display:flex; align-items:center; gap:0; }
 .nav-brand { font-size:1rem; font-weight:900; text-decoration:none; background:linear-gradient(135deg,#60a5fa,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; white-space:nowrap; margin-right:24px; flex-shrink:0; }
 .nav-links { display:flex; align-items:center; gap:2px; overflow-x:auto; flex:1; min-width:0; }
@@ -159,7 +159,7 @@ table.dataTable tbody tr.row-watchlist.row-selected { background: rgba(59,130,24
 #nav-auth { display:flex; align-items:center; gap:6px; }
 #nav-user-nick { font-size:0.78rem; font-weight:700; color:#93c5fd; max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-decoration:none; border-radius:6px; padding:2px 6px; transition:background 0.15s; }
 #nav-user-nick:hover { background:rgba(59,130,246,0.12); }
-#nav-logout-btn { padding:4px 10px; border-radius:7px; background:rgba(248,113,113,0.08); color:#f87171; border:1px solid rgba(248,113,113,0.2); font-size:0.74rem; font-weight:700; cursor:pointer; transition:all 0.15s; font-family:inherit; }
+#nav-logout-btn { padding:4px 10px; border-radius:7px; background:rgba(248,113,113,0.08); color:#f87171; border:1px solid rgba(248,113,113,0.2); font-size:0.74rem; font-weight:700; cursor:pointer; transition:all 0.15s; font-family:inherit; pointer-events:auto; position:relative; z-index:10; }
 #nav-logout-btn:hover { background:rgba(248,113,113,0.18); }
 #nav-login-btn { padding:5px 14px; border-radius:8px; background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.35); font-size:0.78rem; font-weight:700; cursor:pointer; text-decoration:none; transition:all 0.15s; display:inline-flex; align-items:center; gap:5px; }
 #nav-login-btn:hover { background:rgba(59,130,246,0.28); }
@@ -1661,33 +1661,60 @@ $(document).ready(function() {
 (async function initNavAuth() {
   if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) return;
 
-  const authEl    = document.getElementById('nav-auth');
-  const loginBtn  = document.getElementById('nav-login-btn');
+  const authEl = document.getElementById('nav-auth');
+  if (!authEl) return;
+  let _renderedNick = null;
 
-  async function renderAuth() {
-    const user = await CorryuAuth.getUser();
-    if (!user) {
-      // 비로그인 — 로그인 버튼 유지
-      return;
+  // ── 이벤트 위임: authEl 자체에 리스너 (innerHTML 교체와 무관하게 동작) ──
+  authEl.addEventListener('click', function(e) {
+    if (e.target.closest('#nav-logout-btn')) {
+      e.preventDefault();
+      e.stopPropagation();
+      doLogout();
     }
-    // 로그인 상태 — 닉네임 + 로그아웃 버튼
-    const profile = await CorryuAuth.getProfile(user.id);
-    const nick = profile?.nickname || user.email?.split('@')[0] || 'User';
-    authEl.innerHTML = `
-      <a id="nav-user-nick" href="/profile" title="${nick}">${nick}</a>
-      <button id="nav-logout-btn" onclick="window._navLogout()" data-i18n="nav.logout">${I18n.t('nav.logout')}</button>
-    `;
+  });
+
+  async function doLogout() {
+    var btn = document.getElementById('nav-logout-btn');
+    if (btn) { btn.disabled = true; btn.textContent = '로그아웃 중…'; }
+    try {
+      await Promise.race([
+        CorryuAuth.signOut(),
+        new Promise(function(r) { setTimeout(r, 2000); }) // 2초 타임아웃
+      ]);
+    } catch(e) { console.warn('[CORRYU] logout error:', e); }
+    window.location.reload();
   }
 
-  window._navLogout = async function() {
-    try { await CorryuAuth.signOut(); } catch(e) { console.warn('[CORRYU] logout error:', e); }
-    window.location.reload();
-  };
+  // 전역에도 노출 (다른 코드에서 호출 가능)
+  window._navLogout = doLogout;
+
+  async function renderAuth() {
+    var user;
+    try { user = await CorryuAuth.getUser(); } catch(e) { return; }
+    if (!user) return;
+    var profile;
+    try { profile = await CorryuAuth.getProfile(user.id); } catch(e) {}
+    var nick = (profile && profile.nickname) || (user.email ? user.email.split('@')[0] : 'User');
+    // 이미 같은 닉네임으로 렌더링됐으면 skip (불필요한 innerHTML 교체 방지)
+    if (_renderedNick === nick) return;
+    _renderedNick = nick;
+    authEl.innerHTML =
+      '<a id="nav-user-nick" href="/profile" title="' + nick + '">' + nick + '</a>' +
+      '<button id="nav-logout-btn" data-i18n="nav.logout">' + I18n.t('nav.logout') + '</button>';
+  }
 
   await renderAuth();
 
-  // 인증 상태 변경 시 자동 갱신
-  CorryuAuth.onAuthChange(() => renderAuth());
+  // 인증 상태 변경 시 갱신
+  CorryuAuth.onAuthChange(function(event) {
+    if (event === 'SIGNED_OUT') {
+      _renderedNick = null;
+      window.location.reload();
+    } else {
+      renderAuth();
+    }
+  });
 })();
 </script>
 </body>
