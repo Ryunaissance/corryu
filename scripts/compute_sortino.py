@@ -60,9 +60,8 @@ log = logging.getLogger(__name__)
 # ── 파라미터 ───────────────────────────────────────────────────────────
 BATCH_SIZE       = 100    # Supabase IN 절 티커 수
 PAGE_SIZE        = 5_000  # Supabase 페이지당 행 수 (최대 10,000)
-MIN_DAYS         = 63     # 최소 거래일 (≈3개월) — 미달 시 지표 None
-MIN_DOWNSIDE_DAYS = 10    # 하방일 최소 샘플 — 미달 시 Sortino None
-MIN_DD_FLOOR     = 1e-6   # 하방편차 플로어 (사실상 0 방어)
+MIN_DAYS     = 63    # 최소 거래일 (≈3개월) — 미달 시 지표 None
+MIN_DD_FLOOR = 1e-6  # RMS shortfall 플로어 — 사실상 0 분모 방어
 TRADING_DAYS     = 252    # 연 거래일
 
 ETF_DATA_JSON    = os.path.join(OUTPUT_DIR, 'etf_data.json')
@@ -102,15 +101,20 @@ def compute_metrics(prices: pd.Series) -> dict:
     vol = float(daily_ret.std() * math.sqrt(TRADING_DAYS))  # 소수
 
     # ── Sortino (MAR = 4%) ────────────────────────────────────────────
-    # 하방 수익률: MAR_daily 미만인 날만 추출
-    downside = daily_ret[daily_ret < MAR_DAILY]
+    # 원본 Sortino & van der Meer (1991) 공식:
+    #   DD = sqrt( mean( min(r_i − MAR_daily, 0)² ) ) × √252
+    #
+    # 핵심: 분모는 전체 N일 기준 RMS — 하방일이 적을수록 분모가 작아지는
+    # std(하방일만) 방식과 달리, 비하방일의 0² 기여가 분모를 희석하여
+    # 하방 노출이 낮은 ETF를 올바르게 보상한다.
+    shortfalls = np.minimum(daily_ret.values - MAR_DAILY, 0.0)  # 전체 N일
+    rms_shortfall = float(np.sqrt(np.mean(shortfalls ** 2)))    # RMS over N
     sortino = None
 
-    if len(downside) >= MIN_DOWNSIDE_DAYS:
-        dd = float(downside.std() * math.sqrt(TRADING_DAYS))
-        if dd > MIN_DD_FLOOR:
-            # CAGR - MAR_annual (둘 다 소수 기준)
-            sortino = (cagr - MAR_ANNUAL) / dd
+    if rms_shortfall > MIN_DD_FLOOR:
+        dd = rms_shortfall * math.sqrt(TRADING_DAYS)  # 연율화
+        # 분자: CAGR − MAR (둘 다 소수 기준)
+        sortino = (cagr - MAR_ANNUAL) / dd
 
     is_rolling = n >= MIN_ROLLING_DAYS
 
