@@ -13,6 +13,13 @@ OUTPUT_DIR = os.path.join(BASE_DIR, 'output')
 CORR_MONTHLY_CSV = os.path.join(BASE_DIR, 'correlation_matrix_monthly.csv')
 CORR_DAILY_CSV = os.path.join(BASE_DIR, 'correlation_matrix.csv')
 
+# ── 성과 지표 파라미터 ────────────────────────────────
+# Sortino 비율 계산 시 사용하는 연간 무위험 수익률 (MAR)
+# 월가 실무 기준: 3-Month T-Bill 근사값, 고금리 기조(2024~) 반영
+MAR_ANNUAL: float = 0.04          # 연 4.0%
+MAR_DAILY:  float = (1 + MAR_ANNUAL) ** (1 / 252) - 1  # ≈ 0.01540% / day
+MIN_ROLLING_DAYS: int = 750        # 롤링 계산 최소 거래일 (≈3년)
+
 # ── 내 보유 종목 ──────────────────────────────────────
 MY_PORTFOLIO = ['PEY', 'HYG', 'GBTC', 'GLD', 'VNQ', 'UYR', 'XLE']
 
