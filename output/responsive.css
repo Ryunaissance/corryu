@@ -308,6 +308,44 @@ body.mob-menu-open { overflow: hidden; }
 }
 
 /* ================================================================
+   ACCESSIBILITY
+   ================================================================ */
+
+/* 키보드 포커스 링 — 마우스 사용 시 숨김, 키보드 사용 시 표시 */
+:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* 버튼/링크의 기본 outline 제거 (focus-visible로 대체) */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* 동작 감소 선호 — 애니메이션 민감 사용자 대응 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 고대비 모드 — 접근성 모드 사용자 대응 */
+@media (prefers-contrast: more) {
+  :root {
+    --text-muted:   #b0c4d8 !important;
+    --text-primary: #f1f5f9 !important;
+    --border:       rgba(255,255,255,0.3) !important;
+  }
+  .mob-link               { color: #c8d8e8 !important; }
+  .mob-link.active        { color: #93c5fd !important; }
+  .nav-mob-btn            { color: #c8d8e8 !important; border-color: rgba(255,255,255,0.3) !important; }
+}
+
+/* ================================================================
    graph.html PANEL TOGGLE  (all screens, hidden by default)
    ================================================================ */
 .mob-panel-toggle {
