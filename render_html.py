@@ -171,30 +171,90 @@ table.dataTable tbody tr.row-selected {{ background: rgba(59,130,246,0.08) !impo
 .tooltip-container {{ position: relative; cursor: help; }}
 .tooltip-content {{ display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: #1e293b; color: #e2e8f0; padding: 8px 12px; border-radius: 8px; font-size: 0.75rem; white-space: nowrap; z-index: 999; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.5); max-width: 350px; white-space: normal; }}
 .tooltip-container:hover .tooltip-content {{ display: block; }}
+
+/* ── Fixed Navbar ── */
+.gradient-line {{ position:fixed; top:0; left:0; right:0; height:3px; z-index:1001; background:linear-gradient(90deg,#3b82f6,#8b5cf6,#ec4899,#f59e0b); }}
+#main-nav {{ position:fixed; top:3px; left:0; right:0; z-index:1000; background:rgba(10,13,20,0.92); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-bottom:1px solid rgba(255,255,255,0.07); height:54px; display:flex; align-items:center; }}
+.nav-inner {{ max-width:1536px; margin:0 auto; padding:0 20px; width:100%; display:flex; align-items:center; gap:0; }}
+.nav-brand {{ font-size:1rem; font-weight:900; text-decoration:none; background:linear-gradient(135deg,#60a5fa,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; white-space:nowrap; margin-right:24px; flex-shrink:0; }}
+.nav-links {{ display:flex; align-items:center; gap:2px; overflow-x:auto; flex:1; min-width:0; }}
+.nav-links::-webkit-scrollbar {{ display:none; }}
+.nav-link {{ display:inline-flex; align-items:center; gap:5px; padding:5px 11px; border-radius:8px; font-size:0.78rem; font-weight:600; text-decoration:none; color:#64748b; transition:all 0.15s; white-space:nowrap; border:1px solid transparent; }}
+.nav-link:hover {{ color:#e2e8f0; background:rgba(255,255,255,0.06); }}
+.nav-link.active {{ color:#60a5fa; background:rgba(59,130,246,0.1); border-color:rgba(59,130,246,0.25); }}
+.nav-right {{ display:flex; align-items:center; gap:8px; flex-shrink:0; margin-left:16px; position:relative; z-index:2; }}
+#lang-switcher {{ padding:4px 10px; border-radius:7px; background:rgba(255,255,255,0.05); color:#94a3b8; border:1px solid rgba(255,255,255,0.1); font-size:0.76rem; font-weight:700; cursor:pointer; transition:all 0.15s; font-family:inherit; }}
+#lang-switcher:hover {{ background:rgba(255,255,255,0.1); color:#e2e8f0; }}
+#nav-auth {{ display:flex; align-items:center; gap:6px; }}
+#nav-user-nick {{ font-size:0.78rem; font-weight:700; color:#93c5fd; max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-decoration:none; border-radius:6px; padding:2px 6px; transition:background 0.15s; }}
+#nav-user-nick:hover {{ background:rgba(59,130,246,0.12); }}
+#nav-logout-btn {{ padding:4px 10px; border-radius:7px; background:rgba(248,113,113,0.08); color:#f87171; border:1px solid rgba(248,113,113,0.2); font-size:0.74rem; font-weight:700; cursor:pointer; transition:all 0.15s; font-family:inherit; pointer-events:auto; position:relative; z-index:10; }}
+#nav-logout-btn:hover {{ background:rgba(248,113,113,0.18); }}
+#nav-login-btn {{ padding:5px 14px; border-radius:8px; background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.35); font-size:0.78rem; font-weight:700; cursor:pointer; text-decoration:none; transition:all 0.15s; display:inline-flex; align-items:center; gap:5px; }}
+#nav-login-btn:hover {{ background:rgba(59,130,246,0.28); }}
 </style>
 </head>
-<body>
-<div class="max-w-screen-2xl mx-auto">
-    <!-- Header -->
-    <div class="glass p-5 mb-5 text-center relative overflow-hidden">
-        <div class="absolute top-0 left-0 w-full h-0.5" style="background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);"></div>
-        <div class="absolute top-4 right-4" style="display:flex;gap:8px;align-items:center">
-            <button id="lang-switcher" onclick="I18n.setLocale(I18n.locale()==='ko'?'en':'ko')" style="padding:5px 12px;border-radius:8px;background:rgba(255,255,255,0.06);color:#94a3b8;border:1px solid rgba(255,255,255,0.1);font-size:0.78rem;font-weight:700;cursor:pointer;letter-spacing:0.05em;transition:all 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.12)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">EN</button>
-            <button class="theme-toggle" aria-label="\ub77c\uc774\ud2b8 \ubaa8\ub4dc\ub85c \uc804\ud658" title="\ub77c\uc774\ud2b8 \ubaa8\ub4dc" onclick="Theme.toggle()"><svg class="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg><svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
-            <a href="graph.html" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border-radius:10px;background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.35);font-size:0.82rem;font-weight:600;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(139,92,246,0.28)'" onmouseout="this.style.background='rgba(139,92,246,0.15)'">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><line x1="7" y1="11.5" x2="17" y2="6.5"/><line x1="7" y1="12.5" x2="17" y2="17.5"/></svg>
-                <span data-i18n="btn.viewGraph">그래프 보기</span>
-            </a>
-        </div>
-        <h1 class="text-2xl md:text-3xl font-extrabold mb-2 tracking-tight">
-            <span class="text-gradient">CORRYU</span> Master Valuation Dashboard
+<body style="padding-top:57px">
+<!-- 상단 그라데이션 라인 -->
+<div class="gradient-line"></div>
+
+<!-- ── Fixed Navbar ── -->
+<nav id="main-nav">
+  <div class="nav-inner">
+    <a href="/index" class="nav-brand">CORRYU</a>
+    <div class="nav-links">
+      <a href="/index"        class="nav-link active"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span data-i18n="nav.dashboard">대시보드</span></a>
+      <a href="/screener"     class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg><span data-i18n="nav.screener">스크리너</span></a>
+      <a href="/backtest"     class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span data-i18n="nav.backtest">백테스트</span></a>
+      <a href="/correlation"  class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="12" cy="16" r="2"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="9" y1="10" x2="11" y2="14"/><line x1="15" y1="10" x2="13" y2="14"/></svg><span data-i18n="nav.correlation">상관관계</span></a>
+      <a href="/compare"      class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span data-i18n="nav.compare">비교</span></a>
+      <a href="/portfolio"    class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg><span data-i18n="nav.portfolio">포트폴리오</span></a>
+      <a href="/graph"        class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><line x1="7" y1="11.5" x2="17" y2="6.5"/><line x1="7" y1="12.5" x2="17" y2="17.5"/></svg><span data-i18n="btn.viewGraph">그래프</span></a>
+    </div>
+    <div class="nav-right">
+      <button id="lang-switcher" onclick="I18n.setLocale(I18n.locale()==='ko'?'en':'ko')">EN</button>
+      <div id="nav-auth">
+        <a href="/login" id="nav-login-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg><span data-i18n="nav.login">로그인</span></a>
+      </div>
+      <button class="theme-toggle" aria-label="라이트 모드로 전환" title="라이트 모드" onclick="Theme.toggle()"><svg class="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg><svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+      <button id="nav-mob-btn" class="nav-mob-btn" aria-label="메뉴"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="17" y2="6"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="14" x2="17" y2="14"/></svg></button>
+    </div>
+  </div>
+</nav>
+
+<!-- 모바일 드로어 네비게이션 -->
+<div id="nav-mob-drawer" class="nav-mob-drawer">
+  <a href="/index"        class="mob-link active"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span data-i18n="nav.dashboard">대시보드</span></a>
+  <a href="/screener"     class="mob-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg><span data-i18n="nav.screener">스크리너</span></a>
+  <a href="/backtest"     class="mob-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><span data-i18n="nav.backtest">백테스트</span></a>
+  <a href="/correlation"  class="mob-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="12" cy="16" r="2"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="9" y1="10" x2="11" y2="14"/><line x1="15" y1="10" x2="13" y2="14"/></svg><span data-i18n="nav.correlation">상관관계</span></a>
+  <a href="/compare"      class="mob-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span data-i18n="nav.compare">비교</span></a>
+  <a href="/portfolio"    class="mob-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg><span data-i18n="nav.portfolio">포트폴리오</span></a>
+  <a href="/graph"        class="mob-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><line x1="7" y1="11.5" x2="17" y2="6.5"/><line x1="7" y1="12.5" x2="17" y2="17.5"/></svg><span data-i18n="btn.viewGraph">그래프</span></a>
+  <div class="mob-drawer-divider"></div>
+  <div class="mob-drawer-bottom">
+    <button class="mob-lang-btn" onclick="I18n.setLocale(I18n.locale()==='ko'?'en':'ko')">EN / 한</button>
+    <a href="/login" id="nav-mob-login-btn" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;background:rgba(59,130,246,0.12);color:#60a5fa;border:1px solid rgba(59,130,246,0.3);font-size:0.82rem;font-weight:700;text-decoration:none;transition:all 0.15s"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg><span data-i18n="nav.login">로그인</span></a>
+  </div>
+</div>
+<div id="nav-mob-overlay" class="nav-mob-overlay"></div>
+
+<!-- ── 대시보드 본문 ── -->
+<div class="max-w-screen-2xl mx-auto" style="padding:16px">
+
+    <!-- 대시보드 타이틀 카드 -->
+    <div class="glass p-4 mb-4" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div>
+        <h1 style="font-size:1.25rem;font-weight:900;letter-spacing:-.02em;margin:0">
+          <span class="text-gradient">Master Valuation</span> Dashboard
         </h1>
-        <p class="text-sm text-gray-500">
-            Total <span class="text-white font-bold" id="hdr-total">{total_etfs:,}</span> ETFs
-            <span class="text-gray-600" id="hdr-legacy-label">(<span id="hdr-legacy">{total_legacy:,}</span> legacy, <span class="text-green-400 font-bold" id="hdr-active">{total_active:,}</span> active)</span> |
-            <span class="text-white font-bold">{total_sectors}</span> Sectors |
-            Updated: <span class="text-gray-400">{today}</span>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin:4px 0 0">
+          Total <strong style="color:var(--text-primary)" id="hdr-total">{total_etfs:,}</strong> ETFs
+          <span id="hdr-legacy-label"> · <span id="hdr-legacy">{total_legacy:,}</span> legacy · <strong style="color:#4ade80" id="hdr-active">{total_active:,}</strong> active</span>
+          &nbsp;·&nbsp; <strong style="color:var(--text-primary)">{total_sectors}</strong> Sectors
+          &nbsp;·&nbsp; Updated <span style="color:#94a3b8">{today}</span>
         </p>
+      </div>
     </div>
 
     <!-- Asset Class Tabs (Level 1) -->
@@ -1323,6 +1383,34 @@ $(document).ready(function() {{
             }});
         }});
 }});
+</script>
+
+<!-- ── 모바일 햄버거 메뉴 ── -->
+<script>
+(function() {{
+  var btn     = document.getElementById('nav-mob-btn');
+  var drawer  = document.getElementById('nav-mob-drawer');
+  var overlay = document.getElementById('nav-mob-overlay');
+  if (!btn || !drawer) return;
+  function openMenu() {{
+    drawer.classList.add('open');
+    if (overlay) overlay.classList.add('open');
+    document.body.classList.add('mob-menu-open');
+    btn.setAttribute('aria-expanded', 'true');
+  }}
+  function closeMenu() {{
+    drawer.classList.remove('open');
+    if (overlay) overlay.classList.remove('open');
+    document.body.classList.remove('mob-menu-open');
+    btn.setAttribute('aria-expanded', 'false');
+  }}
+  btn.addEventListener('click', function() {{
+    drawer.classList.contains('open') ? closeMenu() : openMenu();
+  }});
+  if (overlay) overlay.addEventListener('click', closeMenu);
+  drawer.querySelectorAll('a').forEach(function(a) {{ a.addEventListener('click', closeMenu); }});
+  document.addEventListener('keydown', function(e) {{ if (e.key === 'Escape') closeMenu(); }});
+}})();
 </script>
 </body>
 </html>"""
