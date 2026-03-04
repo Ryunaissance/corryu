@@ -135,10 +135,6 @@ def main():
         json.dump(db, f, ensure_ascii=False, separators=(',', ':'))
     print(f'   저장: {ETF_DATA_JSON}')
 
-    print('\n🌐 index.html 재생성...')
-    import subprocess
-    subprocess.run([sys.executable, os.path.join(ROOT, 'render_html.py')], check=True)
-
     elapsed = time.time() - t0
     print(f'\n✅ 완료! ({elapsed:.0f}초)')
 
