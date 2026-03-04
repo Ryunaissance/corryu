@@ -333,16 +333,28 @@ body.mob-menu-open { overflow: hidden; }
   }
 }
 
-/* 고대비 모드 — 접근성 모드 사용자 대응 */
+/* 고대비 모드 — 다크 테마 */
 @media (prefers-contrast: more) {
-  :root {
+  :root:not([data-theme="light"]) {
     --text-muted:   #b0c4d8 !important;
     --text-primary: #f1f5f9 !important;
     --border:       rgba(255,255,255,0.3) !important;
   }
-  .mob-link               { color: #c8d8e8 !important; }
-  .mob-link.active        { color: #93c5fd !important; }
-  .nav-mob-btn            { color: #c8d8e8 !important; border-color: rgba(255,255,255,0.3) !important; }
+  :root:not([data-theme="light"]) .mob-link     { color: #c8d8e8 !important; }
+  :root:not([data-theme="light"]) .mob-link.active { color: #93c5fd !important; }
+  :root:not([data-theme="light"]) .nav-mob-btn  { color: #c8d8e8 !important; border-color: rgba(255,255,255,0.3) !important; }
+}
+
+/* 고대비 모드 — 라이트 테마 */
+@media (prefers-contrast: more) {
+  [data-theme="light"] {
+    --text-muted:   #1e293b !important;
+    --text-primary: #0a0d14 !important;
+    --border:       rgba(15,23,42,0.4) !important;
+  }
+  [data-theme="light"] .mob-link        { color: #1e293b !important; }
+  [data-theme="light"] .mob-link.active { color: #1d4ed8 !important; }
+  [data-theme="light"] .nav-mob-btn     { color: #1e293b !important; border-color: rgba(15,23,42,0.4) !important; }
 }
 
 /* ================================================================
@@ -373,6 +385,11 @@ body.mob-menu-open { overflow: hidden; }
 .theme-icon-moon { display: none; }
 [data-theme="light"] .theme-icon-sun  { display: none; }
 [data-theme="light"] .theme-icon-moon { display: block; }
+
+/* 라이트 모드 포커스 링: #60a5fa는 밝은 배경에서 2.2:1 → #2563eb로 5.4:1 확보 */
+[data-theme="light"] :focus-visible {
+  outline-color: #2563eb;
+}
 
 /* ── 라이트 모드 색상 팔레트 ── */
 [data-theme="light"] {
