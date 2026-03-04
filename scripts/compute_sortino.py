@@ -278,8 +278,32 @@ def main():
             json.dump(db, f, ensure_ascii=False, separators=(',', ':'))
         log.info(f'etf_database.json 갱신: {updated}/{len(db)}개 ETF')
 
+    # ── output/etf_data.json 직접 패치 ──────────────────────────────
+    # dashboard_builder.py 전체 재빌드 없이 sortino / cagr / vol 만 교체.
+    # 상관계수·scraped_info 등 로컬 전용 pkl 파일 불필요.
+    if os.path.exists(ETF_DATA_JSON):
+        with open(ETF_DATA_JSON, encoding='utf-8') as f:
+            etf_data = json.load(f)
+
+        patched = 0
+        for sector_etfs in etf_data.get('allData', {}).values():
+            for etf in sector_etfs:
+                tk = etf['ticker']
+                p = perf_stats.get(tk, {})
+                if p.get('Sortino') is not None:
+                    etf['cagr']    = p['CAGR']
+                    etf['vol']     = p['Vol']
+                    etf['sortino'] = p['Sortino']
+                    patched += 1
+
+        with open(ETF_DATA_JSON, 'w', encoding='utf-8') as f:
+            json.dump(etf_data, f, ensure_ascii=False, separators=(',', ':'))
+        log.info(f'output/etf_data.json 패치: {patched}개 ETF')
+    else:
+        log.warning(f'etf_data.json 없음 — 패치 건너뜀 ({ETF_DATA_JSON})')
+
     elapsed = time.time() - t0
-    log.info(f'완료! ({elapsed:.0f}초)  → python src/dashboard_builder.py 로 재빌드 필요')
+    log.info(f'완료! ({elapsed:.0f}초)  → python render_html.py 로 HTML 재생성')
 
 
 if __name__ == '__main__':
