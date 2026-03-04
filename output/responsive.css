@@ -148,6 +148,9 @@ body.mob-menu-open { overflow: hidden; }
   /* sub-page right-side link groups */
   .nav-inner > .nav-right-links  { display: none !important; }
 
+  /* ── nav-links(flex:1) 사라지므로 nav-right 우측 정렬 ── */
+  .nav-right { margin-left: auto; }
+
   /* ── Drawer: flush with 57px nav ── */
   .nav-mob-drawer  { top: 57px; }
   .nav-mob-overlay { top: 57px; }
@@ -271,6 +274,9 @@ body.mob-menu-open { overflow: hidden; }
   nav .nav-links.landing-nav    { display: none !important; }
   nav .nav-actions              { display: none !important; }
   .nav-inner > .nav-right-links { display: none !important; }
+
+  /* ── nav-links(flex:1) 사라지므로 nav-right 우측 정렬 ── */
+  .nav-right { margin-left: auto; }
 
   /* ── Drawer position ── */
   .nav-mob-drawer  { top: 57px; }
