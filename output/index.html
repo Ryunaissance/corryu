@@ -1592,27 +1592,36 @@ function initDashboard() {
 }
 
 $(document).ready(function() {
-    fetch('etf_data.json')
-        .then(function(r) { return r.json(); })
-        .then(async function(d) {
-            sectorMeta = d.sectorMeta;
-            allData = d.allData;
-            snapshotOriginalLegacy(); // 빌드 기본값 스냅샷 (undo 기준점)
+    // 타임아웃 유틸: ms 이후 fallback 값으로 resolve
+    function withTimeout(promise, ms, fallback) {
+        return Promise.race([promise, new Promise(r => setTimeout(() => r(fallback), ms))]);
+    }
 
-            // Admin 감지 (+ _isLoggedIn 설정)
-            const isAdmin = await detectAdmin();
+    fetch('etf_data.json')
+        .then(function(r) {
+            if (!r.ok) throw new Error('etf_data.json ' + r.status);
+            return r.json();
+        })
+        .then(async function(d) {
+            sectorMeta = d.sectorMeta || {};
+            allData    = d.allData    || {};
+            snapshotOriginalLegacy();
+
+            // Auth: 최대 4초 대기, 실패/타임아웃 시 비로그인으로 처리
+            const isAdmin = await withTimeout(detectAdmin(), 4000, false);
             applyAdminUI(isAdmin);
 
-            // 로그인 시에만 관심종목 로드
-            if (_isLoggedIn) try { loadWatchlist(); } catch(e) { console.warn('[CORRYU] loadWatchlist 실패:', e); }
+            // 관심종목 로드 (localStorage 파싱 실패해도 계속)
+            if (_isLoggedIn) try { loadWatchlist(); } catch(e) {}
 
+            // 오버라이드 & 동기화 (네트워크 실패해도 계속)
             try {
                 if (isAdmin) {
-                    // Admin: 오버라이드 & 동기화 로직
                     let ov = getUserOverrides();
                     const localTs = parseInt(localStorage.getItem('corryu_overrides_ts') || '0');
                     setSyncStatus('busy');
-                    const remoteOv = await fetchRemoteOverrides();
+                    // 원격 동기화: 최대 5초
+                    const remoteOv = await withTimeout(fetchRemoteOverrides(), 5000, null);
                     if (remoteOv && remoteOv._meta) {
                         if (remoteOv._meta.ts > localTs) {
                             const { _meta, ...cleanOv } = remoteOv;
@@ -1633,18 +1642,18 @@ $(document).ready(function() {
                     }
                     if (Object.keys(ov).length) applyOverridesToData(ov);
                 } else {
-                    // 비Admin: 레거시 상태 제거 — 모든 ETF가 Active로 표시
                     stripLegacyForNonAdmin();
                 }
-            } catch(e) { console.warn('[CORRYU] 오버라이드 로직 실패:', e); }
+            } catch(e) { console.warn('[CORRYU] 오버라이드 실패:', e); }
 
-            applySmhCorr();           // localStorage SMH 상관계수 적용
-            recalcSectorMeta();       // 오버라이드 반영해 카운트 갱신
-            try { await I18n.init(); } catch(e) {}  // i18n 초기화
+            applySmhCorr();
+            recalcSectorMeta();
+            try { await withTimeout(I18n.init(), 3000, null); } catch(e) {}
+
+            // 대시보드 렌더링 — 항상 실행
             initDashboard();
-            if (isAdmin) setInterval(pollRemoteSync, 30000); // 30초마다 원격 변경사항 자동 체크
+            if (isAdmin) setInterval(pollRemoteSync, 30000);
 
-            // 언어 전환 시 탭·섹터명 즉시 재렌더링
             document.addEventListener('i18n:ready', function() {
                 renderACTabs();
                 renderSectorTabs();
@@ -1652,6 +1661,9 @@ $(document).ready(function() {
                 updateFAB();
                 if (typeof table !== 'undefined') table.rows().invalidate('data').draw(false);
             });
+        })
+        .catch(function(e) {
+            console.error('[CORRYU] 초기화 실패:', e);
         });
 });
 
