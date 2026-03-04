@@ -60,9 +60,12 @@ log = logging.getLogger(__name__)
 # ── 파라미터 ───────────────────────────────────────────────────────────
 BATCH_SIZE       = 100    # Supabase IN 절 티커 수
 PAGE_SIZE        = 5_000  # Supabase 페이지당 행 수 (최대 10,000)
-MIN_DAYS     = 63    # 최소 거래일 (≈3개월) — 미달 시 지표 None
-MIN_DD_FLOOR = 1e-6  # RMS shortfall 플로어 — 사실상 0 분모 방어
-TRADING_DAYS     = 252    # 연 거래일
+MIN_DAYS      = 63    # 최소 거래일 (≈3개월) — 미달 시 지표 None
+# 연율화 하방편차 하한: 연 0.5% = 0.005 소수
+# SGOV·SHV·BIL 등 초단기채는 연 dd ≈ 0.1~0.3% → 이 플로어에 걸려 None 반환
+# → Sortino 분모≈0으로 폭등하는 구조적 문제 원천 차단
+MIN_DD_ANNUAL = 0.005  # 연율화 기준 — 아래에서 sqrt(252) 나누기로 일간 플로어 환산
+TRADING_DAYS  = 252    # 연 거래일
 
 ETF_DATA_JSON    = os.path.join(OUTPUT_DIR, 'etf_data.json')
 ETF_DATABASE_JSON = os.path.join(ROOT, 'etf_database.json')
@@ -111,9 +114,11 @@ def compute_metrics(prices: pd.Series) -> dict:
     rms_shortfall = float(np.sqrt(np.mean(shortfalls ** 2)))    # RMS over N
     sortino = None
 
-    if rms_shortfall > MIN_DD_FLOOR:
-        dd = rms_shortfall * math.sqrt(TRADING_DAYS)  # 연율화
-        # 분자: CAGR − MAR (둘 다 소수 기준)
+    dd = rms_shortfall * math.sqrt(TRADING_DAYS)  # 연율화 하방편차
+    # 연율화 dd < 0.5%인 경우 Sortino 미산출(None):
+    # SGOV·SHV·BIL 등 초단기채는 dd ≈ 0.1~0.3%로 분모가 극소화되어
+    # 분자/분모 비율이 수백~수천으로 폭등하는 구조적 결함 원천 차단.
+    if dd >= MIN_DD_ANNUAL:
         sortino = (cagr - MAR_ANNUAL) / dd
 
     is_rolling = n >= MIN_ROLLING_DAYS
