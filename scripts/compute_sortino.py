@@ -90,7 +90,7 @@ def compute_metrics(prices: pd.Series) -> dict:
     n = len(prices)
 
     if n < MIN_DAYS:
-        return {'CAGR': 0.0, 'Vol': 0.0, 'Sortino': None, 'IsRolling': False}
+        return {'CAGR': 0.0, 'Vol': 0.0, 'Sortino': None, 'IsRolling': False, 'has_data': False}
 
     # ── 일간 수익률 ────────────────────────────────────────────────────
     daily_ret = prices.pct_change().dropna()
@@ -128,6 +128,7 @@ def compute_metrics(prices: pd.Series) -> dict:
         'Vol':       round(vol  * 100, 1),   # 퍼센트 표시 (16.3)
         'Sortino':   round(sortino, 2) if sortino is not None else None,
         'IsRolling': is_rolling,
+        'has_data':  True,
     }
 
 
@@ -272,11 +273,11 @@ def main():
         for etf in db:
             tk = etf['ticker']
             p = perf_stats.get(tk)
-            if p is None:
-                continue
+            if p is None or not p.get('has_data'):
+                continue  # 가격 데이터 없거나 MIN_DAYS 미달 → 기존값 보존
             etf['ret']        = p['CAGR']
             etf['vol']        = p['Vol']
-            etf['sor']        = p['Sortino']  # None이어도 덮어씀
+            etf['sor']        = p['Sortino']  # SGOV 등 dd<0.5%면 None → 폭등 방지
             etf['is_rolling'] = p['IsRolling']
             updated += 1
 
@@ -296,11 +297,11 @@ def main():
             for etf in sector_etfs:
                 tk = etf['ticker']
                 p = perf_stats.get(tk)
-                if p is None:
-                    continue  # Supabase에 가격 데이터 없는 경우만 건너뜀
+                if p is None or not p.get('has_data'):
+                    continue  # 가격 데이터 없거나 MIN_DAYS 미달 → 기존값 보존
                 etf['cagr']    = p['CAGR']
                 etf['vol']     = p['Vol']
-                etf['sortino'] = p['Sortino']  # None이어도 덮어씀 (SGOV 등 폭등 방지)
+                etf['sortino'] = p['Sortino']  # SGOV 등 dd<0.5%면 None → 폭등 방지
                 patched += 1
 
         with open(ETF_DATA_JSON, 'w', encoding='utf-8') as f:
