@@ -75,15 +75,17 @@ create policy "votes_own_delete"   on comment_votes for delete to authenticated
 
 
 -- ── 4. 좋아요/싫어요 자동 카운트 트리거 ─────────────────────────────
-create or replace function sync_vote_counts()
-returns trigger language plpgsql security definer as $$
+create or replace function public.sync_vote_counts()
+returns trigger language plpgsql security definer
+set search_path = ''   -- search path injection 방지
+as $$
 declare
   _cid uuid := coalesce(NEW.comment_id, OLD.comment_id);
 begin
-  update comments
+  update public.comments
   set
-    likes    = (select count(*) from comment_votes where comment_id = _cid and vote_type = 'like'),
-    dislikes = (select count(*) from comment_votes where comment_id = _cid and vote_type = 'dislike')
+    likes    = (select count(*) from public.comment_votes where comment_id = _cid and vote_type = 'like'),
+    dislikes = (select count(*) from public.comment_votes where comment_id = _cid and vote_type = 'dislike')
   where id = _cid;
   return null;
 end;
@@ -124,23 +126,29 @@ create policy "tl_own_delete"   on ticker_likes for delete to authenticated
 
 
 -- ── 7. 인기 종목 집계 뷰 ─────────────────────────────────────────
+-- security_invoker = on: 뷰 소유자가 아닌 호출 사용자 권한으로 실행
+-- → RLS 정책이 올바르게 적용됨 (Security Definer View 취약점 방지)
+
 -- 누적 총 좋아요
-create or replace view ticker_likes_total as
+create or replace view public.ticker_likes_total
+  with (security_invoker = on) as
   select ticker, count(*)::int as total_likes
-  from ticker_likes
+  from public.ticker_likes
   group by ticker;
 
 -- 이번달 좋아요 (월 첫 날 00:00 UTC 기준)
-create or replace view ticker_likes_monthly as
+create or replace view public.ticker_likes_monthly
+  with (security_invoker = on) as
   select ticker, count(*)::int as monthly_likes
-  from ticker_likes
+  from public.ticker_likes
   where created_at >= date_trunc('month', now() at time zone 'UTC')
   group by ticker;
 
 -- 이번주 좋아요 (월요일 00:00 UTC 기준)
-create or replace view ticker_likes_weekly as
+create or replace view public.ticker_likes_weekly
+  with (security_invoker = on) as
   select ticker, count(*)::int as weekly_likes
-  from ticker_likes
+  from public.ticker_likes
   where created_at >= date_trunc('week', now() at time zone 'UTC')
   group by ticker;
 
