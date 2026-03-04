@@ -1,0 +1,13 @@
+# ──────────────────────────────────────────────────────────────────────────
+# 자동 생성 출력 파일 — 충돌 시 현재 브랜치(ours) 유지
+#
+# output/ 파일들은 CI/CD 파이프라인(patch_r_anchor.yml, compute_sortino.yml 등)이
+# main 브랜치에서 직접 갱신하는 생성 파일입니다.
+# feature 브랜치가 이 파일을 수정해도 PR 머지 시 main 측(ours) 버전이 우선됩니다.
+#
+# 로컬 개발 초기 설정 (최초 1회):
+#   git config merge.ours.driver true
+# ──────────────────────────────────────────────────────────────────────────
+output/etf_data.json  merge=ours
+output/graph_data.json merge=ours
+output/*.html          merge=ours
