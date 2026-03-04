@@ -214,16 +214,10 @@ def main():
         json.dump(db, f, ensure_ascii=False, separators=(',', ':'))
     print(f'   저장: {ETF_DATA_JSON}')
 
-    # 7. index.html 재생성
-    print('\n🌐 index.html 재생성...')
-    import subprocess
-    render_script = os.path.join(ROOT, 'render_html.py')
-    subprocess.run([sys.executable, render_script], check=True)
-
     elapsed = time.time() - t0
     print(f'\n✅ 완료! ({elapsed:.0f}초)')
     print('\n다음 단계:')
-    print('  git add output/etf_data.json output/index.html')
+    print('  git add output/etf_data.json')
     print("  git commit -m 'feat: r_anchor QQQ + smh_corr 업데이트'")
     print('  git push')
 
