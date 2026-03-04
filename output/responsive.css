@@ -404,7 +404,7 @@ body.mob-menu-open { overflow: hidden; }
   --bg-card:      rgba(255,255,255,0.92);
   --card:         rgba(255,255,255,0.92);
   --bg-hover:     rgba(37,99,235,0.07);
-  --border:       rgba(15,23,42,0.1);
+  --border:       rgba(15,23,42,0.2);
   --text-primary: #1a202c;
   --text-muted:   #475569;
   --accent:       #2563eb;
@@ -469,10 +469,10 @@ body.mob-menu-open { overflow: hidden; }
 [data-theme="light"] .nav-link:hover        { color: var(--accent) !important; }
 
 /* 햄버거 + 테마 토글 버튼 */
-[data-theme="light"] .nav-mob-btn  { background: rgba(15,23,42,0.05) !important; border-color: rgba(15,23,42,0.12) !important; color: #475569 !important; }
-[data-theme="light"] .nav-mob-btn:hover { background: rgba(15,23,42,0.1) !important; color: #1a202c !important; }
-[data-theme="light"] .theme-toggle  { background: rgba(15,23,42,0.05); border-color: rgba(15,23,42,0.12); color: #475569; }
-[data-theme="light"] .theme-toggle:hover { background: rgba(15,23,42,0.1); color: #1a202c; }
+[data-theme="light"] .nav-mob-btn  { background: rgba(15,23,42,0.05) !important; border-color: rgba(15,23,42,0.22) !important; color: #475569 !important; }
+[data-theme="light"] .nav-mob-btn:hover { background: rgba(15,23,42,0.1) !important; border-color: rgba(15,23,42,0.35) !important; color: #1a202c !important; }
+[data-theme="light"] .theme-toggle  { background: rgba(15,23,42,0.05); border-color: rgba(15,23,42,0.22); color: #475569; }
+[data-theme="light"] .theme-toggle:hover { background: rgba(15,23,42,0.1); border-color: rgba(15,23,42,0.35); color: #1a202c; }
 
 /* 입력 필드 */
 [data-theme="light"] input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
@@ -508,7 +508,21 @@ body.mob-menu-open { overflow: hidden; }
 
 /* FAB */
 [data-theme="light"] #fab-btn        { background: rgba(37,99,235,0.12) !important; border-color: rgba(37,99,235,0.3) !important; color: #2563eb !important; }
-[data-theme="light"] #fab-card       { background: rgba(255,255,255,0.97) !important; border-color: rgba(15,23,42,0.1) !important; }
+[data-theme="light"] #fab-card       { background: rgba(255,255,255,0.97) !important; border-color: rgba(15,23,42,0.18) !important; }
+
+/* ── 버튼 보더: 다크모드 rgba(255,255,255,0.06~0.15) 값들이 라이트에서 안 보이는 문제 수정 ── */
+[data-theme="light"] .sec-tab               { border-color: rgba(15,23,42,0.18) !important; background: rgba(15,23,42,0.04) !important; }
+[data-theme="light"] .sec-tab:hover         { border-color: rgba(15,23,42,0.3) !important; background: rgba(15,23,42,0.07) !important; }
+[data-theme="light"] .sec-tab.active        { border-color: rgba(37,99,235,0.4) !important; background: rgba(37,99,235,0.1) !important; color: #2563eb !important; }
+[data-theme="light"] .btn-history           { border-color: rgba(15,23,42,0.2) !important; background: rgba(15,23,42,0.04) !important; color: #475569 !important; }
+[data-theme="light"] .btn-history:hover     { border-color: rgba(15,23,42,0.35) !important; background: rgba(15,23,42,0.08) !important; color: #1a202c !important; }
+[data-theme="light"] .smb                   { border-color: rgba(15,23,42,0.18) !important; background: rgba(15,23,42,0.03) !important; color: #334155 !important; }
+[data-theme="light"] .smb:hover             { border-color: rgba(37,99,235,0.35) !important; background: rgba(37,99,235,0.06) !important; color: #1a202c !important; }
+[data-theme="light"] #lang-switcher         { border-color: rgba(15,23,42,0.2) !important; background: rgba(15,23,42,0.05) !important; color: #475569 !important; }
+[data-theme="light"] #lang-switcher:hover   { border-color: rgba(15,23,42,0.35) !important; background: rgba(15,23,42,0.09) !important; color: #1a202c !important; }
+[data-theme="light"] #fab-btn-clear         { border-color: rgba(15,23,42,0.2) !important; background: rgba(15,23,42,0.05) !important; color: #475569 !important; }
+[data-theme="light"] .dataTables_wrapper .dataTables_paginate .paginate_button { border-color: rgba(15,23,42,0.18) !important; color: #475569 !important; }
+[data-theme="light"] .dataTables_wrapper .dataTables_paginate .paginate_button.current { border-color: rgba(37,99,235,0.4) !important; background: rgba(37,99,235,0.1) !important; color: #2563eb !important; }
 
 /* graph.html 전용: 라이트 모드에서도 다크 유지 (캔버스 렌더링) */
 [data-theme="light"] #graph-container { filter: none; }
