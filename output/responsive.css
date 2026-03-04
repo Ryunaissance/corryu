@@ -528,6 +528,58 @@ body.mob-menu-open { overflow: hidden; }
 [data-theme="light"] #graph-container { filter: none; }
 
 /* ================================================================
+   LIGHT MODE — STAT CARD & TAILWIND COLOR OVERRIDES
+   다크모드 rgba(10,13,20,0.5) 카드 배경 + 밝은 계열 텍스트가
+   라이트 배경에서 대비 미달(WCAG AA)하는 문제 수정
+   stat-value는 1.3rem bold → 3:1 기준, 그보다 엄격한 4.5:1도 충족
+   ================================================================ */
+
+/* stat-card 배경 교체 */
+[data-theme="light"] .stat-card {
+  background: rgba(255,255,255,0.88) !important;
+  border-color: rgba(15,23,42,0.15) !important;
+}
+
+/* stat-value Tailwind 컬러 → 라이트 배경용 어두운 계열로 재매핑
+   기준 배경 #ffffff: 아래 모든 색상 4.5:1 이상 확보 */
+[data-theme="light"] .stat-card .stat-value.text-white    { color: #1a202c !important; } /* 흰색 → 최어두운 텍스트  19.6:1 */
+[data-theme="light"] .stat-card .stat-value.text-green-400,
+[data-theme="light"] .stat-card .stat-value.text-green-300 { color: #15803d !important; } /* green-700  5.1:1 */
+[data-theme="light"] .stat-card .stat-value.text-red-400   { color: #b91c1c !important; } /* red-700    5.2:1 */
+[data-theme="light"] .stat-card .stat-value.text-yellow-300 { color: #92400e !important; } /* amber-800  7.0:1 */
+[data-theme="light"] .stat-card .stat-value.text-blue-300  { color: #1d4ed8 !important; } /* blue-700   8.6:1 */
+[data-theme="light"] .stat-card .stat-value.text-gray-300  { color: #374151 !important; } /* gray-700  10.5:1 */
+[data-theme="light"] .stat-card .stat-value.text-purple-400,
+[data-theme="light"] .stat-card .stat-value.text-violet-400 { color: #6d28d9 !important; } /* violet-700 6.2:1 */
+[data-theme="light"] .stat-card .stat-value.text-pink-400   { color: #be185d !important; } /* pink-700   6.9:1 */
+[data-theme="light"] .stat-card .stat-value.text-orange-400 { color: #c2410c !important; } /* orange-700 5.7:1 */
+
+/* ── 데이터 의미 색상 (테이블 내 수치 지표) ──
+   screener, backtest, index 등 공통으로 사용
+   라이트 배경(white) 기준 4.5:1 이상 */
+/* backtest.html — .pos / .neg / .amb / .mu on stat-val
+   원본: #4ade80 / #f87171 / #f59e0b / var(--t2)
+   라이트 배경 기준 4.5:1 이상 확보 */
+[data-theme="light"] .pos { color: #15803d !important; } /* green-700  5.1:1 */
+[data-theme="light"] .neg { color: #b91c1c !important; } /* red-700    5.2:1 */
+[data-theme="light"] .amb { color: #92400e !important; } /* amber-800  7.0:1 */
+
+/* portfolio.html — inline style로 색 지정된 stat-value ID들 */
+[data-theme="light"] #summary-cagr    { color: #15803d !important; } /* #4ade80 → green-700  5.1:1 */
+[data-theme="light"] #summary-vol     { color: #92400e !important; } /* #f59e0b → amber-800  7.0:1 */
+[data-theme="light"] #summary-sortino { color: #6d28d9 !important; } /* #a78bfa → violet-700 6.2:1 */
+[data-theme="light"] #summary-zscore  { color: #1d4ed8 !important; } /* #60a5fa → blue-700   8.6:1 */
+
+/* screener.html — z-score, RSI, 티커 링크, 배지 */
+[data-theme="light"] .z-hi            { color: #b91c1c !important; } /* #f87171 → red-700    5.2:1 */
+[data-theme="light"] .z-lo            { color: #1d4ed8 !important; } /* #60a5fa → blue-700   8.6:1 */
+[data-theme="light"] .z-mid           { color: #374151 !important; } /* var(--t2) inherit OK, explicit fallback */
+[data-theme="light"] .rsi-hi          { color: #b91c1c !important; } /* #f87171 → red-700    5.2:1 */
+[data-theme="light"] .rsi-lo          { color: #15803d !important; } /* #4ade80 → green-700  5.1:1 */
+[data-theme="light"] .t-ticker        { color: #1d4ed8 !important; } /* #60a5fa → blue-700   8.6:1 */
+[data-theme="light"] .res-badge       { color: #1d4ed8 !important; border-color: rgba(37,99,235,0.35) !important; background: rgba(37,99,235,0.08) !important; }
+
+/* ================================================================
    graph.html PANEL TOGGLE  (all screens, hidden by default)
    ================================================================ */
 .mob-panel-toggle {
