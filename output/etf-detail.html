@@ -2,6 +2,8 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<script>try{if(localStorage.getItem('corryu-theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
+<script src="/theme.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0a0d14">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -47,7 +49,7 @@
   --bg-card:    rgba(18,22,36,0.92);
   --border:     rgba(255,255,255,0.07);
   --text-primary: #e2e8f0;
-  --text-muted:   #64748b;
+  --text-muted:   #7d90a4;
   --accent:     #3b82f6;
   --accent-glow: rgba(59,130,246,0.25);
 }
@@ -423,7 +425,8 @@ nav {
       <input type="text" id="nav-search-input" data-i18n-placeholder="detail.nav.search.placeholder" placeholder="다른 티커 검색 (예: QQQ)" autocomplete="off">
       <button onclick="goToTicker()">→</button>
     </div>
-    <button id="nav-mob-btn" class="nav-mob-btn" aria-label="메뉴">
+    <button class="theme-toggle" onclick="Theme&&Theme.toggle()" aria-label="라이트 모드로 전환" title="라이트 모드"><svg class="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg><svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+<button id="nav-mob-btn" class="nav-mob-btn" aria-label="메뉴">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="17" y2="6"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="14" x2="17" y2="14"/></svg>
     </button>
   </div>
@@ -688,7 +691,7 @@ nav {
       <div style="height:80px;background:linear-gradient(to bottom,transparent,rgba(10,13,20,0.97));pointer-events:none"></div>
       <div style="text-align:center;padding:20px 16px 8px;background:rgba(10,13,20,0.97)">
         <div style="font-size:.84rem;color:#475569;margin-bottom:10px" data-i18n="detail.comments.gate">🔒 나머지 댓글은 로그인 후 볼 수 있습니다</div>
-        <a href="#" onclick="goLogin(event)" style="display:inline-flex;align-items:center;gap:6px;padding:8px 20px;border-radius:9px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;font-size:.82rem;font-weight:700;text-decoration:none" data-i18n="detail.comments.signup.link">무료 회원가입 · 로그인</a>
+        <a href="#" onclick="goLogin(event)" style="display:inline-flex;align-items:center;gap:6px;padding:8px 20px;border-radius:9px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-size:.82rem;font-weight:700;text-decoration:none" data-i18n="detail.comments.signup.link">무료 회원가입 · 로그인</a>
       </div>
     </div>
 
