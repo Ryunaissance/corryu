@@ -271,13 +271,14 @@ def main():
         updated = 0
         for etf in db:
             tk = etf['ticker']
-            p = perf_stats.get(tk, {})
-            if p.get('Sortino') is not None:
-                etf['ret']        = p['CAGR']
-                etf['vol']        = p['Vol']
-                etf['sor']        = p['Sortino']
-                etf['is_rolling'] = p['IsRolling']
-                updated += 1
+            p = perf_stats.get(tk)
+            if p is None:
+                continue
+            etf['ret']        = p['CAGR']
+            etf['vol']        = p['Vol']
+            etf['sor']        = p['Sortino']  # None이어도 덮어씀
+            etf['is_rolling'] = p['IsRolling']
+            updated += 1
 
         with open(ETF_DATABASE_JSON, 'w', encoding='utf-8') as f:
             json.dump(db, f, ensure_ascii=False, separators=(',', ':'))
@@ -294,12 +295,13 @@ def main():
         for sector_etfs in etf_data.get('allData', {}).values():
             for etf in sector_etfs:
                 tk = etf['ticker']
-                p = perf_stats.get(tk, {})
-                if p.get('Sortino') is not None:
-                    etf['cagr']    = p['CAGR']
-                    etf['vol']     = p['Vol']
-                    etf['sortino'] = p['Sortino']
-                    patched += 1
+                p = perf_stats.get(tk)
+                if p is None:
+                    continue  # Supabase에 가격 데이터 없는 경우만 건너뜀
+                etf['cagr']    = p['CAGR']
+                etf['vol']     = p['Vol']
+                etf['sortino'] = p['Sortino']  # None이어도 덮어씀 (SGOV 등 폭등 방지)
+                patched += 1
 
         with open(ETF_DATA_JSON, 'w', encoding='utf-8') as f:
             json.dump(etf_data, f, ensure_ascii=False, separators=(',', ':'))
