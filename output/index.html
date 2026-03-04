@@ -1014,6 +1014,7 @@ async function pollRemoteSync() {
 }
 
 function initDashboard() {
+    if ($.fn.DataTable.isDataTable('#masterTable')) return; // 이중 초기화 방지
     renderACTabs();
     renderSectorTabs();
     renderSummary();
@@ -1663,10 +1664,6 @@ $(document).ready(function() {
         })
         .catch(function(e) {
             console.error('[CORRYU] 데이터 로드 실패:', e);
-            // 데이터 없이 빈 대시보드라도 렌더링
-            if (typeof initDashboard === 'function' && typeof table === 'undefined') {
-                try { initDashboard(); } catch(_) {}
-            }
         });
 });
 
