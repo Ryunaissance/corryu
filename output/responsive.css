@@ -148,8 +148,11 @@ body.mob-menu-open { overflow: hidden; }
   /* sub-page right-side link groups */
   .nav-inner > .nav-right-links  { display: none !important; }
 
-  /* ── nav-links(flex:1) 사라지므로 nav-right 우측 정렬 ── */
-  .nav-right { margin-left: auto; }
+  /* ── nav-right / 서브페이지 theme-toggle 우측 정렬 ── */
+  /* responsive.css가 <style>보다 먼저 로드되므로 !important 필수 */
+  .nav-right { margin-left: auto !important; }
+  .nav-inner > .theme-toggle,
+  .nav-i    > .theme-toggle { margin-left: auto !important; }
 
   /* ── Drawer: flush with 57px nav ── */
   .nav-mob-drawer  { top: 57px; }
@@ -276,7 +279,10 @@ body.mob-menu-open { overflow: hidden; }
   .nav-inner > .nav-right-links { display: none !important; }
 
   /* ── nav-links(flex:1) 사라지므로 nav-right 우측 정렬 ── */
-  .nav-right { margin-left: auto; }
+  .nav-right { margin-left: auto !important; }
+  /* 서브페이지: nav-desktop-links 숨으면 theme-toggle이 좌측에 붙는 문제 */
+  .nav-inner > .theme-toggle,
+  .nav-i    > .theme-toggle { margin-left: auto !important; }
 
   /* ── Drawer position ── */
   .nav-mob-drawer  { top: 57px; }
