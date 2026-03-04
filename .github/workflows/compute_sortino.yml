@@ -42,19 +42,14 @@ jobs:
           SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
 
-      # ── 4. HTML 재생성 ────────────────────────────────────────────
-      # etf_data.json → output/*.html (pandas 불필요, 순수 Python)
-      - name: Regenerate HTML
-        run: python render_html.py
-
-      # ── 5. 변경사항 커밋·푸시 ────────────────────────────────────
+      # ── 4. 변경사항 커밋·푸시 ────────────────────────────────────
+      # render_html.py 불필요: index.html은 etf_data.json을 fetch로 로드
       - name: Commit and push updated files
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git config merge.ours.driver true
 
-          git add output/etf_data.json output/*.html etf_database.json
+          git add output/etf_data.json etf_database.json
 
           if git diff --cached --quiet; then
             echo "변경사항 없음 — 커밋 생략"
