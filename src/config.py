@@ -197,6 +197,26 @@ MANUAL_SECTOR_OVERRIDES: dict[str, str] = {
     'URAN': 'S19',  # Global X Uranium ETF (alt ticker) → 에너지/원자재
     'HURA': 'S19',  # Horizons Global Uranium Index → 에너지/원자재
     'URNJ': 'S19',  # Sprott Junior Uranium Miners → 에너지/원자재
+    # -- 신흥국 (S12) --
+    'SMIN': 'S12',  # iShares MSCI India Small-Cap → 신흥국
+    'KWT': 'S12',   # iShares MSCI Kuwait → 신흥국
+    'KSA': 'S12',   # iShares MSCI Saudi Arabia → 신흥국
+    'EQLT': 'S12',  # Xtrackers MSCI EM ESG Leaders → 신흥국
+    'QAT': 'S12',   # iShares MSCI Qatar → 신흥국
+    'NDIA': 'S12',  # Motley Fool India → 신흥국
+    # -- 국제선진국 (S11) --
+    'DXJS': 'S11',  # WisdomTree Japan Hedged SmallCap → 국제선진국
+    # -- 에너지/원자재 (S19) 농산물 --
+    'SOYB': 'S19',  # Teucrium Soybean Fund → 원자재
+    'CANE': 'S19',  # Teucrium Sugar Fund → 원자재
+    'CORN': 'S19',  # Teucrium Corn Fund → 원자재
+    'WEAT': 'S19',  # Teucrium Wheat Fund → 원자재
+    # -- 단기채/현금성 (S15) --
+    'CLIP': 'S15',  # Global X 1-3 Month T-Bill → 단기채
+    'FLDB': 'S15',  # Fidelity Low Duration Bond → 단기채
+    'WEEK': 'S15',  # iShares iBonds Weekly → 단기채
+    'LDRC': 'S15',  # iShares Low Duration Climate → 단기채
+    'LDRT': 'S15',  # iShares Low Duration Bond → 단기채
 }
 
 # ── 수동 레거시 오버라이드 (기존 LEGACY_TICKERS 이관) ─
