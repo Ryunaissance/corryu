@@ -33,8 +33,11 @@ window.CorryuAuth = {
 
   async getUser() {
     if (!_sb) return null;
-    // 서버 검증: 만료/무효 토큰은 null 반환 (signOut 호출 금지 — SIGNED_OUT 이벤트로 index reload 루프 방지)
     try {
+      // getSession()은 Supabase 초기화 완료를 보장 (localStorage → 내부 상태 로딩 대기)
+      const { data: { session } } = await _sb.auth.getSession();
+      if (!session) return null;
+      // 서버 검증: access token이 확보된 상태에서 호출
       const { data, error } = await _sb.auth.getUser();
       if (error || !data?.user) return null;
       return data.user;
