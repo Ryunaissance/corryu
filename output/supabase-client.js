@@ -33,14 +33,14 @@ window.CorryuAuth = {
 
   async getUser() {
     if (!_sb) return null;
-    // 서버 검증: 만료/무효 토큰은 null 반환 후 로컬 세션 클리어
-    const { data: { user }, error } = await _sb.auth.getUser();
-    if (error || !user) {
-      // 만료된 로컬 세션 제거 (무한 리디렉션 방지)
-      try { await _sb.auth.signOut({ scope: 'local' }); } catch(_) {}
+    // 서버 검증: 만료/무효 토큰은 null 반환 (signOut 호출 금지 — SIGNED_OUT 이벤트로 index reload 루프 방지)
+    try {
+      const { data, error } = await _sb.auth.getUser();
+      if (error || !data?.user) return null;
+      return data.user;
+    } catch(e) {
       return null;
     }
-    return user;
   },
 
   async getProfile(userId) {
