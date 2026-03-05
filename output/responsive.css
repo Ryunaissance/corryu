@@ -495,6 +495,18 @@ body.mob-menu-open { overflow: hidden; }
 [data-theme="light"] #sector-modal-card    { background: rgba(255,255,255,0.97) !important; }
 [data-theme="light"] #sector-modal-overlay { background: rgba(15,23,42,0.4) !important; }
 
+/* DataTables scrollX: scroll body 숨겨진 thead가 언어전환 시 잠깐 보이는 잔상 방지 */
+div.dataTables_scrollBody table.dataTable thead th,
+div.dataTables_scrollBody table.dataTable thead td {
+  height: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  border-top-width: 0 !important;
+  border-bottom-width: 0 !important;
+  overflow: hidden !important;
+  visibility: hidden !important;
+}
+
 /* DataTables */
 [data-theme="light"] .dataTables_wrapper .dataTables_filter input,
 [data-theme="light"] .dataTables_wrapper .dataTables_length select {
@@ -504,6 +516,20 @@ body.mob-menu-open { overflow: hidden; }
 }
 [data-theme="light"] .dataTables_wrapper .dataTables_info,
 [data-theme="light"] .dataTables_wrapper .dataTables_paginate { color: #475569 !important; }
+
+/* 라이트 모드: 테이블 전체 */
+[data-theme="light"] table.dataTable { color: #1a202c !important; }
+[data-theme="light"] table.dataTable thead th {
+  background: rgba(240,244,248,0.98) !important;
+  color: #334155 !important;
+  border-bottom-color: rgba(15,23,42,0.15) !important;
+}
+[data-theme="light"] table.dataTable tbody td {
+  border-bottom-color: rgba(15,23,42,0.06) !important;
+}
+[data-theme="light"] table.dataTable tbody tr:hover {
+  background-color: rgba(37,99,235,0.05) !important;
+}
 
 /* 툴팁 (index.html .tooltip-content 등) */
 [data-theme="light"] .tooltip-content {
