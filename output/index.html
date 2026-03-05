@@ -1079,13 +1079,15 @@ function initDashboard() {
             } },
             { data: 'z_score', render: function(d,t,row) {
                 if(row.short_history && t==='display') return '<span class="text-gray-600">-</span>';
-                if(t!=='display') return row.short_history ? -999999 : d;
+                if(t!=='display') return row.short_history ? -999999 : (d==null ? -999999 : d);
+                if(d==null) return '<span class="text-gray-600">-</span>';
                 let c = d <= -1.5 ? 'value-down font-bold' : (d >= 2.0 ? 'value-up font-bold' : 'text-gray-500');
                 return '<span class="'+c+'">'+d.toFixed(2)+'</span>';
             } },
             { data: 'ma200_pct', render: function(d,t,row) {
                 if(row.short_history && t==='display') return '<span class="text-gray-600">-</span>';
-                if(t!=='display') return row.short_history ? -999999 : d;
+                if(t!=='display') return row.short_history ? -999999 : (d==null ? -999999 : d);
+                if(d==null) return '<span class="text-gray-600">-</span>';
                 let c = d <= -10 ? 'value-down font-bold' : (d >= 15 ? 'value-up font-bold' : 'text-gray-500');
                 return '<span class="'+c+'">'+(d>0?'+':'')+d.toFixed(1)+'%</span>';
             } },
@@ -1103,23 +1105,27 @@ function initDashboard() {
             } },
             { data: 'mdd_52w', render: function(d,t,row) {
                 if(row.short_history && t==='display') return '<span class="text-gray-600">-</span>';
-                if(t!=='display') return row.short_history ? -999999 : d;
+                if(t!=='display') return row.short_history ? -999999 : (d==null ? -999999 : d);
+                if(d==null) return '<span class="text-gray-600">-</span>';
                 let c = d <= -20 ? 'value-down font-bold' : 'text-gray-500';
                 return '<span class="'+c+'">'+d.toFixed(1)+'%</span>';
             } },
             { data: 'cagr', render: function(d,t,row) {
                 if(row.short_history && t==='display') return '<span class="text-gray-600">-</span>';
-                if(t!=='display') return row.short_history ? -999999 : (d||0);
+                if(t!=='display') return row.short_history ? -999999 : (d==null ? -999999 : d);
+                if(d==null) return '<span class="text-gray-600">-</span>';
                 return '<span class="text-gray-300 font-semibold">'+(d>0?'+':'')+d.toFixed(1)+'%</span>';
             } },
             { data: 'vol', render: function(d,t,row) {
                 if(row.short_history && t==='display') return '<span class="text-gray-600">-</span>';
-                if(t!=='display') return row.short_history ? -999999 : (d||0);
+                if(t!=='display') return row.short_history ? -999999 : (d==null ? -999999 : d);
+                if(d==null) return '<span class="text-gray-600">-</span>';
                 return '<span class="text-gray-500">'+d.toFixed(1)+'%</span>';
             } },
             { data: 'sortino', render: function(d,t,row) {
                 if(row.short_history && t==='display') return '<span class="text-gray-600">-</span>';
-                if(t!=='display') return row.short_history ? -999999 : (d===null?-999999:d);
+                if(t!=='display') return row.short_history ? -999999 : (d==null ? -999999 : d);
+                if(d==null) return '<span class="text-gray-600">-</span>';
                 let c = d > 1.2 ? 'text-purple-400 font-bold' : 'text-gray-500';
                 return '<span class="'+c+'">'+d.toFixed(2)+'</span>';
             } },
