@@ -32,8 +32,15 @@ window.CorryuAuth = {
   },
 
   async getUser() {
-    const s = await this.getSession();
-    return s?.user ?? null;
+    if (!_sb) return null;
+    // 서버 검증: 만료/무효 토큰은 null 반환 후 로컬 세션 클리어
+    const { data: { user }, error } = await _sb.auth.getUser();
+    if (error || !user) {
+      // 만료된 로컬 세션 제거 (무한 리디렉션 방지)
+      try { await _sb.auth.signOut({ scope: 'local' }); } catch(_) {}
+      return null;
+    }
+    return user;
   },
 
   async getProfile(userId) {
