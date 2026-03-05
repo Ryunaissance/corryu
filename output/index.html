@@ -1797,9 +1797,7 @@ $(document).ready(function() {
       '<button id="nav-logout-btn" data-i18n="nav.logout">' + I18n.t('nav.logout') + '</button>';
   }
 
-  await renderAuth();
-
-  // 인증 상태 변경 시 갱신 + 모바일 로그인 버튼 동기화
+  // 인증 상태 변경 시 갱신 — renderAuth() 전에 등록해야 INITIAL_SESSION 이벤트를 놓치지 않음
   CorryuAuth.onAuthChange(function(event) {
     var mobLoginBtn = document.getElementById('nav-mob-login-btn');
     if (event === 'SIGNED_IN' && mobLoginBtn) mobLoginBtn.style.display = 'none';
@@ -1810,6 +1808,8 @@ $(document).ready(function() {
       renderAuth();
     }
   });
+
+  await renderAuth();
 })();
 
 // ── 모바일 햄버거 메뉴 ─────────────────────────────────
