@@ -1,0 +1,49 @@
+name: ETF 초기 데이터 다운로드 (최초 1회)
+
+on:
+  # 수동으로만 실행 (최초 1회 세팅용)
+  workflow_dispatch:
+
+jobs:
+  fetch-initial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180   # 1651 ETF × max 기간 = 최대 2시간
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install --upgrade yfinance pandas numpy pyarrow
+
+      - name: Download all ETF history → raw/*.parquet
+        run: python scripts/fetch_initial.py
+
+      - name: Compute all metrics → etf_data.json + HTML
+        run: python scripts/compute_all.py
+
+      - name: Commit and push raw/ + output/
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add raw/prices_close.parquet raw/meta.parquet
+          git add output/etf_data.json output/classification.json
+          git add output/*.html
+
+          if git diff --cached --quiet; then
+            echo "변경사항 없음"
+          else
+            git commit -m "init: raw/ parquet 초기 데이터 + 전체 재계산 [automated]"
+            git push
+          fi
