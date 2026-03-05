@@ -7,9 +7,12 @@ from typing import Any
 
 # ── 경로 ─────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RAW_DIR = os.path.join(BASE_DIR, 'raw')           # 원본 데이터 (parquet, append-only)
+OUTPUT_DIR = os.path.join(BASE_DIR, 'output')
+
+# 하위 호환용 (구 pkl/csv 경로 — 더 이상 사용 안 함)
 DATA_PROCESSED = os.path.join(BASE_DIR, 'data_processed')
 DATA_SCRAPED = os.path.join(BASE_DIR, 'data_scraped')
-OUTPUT_DIR = os.path.join(BASE_DIR, 'output')
 CORR_MONTHLY_CSV = os.path.join(BASE_DIR, 'correlation_matrix_monthly.csv')
 CORR_DAILY_CSV = os.path.join(BASE_DIR, 'correlation_matrix.csv')
 

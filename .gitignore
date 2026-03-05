@@ -1,4 +1,4 @@
-# 대용량 데이터 (GitHub 제외)
+# 구 데이터 파일 (더 이상 사용 안 함)
 *.pkl
 *.pickle
 correlation_matrix.csv
@@ -6,6 +6,9 @@ correlation_matrix_monthly.csv
 data_processed/
 data_scraped/
 archive/
+
+# raw/ 파일은 Git에 포함 (parquet ~10MB, append-only 원본 데이터)
+# raw/ 는 gitignore 하지 않음
 
 # 시스템
 .DS_Store

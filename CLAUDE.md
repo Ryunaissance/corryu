@@ -11,12 +11,26 @@
 |------|------|------|
 | 전역 설정 | `src/config.py` | 섹터 정의, 앵커, 임계값, 오버라이드 — **규칙 변경은 여기서만** |
 | 분류 엔진 | `src/classify.py` | 3-pass 워터폴 (앵커→키워드→상관계수) |
-| 레거시 판별 | `src/legacy.py` | AUM·기간·중복 기준 자동 판별 + 수동 오버라이드 |
+| 레거시 판별 | `src/legacy.py` | AUM·기간 기준 자동 판별 + 수동 오버라이드 |
 | 지표 계산 | `src/metrics.py` | Z-score, RSI, MDD, 52w 레인지 등 |
-| 데이터 로딩 | `src/data_loader.py` | Supabase → pandas DataFrame |
-| 빌드 오케스트레이터 | `src/dashboard_builder.py` | 단일 진입점: `python src/dashboard_builder.py` |
+| 데이터 로딩 | `src/data_loader.py` | parquet → pandas, 상관계수·성과지표 인라인 계산 |
+| 전체 재계산 | `scripts/compute_all.py` | **단일 진입점**: `python scripts/compute_all.py` |
+| 초기 다운로드 | `scripts/fetch_initial.py` | 최초 1회: yfinance → `raw/*.parquet` |
+| 일별 업데이트 | `scripts/fetch_daily.py` | 매일: 최신 가격·메타 → parquet 추가 |
 | HTML 렌더러 | `render_html.py` | 템플릿→HTML 변환, pandas 불필요, 단독 실행 가능 |
 | MECE 검증 | `src/verify.py` | 빌드 시 자동 실행, 30개 앵커 스팟체크 포함 |
+
+---
+
+## 데이터 원칙
+
+```
+raw/prices_close.parquet  ← 신성불가침, append-only (yfinance 수정종가)
+raw/meta.parquet          ← 신성불가침, daily 갱신 (AUM·수수료·배당·상장일)
+
+etf_data.json             ← 항상 완전 재생성 (절대 수동 패치 금지)
+config.py 규칙 변경       → compute_all.py 재실행으로 즉시 반영
+```
 
 ---
 
@@ -54,10 +68,8 @@ Pass 3   일간 상관계수 폴백
 자동 레거시 처리 조건 (하나라도 해당):
 - 상장일 > `2021-05-20` (약 3년 미만)
 - AUM < $100M
-- 거래일 < 750일
 
 추가 규칙:
-- 같은 섹터 내 AUM 상위 20개 중 r ≥ 0.95인 중복 ETF
 - `MANUAL_LEGACY_OVERRIDES` 명시 항목 (290개+)
 
 면제: `LEGACY_EXEMPTIONS` = 모든 앵커 ETF 자동 면제
@@ -82,20 +94,17 @@ python tests/test_smoke.py
 ## 빌드 파이프라인
 
 ```bash
-# 전체 빌드 (분류 + 지표 + HTML)
-cd src && python dashboard_builder.py
+# 최초 1회: 전체 이력 다운로드 (약 1~2시간)
+python scripts/fetch_initial.py
 
-# HTML만 재생성 (데이터 변경 없을 때)
+# 전체 재계산 (config 변경 후, 또는 수동 실행)
+python scripts/compute_all.py
+
+# HTML만 재생성 (etf_data.json 변경 없을 때)
 python render_html.py
 
 # 그래프 데이터 재계산
 python build_graph.py
-
-# 상관계수 행렬 업데이트
-python build_monthly_corr.py
-
-# r_anchor 패치 (슈퍼섹터 QQQ 기준 재계산)
-python patch_r_anchor_qqq.py
 ```
 
 출력: `output/etf_data.json` (625KB), `output/graph_data.json` (2MB), `output/*.html` (13개)
@@ -105,14 +114,19 @@ python patch_r_anchor_qqq.py
 ## 데이터 흐름
 
 ```
-Supabase (가격 이력)
-  └─ data_loader.load_all()
-       └─ df_price, perf_stats, scraped, df_corr_monthly, df_corr_daily
-            └─ classify_all() → classification dict
-            └─ assess_all_legacy() → legacy_results dict
-            └─ compute_etf_metrics() × N → all_etf_data dict
-                 └─ output/etf_data.json
-                      └─ render_html.py → output/*.html
+yfinance (최초 1회 또는 매일 증분)
+  └─ raw/prices_close.parquet  (수정종가, append-only)
+  └─ raw/meta.parquet          (AUM·수수료·배당, daily 갱신)
+
+scripts/compute_all.py
+  ├─ data_loader.load_price_data()    → df_price
+  ├─ data_loader.load_scraped_info()  → scraped
+  ├─ data_loader.compute_perf_stats() → perf_stats (CAGR·Vol·Sortino)
+  ├─ data_loader.compute_corr_*()     → df_corr_monthly, df_corr_daily
+  ├─ classify_all()  → classification dict
+  ├─ assess_all_legacy() → legacy_results dict
+  └─ compute_etf_metrics() × N → output/etf_data.json
+                                      └─ render_html.py → output/*.html
 ```
 
 ---
@@ -132,7 +146,7 @@ Supabase (가격 이력)
     'ticker': 'VOO',
     'name': 'Vanguard S&P 500 ETF',
     'cagr': 12.5, 'vol': 16.3, 'sortino': 2.15,
-    'mdd': -33.7, 'rsi': 58.2,
+    'mdd_52w': -8.2, 'rsi': 58.2,
     'is_legacy': False, 'mine': 1,
     'rank': 1,    # AUM 순위
 }
@@ -147,15 +161,19 @@ Supabase (가격 이력)
 2. 앵커 ETF가 있으면 `ANCHOR_TO_SECTOR`는 자동 업데이트됨
 3. 키워드 규칙이 필요하면 `KEYWORD_RULES`에 추가
 4. `src/verify.py` → `spot_check()` expected dict 업데이트
+5. `python scripts/compute_all.py` 실행
 
 ### 특정 ETF 강제 섹터 배정
-`src/config.py` → `MANUAL_SECTOR_OVERRIDES`에 `'TICKER': 'S##'` 추가
+1. `src/config.py` → `MANUAL_SECTOR_OVERRIDES`에 `'TICKER': 'S##'` 추가
+2. `python scripts/compute_all.py` 실행 (JSON 패치 불필요)
 
 ### 특정 ETF 레거시 처리
-`src/config.py` → `MANUAL_LEGACY_OVERRIDES`에 `'TICKER': '이유'` 추가
+1. `src/config.py` → `MANUAL_LEGACY_OVERRIDES`에 `'TICKER': '이유'` 추가
+2. `python scripts/compute_all.py` 실행
 
 ### 내 포트폴리오 종목 변경
-`src/config.py` → `MY_PORTFOLIO` 리스트 수정
+1. `src/config.py` → `MY_PORTFOLIO` 리스트 수정
+2. `python scripts/compute_all.py` 실행
 
 ---
 
@@ -163,10 +181,9 @@ Supabase (가격 이력)
 
 - **호스팅**: Vercel (정적 파일: `output/` 디렉토리)
 - **서버리스 API**: `api/yf.js` (Yahoo Finance 프록시), `api/sync.js` (사용자 오버라이드 저장)
-- **DB**: Supabase (가격 이력, 댓글, 투표)
+- **DB**: Supabase (댓글, 투표 — 가격 데이터 제거됨)
 - **CI/CD**: GitHub Actions
-  - `daily_price_update.yml`: 평일 오전 6시 UTC, Supabase 가격 갱신
-  - `patch_r_anchor.yml`: 상관계수 메트릭 업데이트
+  - `daily_update.yml`: 평일 UTC 22:00 (ET 17:00), yfinance → parquet → compute_all → commit
 
 ---
 
@@ -177,3 +194,4 @@ Supabase (가격 이력)
 - `graph_data.json`은 2MB로 크기가 큼 — 그래프 관련 코드 수정 후 `build_graph.py` 재실행 필요
 - 레거시 면제(`LEGACY_EXEMPTIONS`)는 앵커 ETF 자동 생성 — 직접 수정 불필요
 - 섹터 S23(레버리지 롱)은 폐지됨 — 레버리지 상품은 기초자산 섹터로 상관계수 분류
+- `raw/` 파일은 Git에 포함 (~10MB parquet) — GitHub Actions에서 자동 commit·push

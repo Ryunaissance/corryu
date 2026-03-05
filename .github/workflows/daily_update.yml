@@ -1,0 +1,53 @@
+name: ETF 일별 업데이트 + 전체 재계산
+
+on:
+  # 미국 동부 시장 종료 후 1시간 (ET 17:00 = UTC 22:00, 월~금)
+  schedule:
+    - cron: '0 22 * * 1-5'
+
+  # 수동 실행 (config 변경 후 즉시 반영할 때)
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    permissions:
+      contents: write   # raw/ 및 output/ 커밋·푸시 권한
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install --upgrade yfinance pandas numpy pyarrow
+
+      - name: Fetch daily prices + meta
+        run: python scripts/fetch_daily.py
+
+      - name: Compute all metrics → etf_data.json + HTML
+        run: python scripts/compute_all.py
+
+      - name: Commit and push
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add raw/prices_close.parquet raw/meta.parquet
+          git add output/etf_data.json output/classification.json
+          git add output/*.html
+
+          if git diff --cached --quiet; then
+            echo "변경사항 없음 — 커밋 생략"
+          else
+            git commit -m "daily: $(date -u +'%Y-%m-%d') 가격·지표 업데이트 [automated]"
+            git push
+          fi
