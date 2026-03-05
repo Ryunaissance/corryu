@@ -189,7 +189,7 @@ body {
 .toast {
   position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(8px);
   background: rgba(30,36,52,0.97); border: 1px solid rgba(255,255,255,0.1);
-  color: var(--text-primary); padding: 12px 20px; border-radius: 10px;
+  color: #e2e8f0; padding: 12px 20px; border-radius: 10px;
   font-size: 0.82rem; font-weight: 500; white-space: nowrap;
   opacity: 0; transition: all 0.25s; pointer-events: none; z-index: 1000;
   box-shadow: 0 8px 32px rgba(0,0,0,0.4);
@@ -204,6 +204,32 @@ body {
   transition: color 0.15s;
 }
 .back-link:hover { color: var(--text-primary); }
+
+/* ── 라이트모드 오버라이드 ── */
+[data-theme="light"] .login-card {
+  box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+}
+[data-theme="light"] .form-input {
+  background: rgba(255,255,255,0.8);
+  border-color: rgba(15,23,42,0.25);
+}
+[data-theme="light"] .form-input:focus {
+  border-color: rgba(37,99,235,0.5);
+  background: rgba(255,255,255,0.95);
+}
+[data-theme="light"] .form-input::placeholder { color: #94a3b8; }
+[data-theme="light"] .social-btn {
+  background: rgba(255,255,255,0.85);
+  border-color: rgba(15,23,42,0.2);
+}
+[data-theme="light"] .social-btn:hover {
+  background: rgba(255,255,255,1);
+  border-color: rgba(15,23,42,0.35);
+}
+[data-theme="light"] .tab-btn:hover:not(.active) {
+  background: rgba(15,23,42,0.05);
+}
+[data-theme="light"] .bg-glow { opacity: 0.3; }
 
 @media (max-width: 480px) {
   .login-card { padding: 36px 24px 32px; }
