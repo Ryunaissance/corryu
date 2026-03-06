@@ -1449,16 +1449,148 @@ $(document).ready(function() {{
 
 <script>
 // ═══════════════════════════════════════════════════════════════════════
-// ❤️ 좋아요 기능
+// ❤️ 인기 종목 랭킹 (ticker_likes)
 // ═══════════════════════════════════════════════════════════════════════
-(async function initLikes() {{
-    if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) return;
-    const user = await CorryuAuth.getUser();
+(async function initTrending() {{
+  if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) return;
+
+  const section = document.getElementById('trending-section');
+  section.style.display = 'block';
+
+  const TOP_N = 5;
+
+  function rankItemHTML(rank, ticker, count, barPct, period) {{
+    const medals = ['🥇','🥈','🥉'];
+    const medal  = medals[rank - 1] || `<span style="font-size:.75rem;color:#475569;font-weight:800">${{rank}}</span>`;
+    const barColor = period === 'weekly' ? 'rgba(251,191,36,0.6)' : 'rgba(168,85,247,0.6)';
+    return `<a href="/etf-detail?ticker=${{encodeURIComponent(ticker)}}"
+        style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);text-decoration:none;transition:background .15s"
+        onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='rgba(255,255,255,0.02)'">
+      <span style="font-size:.9rem;flex-shrink:0;min-width:22px;text-align:center">${{medal}}</span>
+      <span style="font-weight:800;font-size:.84rem;color:#e2e8f0;min-width:52px">${{ticker}}</span>
+      <div style="flex:1;height:4px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden">
+        <div style="height:100%;border-radius:2px;background:${{barColor}};width:${{barPct}}%"></div>
+      </div>
+      <span style="font-size:.75rem;font-weight:700;color:#64748b;flex-shrink:0">❤️ ${{count}}</span>
+    </a>`;
+  }}
+
+  function emptyHTML() {{
+    return `<div data-i18n="index.trending.empty" style="color:#334155;font-size:.78rem;text-align:center;padding:16px 0">아직 좋아요 데이터가 없습니다</div>`;
+  }}
+
+  async function loadWeekly() {{
+    const el = document.getElementById('trending-weekly');
+    const {{ data, error }} = await _sb.from('ticker_likes_weekly')
+      .select('ticker,weekly_likes')
+      .order('weekly_likes', {{ ascending: false }})
+      .limit(TOP_N);
+    if (error || !data || data.length === 0) {{ el.innerHTML = emptyHTML(); return; }}
+    const maxLikes = data[0].weekly_likes;
+    el.innerHTML = data.map((row, i) => {{
+      const pct = maxLikes > 0 ? Math.round((row.weekly_likes / maxLikes) * 100) : 0;
+      return rankItemHTML(i + 1, row.ticker, row.weekly_likes, pct, 'weekly');
+    }}).join('');
+  }}
+
+  async function loadMonthly() {{
+    const el = document.getElementById('trending-monthly');
+    const {{ data, error }} = await _sb.from('ticker_likes_monthly')
+      .select('ticker,monthly_likes')
+      .order('monthly_likes', {{ ascending: false }})
+      .limit(TOP_N);
+    if (error || !data || data.length === 0) {{ el.innerHTML = emptyHTML(); return; }}
+    const maxLikes = data[0].monthly_likes;
+    el.innerHTML = data.map((row, i) => {{
+      const pct = maxLikes > 0 ? Math.round((row.monthly_likes / maxLikes) * 100) : 0;
+      return rankItemHTML(i + 1, row.ticker, row.monthly_likes, pct, 'monthly');
+    }}).join('');
+  }}
+
+  await Promise.all([loadWeekly(), loadMonthly()]);
+  setInterval(() => {{ loadWeekly(); loadMonthly(); }}, 30 * 60 * 1000);
+}})();
+
+// ═══════════════════════════════════════════════════════════════════════
+// 🔐 Navbar 인증 상태
+// ═══════════════════════════════════════════════════════════════════════
+(async function initNavAuth() {{
+  if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) return;
+
+  const authEl = document.getElementById('nav-auth');
+  if (!authEl) return;
+  let _renderedNick = null;
+
+  authEl.addEventListener('click', function(e) {{
+    if (e.target.closest('#nav-logout-btn')) {{
+      e.preventDefault();
+      e.stopPropagation();
+      doLogout();
+    }}
+  }});
+
+  async function doLogout() {{
+    var btn = document.getElementById('nav-logout-btn');
+    if (btn) {{ btn.disabled = true; btn.textContent = '로그아웃 중…'; }}
+    try {{
+      await Promise.race([
+        CorryuAuth.signOut(),
+        new Promise(function(r) {{ setTimeout(r, 2000); }})
+      ]);
+    }} catch(e) {{ console.warn('[CORRYU] logout error:', e); }}
+    window.location.reload();
+  }}
+
+  window._navLogout = doLogout;
+
+  async function renderAuth() {{
+    var user;
+    try {{ user = await CorryuAuth.getUser(); }} catch(e) {{ return; }}
     if (!user) return;
-    _currentUserId = user.id;
-    const {{ data }} = await _sb.from('ticker_likes').select('ticker').eq('user_id', user.id);
-    if (data) data.forEach(function(r) {{ likedTickers.add(r.ticker); }});
-    if (typeof table !== 'undefined') table.rows().invalidate('data').draw(false);
+    var profile;
+    try {{ profile = await CorryuAuth.getProfile(user.id); }} catch(e) {{}}
+    var nick = (profile && profile.nickname) || (user.email ? user.email.split('@')[0] : 'User');
+    if (_renderedNick === nick) return;
+    _renderedNick = nick;
+    authEl.innerHTML =
+      '<a id="nav-user-nick" href="/profile" title="' + nick + '">' + nick + '</a>' +
+      '<button id="nav-logout-btn" data-i18n="nav.logout">' + I18n.t('nav.logout') + '</button>';
+  }}
+
+  CorryuAuth.onAuthChange(function(event) {{
+    var mobLoginBtn = document.getElementById('nav-mob-login-btn');
+    if (event === 'SIGNED_IN' && mobLoginBtn) mobLoginBtn.style.display = 'none';
+    if (event === 'SIGNED_OUT') {{
+      _renderedNick = null;
+      window.location.reload();
+    }} else {{
+      renderAuth();
+    }}
+  }});
+
+  await renderAuth();
+}})();
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+// ❤️ 좋아요 기능 — onAuthChange 기반으로 nav 인증 상태와 동기화
+// ═══════════════════════════════════════════════════════════════════════
+(function initLikes() {{
+    if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) return;
+
+    CorryuAuth.onAuthChange(async function(event, session) {{
+        if (session && session.user) {{
+            _currentUserId = session.user.id;
+            const {{ data }} = await _sb.from('ticker_likes').select('ticker').eq('user_id', _currentUserId);
+            likedTickers = new Set();
+            if (data) data.forEach(function(r) {{ likedTickers.add(r.ticker); }});
+        }} else {{
+            _currentUserId = null;
+            likedTickers = new Set();
+        }}
+        if (typeof table !== 'undefined') table.rows().invalidate('data').draw(false);
+    }});
 }})();
 
 $(document).on('click', '.star-btn[data-like]', async function(e) {{
@@ -1477,7 +1609,7 @@ $(document).on('click', '.star-btn[data-like]', async function(e) {{
         likedTickers.add(ticker);
         await _sb.from('ticker_likes').upsert({{ ticker: ticker, user_id: _currentUserId }});
     }}
-    $(this).toggleClass('starred', !isLiked);
+    $(this).toggleClass('starred', likedTickers.has(ticker));
     $(this).text(likedTickers.has(ticker) ? '♥' : '♡');
 }});
 </script>
