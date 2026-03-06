@@ -207,6 +207,9 @@ MANUAL_SECTOR_OVERRIDES: dict[str, str] = {
     'EQLT': 'S12',  # Xtrackers MSCI EM ESG Leaders → 신흥국
     'QAT': 'S12',   # iShares MSCI Qatar → 신흥국
     'NDIA': 'S12',  # Motley Fool India → 신흥국
+    'FLBR': 'S12',  # Franklin FTSE Brazil ETF → 신흥국
+    'TOKE': 'S24',  # Cambria Cannabis ETF → 테마/특수목적
+    'FINE': 'S24',  # FinecoBank/테마 ETF → 테마/특수목적
     # -- 국제선진국 (S11) --
     'DXJS': 'S11',  # WisdomTree Japan Hedged SmallCap → 국제선진국
     # -- 에너지/원자재 (S19) 농산물 --
