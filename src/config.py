@@ -208,6 +208,7 @@ MANUAL_SECTOR_OVERRIDES: dict[str, str] = {
     'QAT': 'S12',   # iShares MSCI Qatar → 신흥국
     'NDIA': 'S12',  # Motley Fool India → 신흥국
     'FLBR': 'S12',  # Franklin FTSE Brazil ETF → 신흥국
+    'ARGT': 'S12',  # Global X MSCI Argentina ETF → 신흥국
     'TOKE': 'S24',  # Cambria Cannabis ETF → 테마/특수목적
     'FINE': 'S24',  # FinecoBank/테마 ETF → 테마/특수목적
     # -- 국제선진국 (S11) --
