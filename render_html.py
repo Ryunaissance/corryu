@@ -484,6 +484,14 @@ let table;
 let likedTickers = new Set();
 let _currentUserId = null;
 
+function applyHearts() {{
+    document.querySelectorAll('.star-btn[data-like]').forEach(function(btn) {{
+        var t = btn.dataset.like;
+        var liked = likedTickers.has(t);
+        btn.classList.toggle('starred', liked);
+        btn.textContent = liked ? '♥' : '♡';
+    }});
+}}
 
 function formatMCap(val) {{
     if (!val) return '-';
@@ -777,6 +785,7 @@ function loadSector(sectorId) {{
         data = allData[sectorId] || [];
     }}
     table.clear().rows.add(data).draw();
+    if (typeof applyHearts === 'function') applyHearts();
 }}
 
 function loadSuperSector(ssId) {{
@@ -787,6 +796,7 @@ function loadSuperSector(ssId) {{
     let ss = superSectorDefs[ssId];
     let data = ss ? ss.sub_sectors.flatMap(sid => allData[sid] || []) : [];
     table.clear().rows.add(data).draw();
+    if (typeof applyHearts === 'function') applyHearts();
 }}
 
 // ── 토스트 알림 (전역) ────────────────────────────────────
@@ -1582,14 +1592,14 @@ $(document).ready(function() {{
     CorryuAuth.onAuthChange(async function(event, session) {{
         if (session && session.user) {{
             _currentUserId = session.user.id;
-            const {{ data }} = await _sb.from('ticker_likes').select('ticker').eq('user_id', _currentUserId);
+            var res = await _sb.from('ticker_likes').select('ticker').eq('user_id', _currentUserId);
             likedTickers = new Set();
-            if (data) data.forEach(function(r) {{ likedTickers.add(r.ticker); }});
+            if (res.data) res.data.forEach(function(r) {{ likedTickers.add(r.ticker); }});
         }} else {{
             _currentUserId = null;
             likedTickers = new Set();
         }}
-        if (typeof table !== 'undefined') table.rows().invalidate('data').draw(false);
+        applyHearts();
     }});
 }})();
 
