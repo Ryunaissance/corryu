@@ -200,6 +200,7 @@ MANUAL_SECTOR_OVERRIDES: dict[str, str] = {
     'URAN': 'S19',  # Global X Uranium ETF (alt ticker) → 에너지/원자재
     'HURA': 'S19',  # Horizons Global Uranium Index → 에너지/원자재
     'URNJ': 'S19',  # Sprott Junior Uranium Miners → 에너지/원자재
+    'URAA': 'S19',  # Uranium Royalty Corp ETF → 에너지/원자재
     # -- 신흥국 (S12) --
     'SMIN': 'S12',  # iShares MSCI India Small-Cap → 신흥국
     'KWT': 'S12',   # iShares MSCI Kuwait → 신흥국
