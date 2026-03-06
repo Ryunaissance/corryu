@@ -481,6 +481,8 @@ let state = {{
 }};
 
 let table;
+let likedTickers = new Set();
+let _currentUserId = null;
 
 
 function formatMCap(val) {{
@@ -883,7 +885,11 @@ function initDashboard() {{
                     if (type !== 'display') return d;
                     let isMine = myPortfolio.includes(d);
                     let cls = isMine ? 'text-yellow-400 text-base' : 'text-blue-300';
-                    let h = '<span class="'+cls+'">'+d+'</span>';
+                    let isLiked = likedTickers.has(d);
+                    let heartCls = 'star-btn' + (isLiked ? ' starred' : '');
+                    let heartIcon = isLiked ? '♥' : '♡';
+                    let h = '<button class="' + heartCls + '" data-like="' + d + '" title="좋아요">' + heartIcon + '</button>';
+                    h += '<span class="'+cls+'">'+d+'</span>';
                     if (row.short_history) h += '<span class="badge-short" title="상장 3년 미만">짧은연혁</span>';
                     return h;
                 }}
@@ -1439,6 +1445,41 @@ $(document).ready(function() {{
   drawer.querySelectorAll('a').forEach(function(a) {{ a.addEventListener('click', closeMenu); }});
   document.addEventListener('keydown', function(e) {{ if (e.key === 'Escape') closeMenu(); }});
 }})();
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+// ❤️ 좋아요 기능
+// ═══════════════════════════════════════════════════════════════════════
+(async function initLikes() {{
+    if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) return;
+    const user = await CorryuAuth.getUser();
+    if (!user) return;
+    _currentUserId = user.id;
+    const {{ data }} = await _sb.from('ticker_likes').select('ticker').eq('user_id', user.id);
+    if (data) data.forEach(function(r) {{ likedTickers.add(r.ticker); }});
+    if (typeof table !== 'undefined') table.rows().invalidate('data').draw(false);
+}})();
+
+$(document).on('click', '.star-btn[data-like]', async function(e) {{
+    e.stopPropagation();
+    const ticker = this.dataset.like;
+    if (!_currentUserId) {{
+        showToast('로그인이 필요한 기능이에요', 2500);
+        setTimeout(function() {{ window.location.href = '/login'; }}, 1200);
+        return;
+    }}
+    const isLiked = likedTickers.has(ticker);
+    if (isLiked) {{
+        likedTickers.delete(ticker);
+        await _sb.from('ticker_likes').delete().eq('ticker', ticker).eq('user_id', _currentUserId);
+    }} else {{
+        likedTickers.add(ticker);
+        await _sb.from('ticker_likes').upsert({{ ticker: ticker, user_id: _currentUserId }});
+    }}
+    $(this).toggleClass('starred', !isLiked);
+    $(this).text(likedTickers.has(ticker) ? '♥' : '♡');
+}});
 </script>
 </body>
 </html>"""
