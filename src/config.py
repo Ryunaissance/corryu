@@ -212,6 +212,7 @@ MANUAL_SECTOR_OVERRIDES: dict[str, str] = {
     'FINE': 'S24',  # FinecoBank/테마 ETF → 테마/특수목적
     # -- 국제선진국 (S11) --
     'DXJS': 'S11',  # WisdomTree Japan Hedged SmallCap → 국제선진국
+    'DFJ': 'S11',   # WisdomTree Japan SmallCap Dividend → 국제선진국
     # -- 에너지/원자재 (S19) 농산물 --
     'SOYB': 'S19',  # Teucrium Soybean Fund → 원자재
     'CANE': 'S19',  # Teucrium Sugar Fund → 원자재
