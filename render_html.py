@@ -895,10 +895,7 @@ function initDashboard() {{
                     if (type !== 'display') return d;
                     let isMine = myPortfolio.includes(d);
                     let cls = isMine ? 'text-yellow-400 text-base' : 'text-blue-300';
-                    let isLiked = likedTickers.has(d);
-                    let heartCls = 'star-btn' + (isLiked ? ' starred' : '');
-                    let heartIcon = isLiked ? '♥' : '♡';
-                    let h = '<button class="' + heartCls + '" data-like="' + d + '" title="좋아요">' + heartIcon + '</button>';
+                    let h = '<button class="star-btn" data-like="' + d + '" title="좋아요">♡</button>';
                     h += '<span class="'+cls+'">'+d+'</span>';
                     if (row.short_history) h += '<span class="badge-short" title="상장 3년 미만">짧은연혁</span>';
                     return h;
@@ -1009,6 +1006,9 @@ function initDashboard() {{
             else $(row).removeClass('row-legacy');
             if (selectedTickers.has(data.ticker)) $(row).addClass('row-selected');
             else $(row).removeClass('row-selected');
+        }},
+        drawCallback: function() {{
+            if (typeof applyHearts === 'function') applyHearts();
         }}
     }});
 
