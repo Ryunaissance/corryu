@@ -217,11 +217,14 @@ MANUAL_SECTOR_OVERRIDES: dict[str, str] = {
     'DXJS': 'S11',  # WisdomTree Japan Hedged SmallCap → 국제선진국
     'DFJ': 'S11',   # WisdomTree Japan SmallCap Dividend → 국제선진국
     'EWJV': 'S11',  # iShares MSCI Japan Value → 국제선진국
+    'FJP': 'S11',   # Matthews Japan ETF → 국제선진국
+    'SCJ': 'S11',   # iShares MSCI Japan Small-Cap → 국제선진국
     # -- 에너지/원자재 (S19) 농산물 --
     'SOYB': 'S19',  # Teucrium Soybean Fund → 원자재
     'CANE': 'S19',  # Teucrium Sugar Fund → 원자재
     'CORN': 'S19',  # Teucrium Corn Fund → 원자재
     'WEAT': 'S19',  # Teucrium Wheat Fund → 원자재
+    'JPXN': 'S19',  # iShares JPX-Nikkei 400 → 원자재
     # -- 단기채/현금성 (S15) --
     'CLIP': 'S15',  # Global X 1-3 Month T-Bill → 단기채
     'FLDB': 'S15',  # Fidelity Low Duration Bond → 단기채
