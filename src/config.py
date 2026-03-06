@@ -200,6 +200,7 @@ MANUAL_SECTOR_OVERRIDES: dict[str, str] = {
     'URAN': 'S19',  # Global X Uranium ETF (alt ticker) → 에너지/원자재
     'HURA': 'S19',  # Horizons Global Uranium Index → 에너지/원자재
     'URNJ': 'S19',  # Sprott Junior Uranium Miners → 에너지/원자재
+    'URAA': 'S19',  # Uranium Royalty Corp ETF → 에너지/원자재
     # -- 신흥국 (S12) --
     'SMIN': 'S12',  # iShares MSCI India Small-Cap → 신흥국
     'KWT': 'S12',   # iShares MSCI Kuwait → 신흥국
@@ -207,13 +208,23 @@ MANUAL_SECTOR_OVERRIDES: dict[str, str] = {
     'EQLT': 'S12',  # Xtrackers MSCI EM ESG Leaders → 신흥국
     'QAT': 'S12',   # iShares MSCI Qatar → 신흥국
     'NDIA': 'S12',  # Motley Fool India → 신흥국
+    'FLBR': 'S12',  # Franklin FTSE Brazil ETF → 신흥국
+    'ARGT': 'S12',  # Global X MSCI Argentina ETF → 신흥국
+    'VNM': 'S12',   # VanEck Vietnam ETF → 신흥국
+    'TOKE': 'S24',  # Cambria Cannabis ETF → 테마/특수목적
+    'FINE': 'S24',  # FinecoBank/테마 ETF → 테마/특수목적
     # -- 국제선진국 (S11) --
     'DXJS': 'S11',  # WisdomTree Japan Hedged SmallCap → 국제선진국
+    'DFJ': 'S11',   # WisdomTree Japan SmallCap Dividend → 국제선진국
+    'EWJV': 'S11',  # iShares MSCI Japan Value → 국제선진국
+    'FJP': 'S11',   # Matthews Japan ETF → 국제선진국
+    'SCJ': 'S11',   # iShares MSCI Japan Small-Cap → 국제선진국
     # -- 에너지/원자재 (S19) 농산물 --
     'SOYB': 'S19',  # Teucrium Soybean Fund → 원자재
     'CANE': 'S19',  # Teucrium Sugar Fund → 원자재
     'CORN': 'S19',  # Teucrium Corn Fund → 원자재
     'WEAT': 'S19',  # Teucrium Wheat Fund → 원자재
+    'JPXN': 'S19',  # iShares JPX-Nikkei 400 → 원자재
     # -- 단기채/현금성 (S15) --
     'CLIP': 'S15',  # Global X 1-3 Month T-Bill → 단기채
     'FLDB': 'S15',  # Fidelity Low Duration Bond → 단기채
