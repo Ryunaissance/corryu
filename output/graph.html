@@ -541,7 +541,7 @@ function applyFilter(minR) {
   // 1) 반발력: 노드가 많을수록, 임계값이 낮을수록 더 세게 밀어내야 공간 확보
   //    기본 r=0.95 → ~100노드 → charge -200
   //    r=0.70 → ~1300노드 → charge -800 정도로 스케일
-  const baseCharge = -200;
+  const baseCharge = -120; // 반발력 약화 (-200 → -120)
   const chargeScale = Math.max(1, Math.sqrt(nNodes / 100));
   const charge = baseCharge * chargeScale;
 
