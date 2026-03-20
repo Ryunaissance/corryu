@@ -221,11 +221,11 @@
 
   <div class="ctrl-row">
     <div class="ctrl-label">
-      <span data-i18n="graph.threshold">임계값 (r ≥)</span> <span id="r-val">0.80</span>
+      <span data-i18n="graph.threshold">임계값 (r ≥)</span> <span id="r-val">0.90</span>
     </div>
     <div class="slider-row">
       <button class="slider-btn" id="r-minus" title="-0.05">−</button>
-      <input type="range" id="r-slider" min="70" max="99" value="80" step="1">
+      <input type="range" id="r-slider" min="70" max="99" value="90" step="1">
       <button class="slider-btn" id="r-plus" title="+0.05">+</button>
     </div>
     <div class="slider-labels">
@@ -260,11 +260,11 @@
 
   <div class="ctrl-row">
     <div class="ctrl-label">
-      <span>노드 크기</span> <span id="node-size-val">10.0x</span>
+      <span>노드 크기</span> <span id="node-size-val">4.0x</span>
     </div>
     <div class="slider-row">
       <button class="slider-btn" id="ns-minus" title="-1x">−</button>
-      <input type="range" id="node-size-slider" min="10" max="1000" value="1000" step="10">
+      <input type="range" id="node-size-slider" min="10" max="1000" value="400" step="10">
       <button class="slider-btn" id="ns-plus" title="+1x">+</button>
     </div>
     <div class="slider-labels">
@@ -320,7 +320,7 @@
 
 <script>
 // ── 상수 ──────────────────────────────────────────────
-const DEFAULT_R    = 0.80;
+const DEFAULT_R    = 0.90;
 const STATIC_THRESHOLD = 0.90; // r 이하면 정적 렌더링 모드
 const LINK_DIST_K  = 800;   // link distance = (1 - r) * K  →  r=1: 0px, r=0: 800px
 const LINK_STRENGTH_K = 0.8; // link strength = (r - 0.65) * K  →  r=0.95: 0.24
@@ -335,7 +335,7 @@ let storeMinR   = 0.70;
 let currentR    = DEFAULT_R;
 let hiddenSectors = new Set();
 let hideShortHistory = false; // 해제된 섯터 ID 입니다
-let nodeScaleMult = 10.0; // 노드 크기 배율 (슬라이더 제어)
+let nodeScaleMult = 4.0; // 노드 크기 배율 (슬라이더 제어)
 
 let hoverNode        = null;
 let highlightNodeIds = new Set();
