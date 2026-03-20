@@ -376,20 +376,20 @@ function effectiveColor(node) {
 function getNodeColor(node) {
   const base = effectiveColor(node);
   if (searchTicker && node.id === searchTicker) return '#ffffff';
-  if (hoverNode) {
-    if (node === hoverNode)              return base;
-    if (highlightNodeIds.has(node.id))  return base;
-    return base + '22';  // 흐리게
+  if (hoverSector) {
+    const s = hoverSector;
+    const active = s.startsWith('SS_') ? ((sectorMeta[node.s] || {}).ss === s.slice(3)) : (node.s === s);
+    return active ? base : base + '18';
   }
-  if (hoverSector || focusSector) {
-    const s = hoverSector || focusSector;
-    // 'SS_<id>' 형태이면 슈퍼섹터 소속 전체 하이라이트
-    if (s.startsWith('SS_')) {
-      const ssId = s.slice(3);
-      const nodeSS = (sectorMeta[node.s] || {}).ss;
-      return nodeSS === ssId ? base : base + '18';
-    }
-    return node.s === s ? base : base + '18';
+  if (hoverNode) {
+    if (node === hoverNode)             return base;
+    if (highlightNodeIds.has(node.id)) return base;
+    return base + '22';  // \ud76c\ub9ac\uac게
+  }
+  if (focusSector) {
+    const s = focusSector;
+    const active = s.startsWith('SS_') ? ((sectorMeta[node.s] || {}).ss === s.slice(3)) : (node.s === s);
+    return active ? base : base + '18';
   }
   return base;
 }
@@ -415,22 +415,25 @@ function getLinkColor(link) {
   const sid = sn ? sn.id : link.source;
   const tid = tn ? tn.id : link.target;
 
+  const t = Math.max(0, (link.r - storeMinR) / (1 - storeMinR));
+  const sameSector = (sn && tn && sn.s === tn.s);
+  const baseColorHex = sameSector ? sectorColor(sn.s) : '#94a3b8';
+
+  if (hoverSector) {
+    const s = hoverSector;
+    const active = s.startsWith('SS_') ? ((sn && (sectorMeta[sn.s] || {}).ss === s.slice(3)) || (tn && (sectorMeta[tn.s] || {}).ss === s.slice(3))) : ((sn && sn.s === s) || (tn && tn.s === s));
+    if (active) return hexToRgba(baseColorHex, 0.15 + t * 0.40);
+    return 'rgba(255,255,255,0.01)';
+  }
   if (hoverNode) {
     const active = sid === hoverNode.id || tid === hoverNode.id;
     if (!active) return 'rgba(255,255,255,0.02)';
-    const t = Math.max(0, Math.min(1, (link.r - 0.8) / 0.2));
-    return `rgba(${Math.round(255*t)},${Math.round(120+80*t)},${Math.round(255*(1-t))},0.85)`;
+    const tLink = Math.max(0, Math.min(1, (link.r - 0.8) / 0.2));
+    return `rgba(${Math.round(255*tLink)},${Math.round(120+80*tLink)},${Math.round(255*(1-tLink))},0.85)`;
   }
-
-  const t = Math.max(0, (link.r - storeMinR) / (1 - storeMinR));
-  
-  // 같은 섹터 내 연결인 경우 해당 섹터 색상 적용
-  const sameSector = (sn && tn && sn.s === tn.s);
-  const baseColorHex = sameSector ? sectorColor(sn.s) : '#94a3b8';
-  
-  if (hoverSector || focusSector) {
-    const s = hoverSector || focusSector;
-    const active = (sn && sn.s === s) || (tn && tn.s === s);
+  if (focusSector) {
+    const s = focusSector;
+    const active = s.startsWith('SS_') ? ((sn && (sectorMeta[sn.s] || {}).ss === s.slice(3)) || (tn && (sectorMeta[tn.s] || {}).ss === s.slice(3))) : ((sn && sn.s === s) || (tn && tn.s === s));
     if (active) return hexToRgba(baseColorHex, 0.15 + t * 0.40);
     return 'rgba(255,255,255,0.01)';
   }
