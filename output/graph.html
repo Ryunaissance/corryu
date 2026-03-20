@@ -118,6 +118,26 @@
     .legend-item.hidden-sector .legend-text { opacity: 0.35; text-decoration: line-through; }
 
 
+    .slider-row {
+      display: flex; align-items: center; gap: 5px;
+    }
+    .slider-row input[type="range"] { flex: 1; }
+    .slider-labels {
+      display: flex; justify-content: space-between;
+      font-size: 10px; color: #484f58; margin-top: 2px;
+    }
+    .slider-btn {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #94a3b8; font-size: 14px; font-weight: 700;
+      width: 22px; height: 22px; border-radius: 5px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: background 0.12s, color 0.12s; line-height: 1;
+      padding: 0;
+    }
+    .slider-btn:hover { background: rgba(255,255,255,0.15); color: #e2e8f0; }
+    .slider-btn:active { background: rgba(255,255,255,0.22); }
+
     /* ── 툴팁 ── */
     #tooltip {
       position: fixed; display: none; z-index: 200;
@@ -203,8 +223,12 @@
     <div class="ctrl-label">
       <span data-i18n="graph.threshold">임계값 (r ≥)</span> <span id="r-val">0.95</span>
     </div>
-    <input type="range" id="r-slider" min="70" max="99" value="95" step="1">
-    <div class="slider-labels" style="display:flex;justify-content:space-between;font-size:10px;color:#484f58;margin-top:2px">
+    <div class="slider-row">
+      <button class="slider-btn" id="r-minus" title="-0.05">−</button>
+      <input type="range" id="r-slider" min="70" max="99" value="95" step="1">
+      <button class="slider-btn" id="r-plus" title="+0.05">+</button>
+    </div>
+    <div class="slider-labels">
       <span id="r-min-label">0.70</span><span>0.99</span>
     </div>
   </div>
@@ -231,9 +255,13 @@
     <div class="ctrl-label">
       <span>노드 크기</span> <span id="node-size-val">1.0x</span>
     </div>
-    <input type="range" id="node-size-slider" min="20" max="300" value="100" step="5">
-    <div style="display:flex;justify-content:space-between;font-size:10px;color:#484f58;margin-top:2px">
-      <span>0.2x</span><span>3.0x</span>
+    <div class="slider-row">
+      <button class="slider-btn" id="ns-minus" title="-1x">−</button>
+      <input type="range" id="node-size-slider" min="10" max="1000" value="100" step="10">
+      <button class="slider-btn" id="ns-plus" title="+1x">+</button>
+    </div>
+    <div class="slider-labels">
+      <span>0.1x</span><span>10x</span>
     </div>
   </div>
 
@@ -706,6 +734,18 @@ document.getElementById('node-size-slider').addEventListener('input', e => {
   document.getElementById('node-size-val').textContent = nodeScaleMult.toFixed(1) + 'x';
   if (Graph) { Graph.nodeVal(getNodeVal); Graph.refresh(); }
 });
+
+// ── 슬라이더 +/- 버튼 ───────────────────────────────
+function nudgeSlider(sliderId, labelId, delta, scale, fmt) {
+  const slider = document.getElementById(sliderId);
+  const newVal = Math.min(parseInt(slider.max), Math.max(parseInt(slider.min), parseInt(slider.value) + delta));
+  slider.value = newVal;
+  slider.dispatchEvent(new Event('input'));
+}
+document.getElementById('r-minus').addEventListener('click', () => nudgeSlider('r-slider', 'r-val', -5, 100, v => v.toFixed(2)));
+document.getElementById('r-plus' ).addEventListener('click', () => nudgeSlider('r-slider', 'r-val', +5, 100, v => v.toFixed(2)));
+document.getElementById('ns-minus').addEventListener('click', () => nudgeSlider('node-size-slider', 'node-size-val', -100, 100, v => v.toFixed(1)+'x'));
+document.getElementById('ns-plus' ).addEventListener('click', () => nudgeSlider('node-size-slider', 'node-size-val', +100, 100, v => v.toFixed(1)+'x'));
 
 // ── 레거시 토글 ──────────────────────────────────────
 document.getElementById('hide-legacy').addEventListener('change', e => {
