@@ -795,8 +795,9 @@ fetch('graph_data.json')
         requestAnimationFrame(() => { if (Graph) Graph.refresh(); });
       })
       .onNodeClick(node => {
-        Graph.centerAt(node.x, node.y, 500);
-        Graph.zoom(5, 500);
+        // 클릭 시 확대 및 중심 이동 제거 (USER REQUEST)
+        // Graph.centerAt(node.x, node.y, 500);
+        // Graph.zoom(5, 500);
       })
       .onBackgroundClick(() => {
         if (focusSector) {
