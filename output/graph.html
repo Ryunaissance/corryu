@@ -383,7 +383,7 @@ function getNodeVal(node) {
   // 파워 스케일 (0.55승): AUM 차이가 눈에 띄게 나도록
   // $0.1B→1  $1B→1   $10B→3.5  $50B→10  $100B→12  $600B→45
   const aumB = node.a || 0;
-  return Math.max(1, Math.pow(aumB + 0.01, 0.85) // 지수 증가 (0.70 → 0.85)) * nodeScaleMult;
+  return Math.max(1, Math.pow(aumB + 0.01, 0.85)) * nodeScaleMult;
 }
 
 function getLinkColor(link) {
