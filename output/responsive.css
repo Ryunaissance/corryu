@@ -631,3 +631,10 @@ div.dataTables_scrollBody table.dataTable thead td {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
+
+/* Navbar Auth Styles */
+#nav-auth { display:flex; align-items:center; gap:6px; margin-right: 8px; }
+#nav-user-nick { font-size:0.78rem; font-weight:700; color:#93c5fd; max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-decoration:none; border-radius:6px; padding:2px 6px; transition:background 0.15s; }
+#nav-user-nick:hover { background:rgba(59,130,246,0.12); }
+#nav-logout-btn { padding:4px 10px; border-radius:7px; background:rgba(248,113,113,0.08); color:#f87171; border:1px solid rgba(248,113,113,0.2); font-size:0.74rem; font-weight:700; cursor:pointer; transition:all 0.15s; font-family:inherit; pointer-events:auto; position:relative; z-index:10; }
+#nav-logout-btn:hover { background:rgba(248,113,113,0.18); }

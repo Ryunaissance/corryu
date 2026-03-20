@@ -132,6 +132,7 @@ nav{position:fixed;top:3px;left:0;right:0;z-index:100;background:rgba(10,13,20,0
       <a href="/correlation" class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="12" cy="16" r="2"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="9" y1="10" x2="11" y2="14"/><line x1="15" y1="10" x2="13" y2="14"/></svg><span data-i18n="nav.correlation">상관관계</span></a>
       <a href="/compare"     class="nav-link"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span data-i18n="nav.compare">비교</span></a>
     </div>
+    <div id="nav-auth"></div>
     <button class="theme-toggle" aria-label="라이트 모드로 전환" title="라이트 모드"><svg class="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg><svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
 <button id="nav-mob-btn" class="nav-mob-btn" aria-label="메뉴">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="17" y2="6"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="14" x2="17" y2="14"/></svg>
@@ -885,5 +886,71 @@ document.addEventListener('i18n:ready', () => {
   document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
 })();
 </script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+// 🔐 Navbar 인증 상태 자동화
+// ═══════════════════════════════════════════════════════════════════════
+(async function initNavAuth() {
+  if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) return;
+
+  const authEl = document.getElementById('nav-auth');
+  if (!authEl) return;
+  let _renderedNick = null;
+
+  authEl.addEventListener('click', function(e) {
+    if (e.target.closest('#nav-logout-btn')) {
+      e.preventDefault();
+      e.stopPropagation();
+      doLogout();
+    }
+  });
+
+  async function doLogout() {
+    var btn = document.getElementById('nav-logout-btn');
+    if (btn) { btn.disabled = true; btn.textContent = '로그아웃 중…'; }
+    try {
+      await Promise.race([
+        CorryuAuth.signOut(),
+        new Promise(function(r) { setTimeout(r, 2000); })
+      ]);
+    } catch(e) { console.warn('[CORRYU] logout error:', e); }
+    window.location.reload();
+  }
+
+  window._navLogout = doLogout;
+
+  async function renderAuth() {
+    var user;
+    try { user = await CorryuAuth.getUser(); } catch(e) { return; }
+    if (!user) return;
+    var profile;
+    try { profile = await CorryuAuth.getProfile(user.id); } catch(e) {}
+    var nick = (profile && profile.nickname) || (user.email ? user.email.split('@')[0] : 'User');
+    if (_renderedNick === nick) return;
+    _renderedNick = nick;
+    // We try to get correct I18n, else fallback to "로그아웃"
+    var logoutTxt = (typeof I18n !== 'undefined') ? I18n.t('nav.logout') : '로그아웃';
+    if (!logoutTxt || logoutTxt.indexOf('nav.logout')!==-1) logoutTxt = '로그아웃';
+    authEl.innerHTML =
+      '<a id="nav-user-nick" href="/profile" title="' + nick + '">' + nick + '</a>' +
+      '<button id="nav-logout-btn" data-i18n="nav.logout">' + logoutTxt + '</button>';
+  }
+
+  CorryuAuth.onAuthChange(function(event) {
+    var mobLoginBtn = document.getElementById('nav-mob-login-btn');
+    if (event === 'SIGNED_IN' && mobLoginBtn) mobLoginBtn.style.display = 'none';
+    if (event === 'SIGNED_OUT') {
+      _renderedNick = null;
+      window.location.reload();
+    } else {
+      renderAuth();
+    }
+  });
+
+  await renderAuth();
+})();
+</script>
 </body>
+
 </html>

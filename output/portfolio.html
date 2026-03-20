@@ -167,6 +167,7 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         ETF 비교</a>
     </div>
+    <div id="nav-auth"></div>
     <button class="theme-toggle" aria-label="라이트 모드로 전환" title="라이트 모드"><svg class="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg><svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
 <button id="nav-mob-btn" class="nav-mob-btn" aria-label="메뉴" aria-expanded="false">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -273,7 +274,7 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
         ETF 추가
       </button>
       <div class="save-bar">
-        <button class="btn-save" onclick="calculatePortfolio()">계산하기</button>
+        <button class="btn-save" onclick="calculatePortfolio(true)">계산하기</button>
         <button class="btn-save" onclick="savePortfolio()" style="background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.3);color:#4ade80">저장</button>
       </div>
     </div>
@@ -359,12 +360,34 @@ function renderRows() {
 }
 
 // ── 계산 ──────────────────────────────────────────────
-function calculatePortfolio() {
+function calculatePortfolio(fromButton = false) {
+  // 금액(Amount)이 입력된 경우 비중(Weight) 자동 계산
+  let totalAmt = 0;
+  rows.forEach(r => { let a = parseFloat(r.amount); if(!isNaN(a) && a > 0) totalAmt += a; });
+  if (totalAmt > 0) {
+    rows.forEach((r, i) => {
+      let a = parseFloat(r.amount);
+      if(!isNaN(a) && a > 0) {
+        r.weight = ((a / totalAmt) * 100).toFixed(1);
+        const wInput = document.querySelector(`#row-${i} input:nth-child(2)`);
+        if (wInput && document.activeElement !== wInput) wInput.value = r.weight;
+      }
+    });
+  }
+
   const valid = rows.filter(r => r.ticker && r.weight && allData[r.ticker.toUpperCase()]);
-  if (valid.length === 0) { clearSummary(); return; }
+  if (valid.length === 0) {
+    clearSummary();
+    if (fromButton) showToast('올바른 티커와 비중(또는 금액)을 입력해주세요.', 'error');
+    return;
+  }
 
   let totalW = valid.reduce((s, r) => s + parseFloat(r.weight), 0);
-  if (totalW === 0) { clearSummary(); return; }
+  if (totalW === 0) {
+    clearSummary();
+    if (fromButton) showToast('비중의 합이 0보다 커야 합니다.', 'error');
+    return;
+  }
 
   let wCAGR = 0, wVol = 0, wSortino = 0, wZScore = 0, zCount = 0;
   const items = [];
@@ -399,6 +422,8 @@ function calculatePortfolio() {
       <span class="wbi-pct">${it.weight}%</span>
     </div>`).join('');
   document.getElementById('weight-bars').innerHTML = barHtml;
+
+  if (fromButton) showToast('포트폴리오 계산이 완료되었습니다.', 'success');
 }
 
 function clearSummary() {
@@ -457,5 +482,71 @@ function showToast(msg, type='info') {
 <script>
 (function(){var btn=document.getElementById('nav-mob-btn'),drawer=document.getElementById('nav-mob-drawer'),overlay=document.getElementById('nav-mob-overlay');if(!btn||!drawer)return;function open(){drawer.classList.add('open');if(overlay)overlay.classList.add('open');document.body.classList.add('mob-menu-open');btn.setAttribute('aria-expanded','true');}function close(){drawer.classList.remove('open');if(overlay)overlay.classList.remove('open');document.body.classList.remove('mob-menu-open');btn.setAttribute('aria-expanded','false');}btn.addEventListener('click',function(){drawer.classList.contains('open')?close():open();});if(overlay)overlay.addEventListener('click',close);drawer.querySelectorAll('a').forEach(function(a){a.addEventListener('click',close);});document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});})();
 </script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+// 🔐 Navbar 인증 상태 자동화
+// ═══════════════════════════════════════════════════════════════════════
+(async function initNavAuth() {
+  if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) return;
+
+  const authEl = document.getElementById('nav-auth');
+  if (!authEl) return;
+  let _renderedNick = null;
+
+  authEl.addEventListener('click', function(e) {
+    if (e.target.closest('#nav-logout-btn')) {
+      e.preventDefault();
+      e.stopPropagation();
+      doLogout();
+    }
+  });
+
+  async function doLogout() {
+    var btn = document.getElementById('nav-logout-btn');
+    if (btn) { btn.disabled = true; btn.textContent = '로그아웃 중…'; }
+    try {
+      await Promise.race([
+        CorryuAuth.signOut(),
+        new Promise(function(r) { setTimeout(r, 2000); })
+      ]);
+    } catch(e) { console.warn('[CORRYU] logout error:', e); }
+    window.location.reload();
+  }
+
+  window._navLogout = doLogout;
+
+  async function renderAuth() {
+    var user;
+    try { user = await CorryuAuth.getUser(); } catch(e) { return; }
+    if (!user) return;
+    var profile;
+    try { profile = await CorryuAuth.getProfile(user.id); } catch(e) {}
+    var nick = (profile && profile.nickname) || (user.email ? user.email.split('@')[0] : 'User');
+    if (_renderedNick === nick) return;
+    _renderedNick = nick;
+    // We try to get correct I18n, else fallback to "로그아웃"
+    var logoutTxt = (typeof I18n !== 'undefined') ? I18n.t('nav.logout') : '로그아웃';
+    if (!logoutTxt || logoutTxt.indexOf('nav.logout')!==-1) logoutTxt = '로그아웃';
+    authEl.innerHTML =
+      '<a id="nav-user-nick" href="/profile" title="' + nick + '">' + nick + '</a>' +
+      '<button id="nav-logout-btn" data-i18n="nav.logout">' + logoutTxt + '</button>';
+  }
+
+  CorryuAuth.onAuthChange(function(event) {
+    var mobLoginBtn = document.getElementById('nav-mob-login-btn');
+    if (event === 'SIGNED_IN' && mobLoginBtn) mobLoginBtn.style.display = 'none';
+    if (event === 'SIGNED_OUT') {
+      _renderedNick = null;
+      window.location.reload();
+    } else {
+      renderAuth();
+    }
+  });
+
+  await renderAuth();
+})();
+</script>
 </body>
+
 </html>

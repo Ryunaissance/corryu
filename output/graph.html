@@ -629,6 +629,8 @@ document.getElementById('r-slider').addEventListener('input', e => {
 // ── 레거시 토글 ──────────────────────────────────────
 document.getElementById('hide-legacy').addEventListener('change', e => {
   hideLegacy = e.target.checked;
+  // Reset coordinates to prevent gradual scattering when toggling
+  allNodes.forEach(n => { delete n.x; delete n.y; delete n.vx; delete n.vy; });
   if (Graph) applyFilter(currentR);
 });
 
