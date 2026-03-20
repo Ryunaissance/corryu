@@ -670,7 +670,7 @@ fetch('graph_data.json')
       .d3VelocityDecay(0.55)
       .d3AlphaMin(0.01)
       .cooldownTime(8000)
-      .enableNodeDrag(true)
+      .enableNodeDrag(false)
       .enableZoomInteraction(true)
       .onEngineStop(() => {
         showLayoutOverlay(false);
