@@ -547,22 +547,7 @@ function renderLegend() {
     if (Graph) Graph.refresh();
   });
 
-  container.addEventListener('mouseover', e => {
-    const item = e.target.closest('.legend-item');
-    if (!item) return;
-    const sid = item.dataset.sid;
-    if (hoverSector !== sid) {
-      hoverSector = sid;
-      if (Graph) Graph.refresh();
-    }
-  });
 
-  container.addEventListener('mouseout', e => {
-    const item = e.target.closest('.legend-item');
-    if (!item) return;
-    hoverSector = null;
-    if (Graph) Graph.refresh();
-  });
 }
 
 // ── 레이아웃 오버레이 제어 ────────────────────────────
@@ -698,6 +683,23 @@ fetch('graph_data.json')
     document.getElementById('r-min-label').textContent = storeMinR.toFixed(2);
 
     renderLegend();
+
+    // ── Legend Hover Highlights (New Delegated) ─────────
+    const legendContainer = document.getElementById('legend-items');
+    legendContainer.addEventListener('mouseover', e => {
+      const item = e.target.closest('.legend-item');
+      const sid = item ? item.dataset.sid : null;
+      if (hoverSector !== sid) {
+        hoverSector = sid;
+        if (Graph) Graph.refresh();
+      }
+    });
+    legendContainer.addEventListener('mouseleave', () => {
+      if (hoverSector !== null) {
+        hoverSector = null;
+        if (Graph) Graph.refresh();
+      }
+    });
 
     // ── ForceGraph 초기화 ────────────────────────────
     Graph = ForceGraph()(document.getElementById('graph-container'))
