@@ -104,7 +104,19 @@
     .legend-item.active { background: rgba(96,165,250,0.12); outline: 1px solid rgba(96,165,250,0.35); }
     .legend-item.dimmed { opacity: 0.35; }
     .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-    .legend-text { font-size: 11px; color: #c9d1d9; }
+    .legend-text { font-size: 11px; color: #c9d1d9; flex: 1; }
+    .legend-toggle {
+      background: none; border: none; cursor: pointer; padding: 2px 4px;
+      color: #484f58; display: flex; align-items: center; border-radius: 3px;
+      opacity: 0; transition: opacity 0.15s, color 0.15s;
+      margin-left: auto; flex-shrink: 0;
+    }
+    .legend-item:hover .legend-toggle { opacity: 1; }
+    .legend-toggle:hover { color: #c9d1d9; background: rgba(255,255,255,0.08); }
+    .legend-item.hidden-sector .legend-toggle { opacity: 1; color: #ef4444; }
+    .legend-item.hidden-sector .legend-dot { opacity: 0.2; }
+    .legend-item.hidden-sector .legend-text { opacity: 0.35; text-decoration: line-through; }
+
 
     /* ── 툴팁 ── */
     #tooltip {
@@ -267,6 +279,7 @@ let Graph;
 let ETF_META = {};
 let storeMinR   = 0.70;
 let currentR    = DEFAULT_R;
+let hiddenSectors = new Set(); // 해제된 섯터 ID 입니다
 
 let hoverNode        = null;
 let highlightNodeIds = new Set();
@@ -362,6 +375,9 @@ function fmtAUM(b) {
 }
 
 // ── 레전드 렌더 ──────────────────────────────────────
+const SVG_EYE_ON  = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+const SVG_EYE_OFF = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
 function renderLegend() {
   const AC_ORDER = ['EQUITY','FIXED_INCOME','REAL_ASSETS','ALTERNATIVE','THEMATIC'];
   const AC_KO = {
@@ -386,20 +402,24 @@ function renderLegend() {
         if (!renderedSS.has(ss)) {
           renderedSS.add(ss);
           const ssDef = superSectorMeta[ss];
+          const isHidden = hiddenSectors.has('SS_' + ss);
           html += `
-            <div class="legend-item" data-sid="SS_${ss}" title="${ssDef.name_en}">
+            <div class="legend-item${isHidden ? ' hidden-sector' : ''}" data-sid="SS_${ss}" title="${ssDef.name_en}">
               <div class="legend-dot" style="background:${ssDef.color}"></div>
               <span class="legend-text">${ssDef.name}</span>
+              <button class="legend-toggle" data-toggle="SS_${ss}" title="토글">${isHidden ? SVG_EYE_OFF : SVG_EYE_ON}</button>
             </div>`;
         }
       } else {
         // 개별 섹터 항목
         const color = (superSectorMode && ss && superSectorMeta[ss])
           ? superSectorMeta[ss].color : s.color;
+        const isHidden = hiddenSectors.has(s.sid);
         html += `
-          <div class="legend-item" data-sid="${s.sid}" title="${s.name_en}">
+          <div class="legend-item${isHidden ? ' hidden-sector' : ''}" data-sid="${s.sid}" title="${s.name_en}">
             <div class="legend-dot" style="background:${color}"></div>
             <span class="legend-text">${s.name}</span>
+            <button class="legend-toggle" data-toggle="${s.sid}" title="토글">${isHidden ? SVG_EYE_OFF : SVG_EYE_ON}</button>
           </div>`;
       }
     }
@@ -408,6 +428,21 @@ function renderLegend() {
   container.innerHTML = html;
 
   container.addEventListener('click', e => {
+    // Toggle button
+    const toggleBtn = e.target.closest('.legend-toggle');
+    if (toggleBtn) {
+      e.stopPropagation();
+      const sid = toggleBtn.dataset.toggle;
+      if (hiddenSectors.has(sid)) {
+        hiddenSectors.delete(sid);
+      } else {
+        hiddenSectors.add(sid);
+      }
+      renderLegend();
+      if (Graph) applyFilter(currentR);
+      return;
+    }
+    // Focus sector on legend click
     const item = e.target.closest('.legend-item');
     if (!item) return;
     const sid = item.dataset.sid;
@@ -426,7 +461,8 @@ function renderLegend() {
 // ── 필터 적용 (슬라이더 변경 시) ───────────────────────
 function applyFilter(minR) {
   currentR = minR;
-  const visibleNodes = hideLegacy ? allNodes.filter(n => !n.l) : allNodes;
+  const visibleNodes = (hideLegacy ? allNodes.filter(n => !n.l) : allNodes)
+    .filter(n => !hiddenSectors.has(n.s));
   const visibleIds   = new Set(visibleNodes.map(n => n.id));
   const filtered     = allLinks.filter(l => l.r >= minR && visibleIds.has(l.s) && visibleIds.has(l.t));
   Graph.graphData({ nodes: visibleNodes, links: filtered });
