@@ -268,6 +268,14 @@
   <div id="stats" data-i18n="graph.loading">데이터 로딩 중...</div>
   <div id="progress-bar"><div id="progress-fill"></div></div>
 </div>
+<-genkey 레이아웃 오버레이 (정적 렌더링 모드) -->
+<div id="layout-overlay" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(13,17,23,0.82);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px">
+  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" style="animation:spin 1s linear infinite">
+    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+  </svg>
+  <span id="layout-msg" style="font-size:13px;color:#8b949e">레이아웃 계산 중...</span>
+</div>
+<style>@keyframes spin { to { transform: rotate(360deg); } }</style>
 
 <!-- 레전드 -->
 <div id="legend">
@@ -306,6 +314,7 @@
 <script>
 // ── 상수 ──────────────────────────────────────────────
 const DEFAULT_R    = 0.95;
+const STATIC_THRESHOLD = 0.90; // r 이하면 정적 렌더링 모드
 const LINK_DIST_K  = 800;   // link distance = (1 - r) * K  →  r=1: 0px, r=0: 800px
 const LINK_STRENGTH_K = 0.8; // link strength = (r - 0.65) * K  →  r=0.95: 0.24
 
@@ -499,6 +508,13 @@ function renderLegend() {
   });
 }
 
+// ── 레이아웃 오버레이 제어 ────────────────────────────
+function showLayoutOverlay(show, msg) {
+  const el = document.getElementById('layout-overlay');
+  el.style.display = show ? 'flex' : 'none';
+  if (msg) document.getElementById('layout-msg').textContent = msg;
+}
+
 // ── 필터 적용 (슬라이더 변경 시) ───────────────────────
 function applyFilter(minR) {
   currentR = minR;
@@ -537,9 +553,23 @@ function applyFilter(minR) {
   // 4) 반발력 적용
   Graph.d3Force('charge').strength(charge);
 
-  // 5) 중심 인력 약화: 노드가 많을면 가운데로 당기는 힘을 줄여 퍼짐 유도
+  // 5) 중심 인력 약화
   const centerF = Graph.d3Force('center');
   if (centerF) centerF.strength(Math.max(0.02, 0.1 / chargeScale));
+
+  // ── 하이브리드 렌더링 모드 ──────────────────────────────
+  if (minR < STATIC_THRESHOLD) {
+    // 정적 모드: 빠른 감쇠로 즉시 수렴, 오버레이 표시
+    const warmTicks = Math.round(50 + (1 - minR) * 500); // r=0.89→55틱, r=0.70→200틱
+    const nodeCount = visibleNodes.length;
+    const msg = `레이아웃 계산 중... (${nodeCount.toLocaleString()}개 노드)`;
+    showLayoutOverlay(true, msg);
+    Graph.d3AlphaDecay(0.25).d3VelocityDecay(0.6).d3AlphaMin(0.05).cooldownTime(6000);
+  } else {
+    // 애니메이션 모드: 느린 감쇠로 부드럽게 수렴
+    showLayoutOverlay(false);
+    Graph.d3AlphaDecay(0.04).d3VelocityDecay(0.55).d3AlphaMin(0.01).cooldownTime(8000);
+  }
 
   Graph.d3ReheatSimulation();
   updateStats(allNodes.length, filtered.length, true);
@@ -643,6 +673,7 @@ fetch('graph_data.json')
       .enableNodeDrag(true)
       .enableZoomInteraction(true)
       .onEngineStop(() => {
+        showLayoutOverlay(false);
         const gd = Graph.graphData();
         updateStats(gd.nodes.length, gd.links.length, false);
       })
