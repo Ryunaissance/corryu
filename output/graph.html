@@ -339,6 +339,7 @@ let hideShortHistory = false; // 해제된 섯터 ID 입니다
 let nodeScaleMult = 4.0; // 노드 크기 배율 (슬라이더 제어)
 
 let hoverNode        = null;
+let selectedNode     = null;
 let highlightNodeIds = new Set();
 let searchTicker     = '';
 let hideLegacy       = false;
@@ -754,7 +755,7 @@ fetch('graph_data.json')
         updateStats(gd.nodes.length, gd.links.length, false);
       })
       .onNodeHover(node => {
-        hoverNode = node || null;
+        hoverNode = node || selectedNode || null;
         highlightNodeIds.clear();
 
         if (node) {
@@ -795,11 +796,14 @@ fetch('graph_data.json')
         requestAnimationFrame(() => { if (Graph) Graph.refresh(); });
       })
       .onNodeClick(node => {
-        // 클릭 시 확대 및 중심 이동 제거 (USER REQUEST)
-        // Graph.centerAt(node.x, node.y, 500);
-        // Graph.zoom(5, 500);
+        // Focus node on click without zoom
+        selectedNode = node;
+        hoverNode = node;
+        Graph.refresh();
       })
       .onBackgroundClick(() => {
+        selectedNode = null;
+        hoverNode = null;
         if (focusSector) {
           focusSector = null;
           document.querySelectorAll('.legend-item').forEach(el => el.classList.remove('active', 'dimmed'));
