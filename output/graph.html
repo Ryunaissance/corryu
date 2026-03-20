@@ -431,15 +431,40 @@ function applyFilter(minR) {
   const filtered     = allLinks.filter(l => l.r >= minR && visibleIds.has(l.s) && visibleIds.has(l.t));
   Graph.graphData({ nodes: visibleNodes, links: filtered });
 
-  // r=1 → 가깝게, r≈0 → 멀게  (graphData 호출 후 직접 설정)
+  // ── 노드/엣지 수에 비례하는 동적 물리 파라미터 ──
+  const nNodes = visibleNodes.length;
+  const nEdges = filtered.length;
+
+  // 1) 반발력: 노드가 많을수록, 임계값이 낮을수록 더 세게 밀어내야 공간 확보
+  //    기본 r=0.95 → ~100노드 → charge -200
+  //    r=0.70 → ~1300노드 → charge -800 정도로 스케일
+  const baseCharge = -200;
+  const chargeScale = Math.max(1, Math.sqrt(nNodes / 100));
+  const charge = baseCharge * chargeScale;
+
+  // 2) 링크 거리: r이 낮을수록 이미 링크 인력이 세지므로 distance를 키워 균형 유지
+  //    기본 LINK_DIST_K=800 → r=0.95일 때 (1-0.95)*800 = 40px
+  //    r=0.70일 때 (1-0.70)*800 = 240px → 충분히 멀어짐
+  const distK = LINK_DIST_K * Math.max(1, (1 - minR) * 3);
+
+  // 3) 링크 강도: 엣지가 많을수록 약하게 해야 뭉침 방지
+  const edgeDensity = nEdges / Math.max(1, nNodes);
+  const strengthScale = Math.max(0.1, 1 / Math.max(1, edgeDensity / 5));
+
   const lf = Graph.d3Force('link');
   if (lf) {
-    lf.distance(l => Math.max(5, (1 - (l.r || 0.9)) * LINK_DIST_K))
-      .strength(l => Math.max(0, ((l.r || 0.9) - 0.65) * LINK_STRENGTH_K));
+    lf.distance(l => Math.max(10, (1 - (l.r || 0.9)) * distK))
+      .strength(l => Math.max(0, ((l.r || 0.9) - 0.65) * LINK_STRENGTH_K * strengthScale));
   }
-  Graph.d3Force('charge').strength(-80);
-  Graph.d3ReheatSimulation();
 
+  // 4) 반발력 적용
+  Graph.d3Force('charge').strength(charge);
+
+  // 5) 중심 인력 약화: 노드가 많을면 가운데로 당기는 힘을 줄여 퍼짐 유도
+  const centerF = Graph.d3Force('center');
+  if (centerF) centerF.strength(Math.max(0.02, 0.1 / chargeScale));
+
+  Graph.d3ReheatSimulation();
   updateStats(allNodes.length, filtered.length, true);
 }
 
