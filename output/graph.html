@@ -571,18 +571,18 @@ function applyFilter(minR) {
   // 1) 반발력: 노드가 많을수록, 임계값이 낮을수록 더 세게 밀어내야 공간 확보
   //    기본 r=0.95 → ~100노드 → charge -200
   //    r=0.70 → ~1300노드 → charge -800 정도로 스케일
-  const baseCharge = -100; // 반발력 약홄 조절 (-80 → -100)
+  const baseCharge = -150; // 반발력 약홄 조절 (-80 → -100)
   const chargeScale = Math.max(1, Math.pow(nNodes / 100, 0.6)); // 반발력 산출 강화 (0.5 → 0.6 승)
   const charge = baseCharge * chargeScale;
 
   // 2) 링크 거리: r이 낮을수록 이미 링크 인력이 세지므로 distance를 키워 균형 유지
   //    기본 LINK_DIST_K=800 → r=0.95일 때 (1-0.95)*800 = 40px
   //    r=0.70일 때 (1-0.70)*800 = 240px → 충분히 멀어짐
-  const distK = LINK_DIST_K * Math.max(1, (1 - minR) * 8); // 확장성 귱단적 강화 (5 → 8) // 확장성 강화 (3 → 5)
+  const distK = LINK_DIST_K * Math.max(1, Math.pow((1 - minR) * 15, 1.2)); // 확장산식 고도화 (8 → 15x 파워) // 확장성 강화 (3 → 5)
 
   // 3) 링크 강도: 엣지가 많을수록 약하게 해야 뭉침 방지
   const edgeDensity = nEdges / Math.max(1, nNodes);
-  const strengthScale = Math.max(0.1, 1 / Math.max(1, edgeDensity / 5));
+  const strengthScale = Math.max(0.01, 1 / Math.max(1, edgeDensity / 5)); // 바닥 제한 완화 (0.1 → 0.01)
 
   const lf = Graph.d3Force('link');
   if (lf) {
@@ -595,7 +595,7 @@ function applyFilter(minR) {
 
   // 5) 중심 인력 약화
   const centerF = Graph.d3Force('center');
-  if (centerF) centerF.strength(Math.max(0.02, 0.1 / chargeScale));
+  if (centerF) centerF.strength(Math.max(0.005, 0.05 / (chargeScale * chargeScale))); // 중심 인력 귱단적 약화
 
   // ── 하이브리드 렌더링 모드 ──────────────────────────────
   if (minR < STATIC_THRESHOLD) {
