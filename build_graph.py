@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.join(ROOT, 'src'))
 from config import SECTOR_DEFS, SUPER_SECTOR_DEFS, CORR_MONTHLY_CSV
 
 # ── 설정 ──────────────────────────────────────────────
-STORE_MIN_R   = 0.85   # JSON 저장 최소 r (슬라이더 하한)
+STORE_MIN_R   = 0.70   # JSON 저장 최소 r (슬라이더 하한)
 ETF_DATA_JSON    = os.path.join(ROOT, 'output', 'etf_data.json')
 CLASSIF_JSON     = os.path.join(ROOT, 'output', 'classification.json')
 OUT_JSON         = os.path.join(ROOT, 'output', 'graph_data.json')
