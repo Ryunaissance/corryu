@@ -162,6 +162,14 @@ def _safe(v, default=None):
     except (TypeError, ValueError):
         return default
 
+def _get_div_yield(info):
+    div = _safe(info.get('trailingAnnualDividendYield'))
+    if div is not None and div > 0 and div < 0.5: return div
+    dy = _safe(info.get('dividendYield')) or _safe(info.get('yield'))
+    if dy is not None and dy > 0:
+        return dy / 100.0 if dy > 0.001 else dy
+    return None
+
 
 def fetch_meta(tickers: list[str]) -> pd.DataFrame:
     """yfinance .info로 메타 수집 (AUM, 수수료, 배당, 상장일, 종목명)"""
@@ -175,14 +183,10 @@ def fetch_meta(tickers: list[str]) -> pd.DataFrame:
             log.debug(f'  {ticker}: info 실패 — {e}')
             info = {}
 
-        # AUM
+        # 메타 확보
         aum = _safe(info.get('totalAssets'), 0)
-
-        # 수수료 (소수 형식, 예: 0.0003)
         exp = _safe(info.get('annualReportExpenseRatio')) or _safe(info.get('totalExpenseRatio'))
-
-        # 배당수익률 (소수 형식, 예: 0.0275)
-        div = _safe(info.get('dividendYield')) or _safe(info.get('trailingAnnualDividendYield'))
+        div = _get_div_yield(info)
 
         # 상장일 (Unix timestamp → YYYY-MM-DD)
         inception = '1900-01-01'

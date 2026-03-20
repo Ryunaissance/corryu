@@ -78,10 +78,15 @@ def fetch_one(ticker: str) -> float | None:
     """단일 티커 배당수익률 조회. 실패 시 None 반환."""
     try:
         info = yf.Ticker(ticker).info
-        for key in ('dividendYield', 'trailingAnnualDividendYield', 'yield'):
-            v = info.get(key)
-            if v is not None and isinstance(v, (int, float)) and 0 < v < 1:
-                return round(float(v), 6)
+        div = info.get('trailingAnnualDividendYield')
+        if div is not None and isinstance(div, (int, float)) and 0 < div < 0.5:
+            return round(float(div), 6)
+
+        dy = info.get('dividendYield') or info.get('yield')
+        if dy is not None and isinstance(dy, (int, float)) and dy > 0:
+            if dy > 0.001:
+                val = dy / 100.0 if dy > 0.2 else dy
+                return round(float(val), 6)
         return None
     except Exception as e:
         log.debug('%s fetch error: %s', ticker, e)
