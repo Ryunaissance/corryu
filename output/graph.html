@@ -345,6 +345,17 @@ let focusSector      = null;   // 레전드 클릭으로 선택된 섹터 ID (or
 let superSectorMode  = false;  // 슈퍼섹터 통합 색상 토글
 let superSectorMeta  = {};     // graph_data.json 에서 로드
 
+// ── 색상 조절 헬퍼 ──────────────────────────────
+function darkenColor(hex, percent) {
+  if (!hex || hex[0] !== '#') return hex;
+  const num = parseInt(hex.slice(1), 16),
+        amt = Math.round(2.55 * percent),
+        R = (num >> 16) - amt,
+        G = (num >> 8 & 0x00FF) - amt,
+        B = (num & 0x0000FF) - amt;
+  return "#" + (0x1000000 + (R<255?R<0?0:R:255)*0x10000 + (G<255?G<0?0:G:255)*0x100 + (B<255?B<0?0:B:255)).toString(16).slice(1);
+}
+
 // ── 색상 / 크기 함수 ─────────────────────────────────
 function sectorColor(sid) {
   return (sectorMeta[sid] || {}).color || '#888888';
@@ -363,7 +374,7 @@ function getNodeColor(node) {
   const base = effectiveColor(node);
   if (searchTicker && node.id === searchTicker) return '#ffffff';
   if (hoverNode) {
-    if (node === hoverNode)              return '#ffffff';
+    if (node === hoverNode)              return base;
     if (highlightNodeIds.has(node.id))  return base;
     return base + '22';  // 흐리게
   }
@@ -653,7 +664,37 @@ fetch('graph_data.json')
       .linkTarget('t')
       .nodeLabel(() => '')          // 커스텀 툴팁 사용
       .nodeVal(getNodeVal)
-      .nodeColor(getNodeColor)
+      .nodeCanvasObject((node, ctx, globalScale) => {
+        const r = Math.sqrt(getNodeVal(node)) * 4;
+        const color = getNodeColor(node);
+        
+        // 그림자 효과 (호버 시에만)
+        if (node === hoverNode) {
+          ctx.shadowColor = 'rgba(0,0,0,0.5)';
+          ctx.shadowBlur = 10 / globalScale;
+        }
+
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, r, 0, 2 * Math.PI, false);
+        ctx.fillStyle = color;
+        ctx.fill();
+
+        // 테두리 (호버 시)
+        if (node === hoverNode) {
+          ctx.shadowBlur = 0;
+          const bc = darkenColor(effectiveColor(node), 40);
+          ctx.strokeStyle = bc;
+          ctx.lineWidth = 2.5 / globalScale;
+          ctx.stroke();
+          
+          // 내부 하이라이트 (약간 밝은 점)
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, r * 0.9, 0, 2 * Math.PI, false);
+          ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+          ctx.lineWidth = 1 / globalScale;
+          ctx.stroke();
+        }
+      })
       .onRenderFramePost((ctx, globalScale) => {
         const anchorNodes = (Graph.graphData().nodes || []).filter(n => n.anchor);
         if (!anchorNodes.length) return;
