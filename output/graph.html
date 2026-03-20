@@ -694,7 +694,11 @@ fetch('graph_data.json')
       const sid = item ? item.dataset.sid : null;
       if (hoverSector !== sid) {
         hoverSector = sid;
-        if (Graph) Graph.refresh();
+        // console.log('Hover Sector:', sid); 
+        if (Graph) {
+           Graph.nodeRelSize(Graph.nodeRelSize()); // Re-evaluate attributes
+           Graph.refresh();
+        }
       }
     });
     legendContainer.addEventListener('mouseleave', () => {
