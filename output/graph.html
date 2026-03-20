@@ -191,9 +191,9 @@
     <div class="ctrl-label">
       <span data-i18n="graph.threshold">임계값 (r ≥)</span> <span id="r-val">0.95</span>
     </div>
-    <input type="range" id="r-slider" min="85" max="99" value="95" step="1">
-    <div style="display:flex;justify-content:space-between;font-size:10px;color:#484f58;margin-top:2px">
-      <span id="r-min-label">0.85</span><span>0.99</span>
+    <input type="range" id="r-slider" min="70" max="99" value="95" step="1">
+    <div class="slider-labels" style="display:flex;justify-content:space-between;font-size:10px;color:#484f58;margin-top:2px">
+      <span id="r-min-label">0.70</span><span>0.99</span>
     </div>
   </div>
 
@@ -257,14 +257,15 @@
 // ── 상수 ──────────────────────────────────────────────
 const DEFAULT_R    = 0.95;
 const LINK_DIST_K  = 800;   // link distance = (1 - r) * K  →  r=1: 0px, r=0: 800px
-const LINK_STRENGTH_K = 0.8; // link strength = (r - 0.8) * K  →  r=0.95: 0.12
+const LINK_STRENGTH_K = 0.8; // link strength = (r - 0.65) * K  →  r=0.95: 0.24
 
 // ── 전역 상태 ──────────────────────────────────────────
 let allNodes    = [];
 let allLinks    = [];
 let sectorMeta  = {};
 let Graph;
-let storeMinR   = 0.85;
+let ETF_META = {};
+let storeMinR   = 0.70;
 let currentR    = DEFAULT_R;
 
 let hoverNode        = null;
@@ -434,7 +435,7 @@ function applyFilter(minR) {
   const lf = Graph.d3Force('link');
   if (lf) {
     lf.distance(l => Math.max(5, (1 - (l.r || 0.9)) * LINK_DIST_K))
-      .strength(l => Math.max(0, ((l.r || 0.9) - 0.8) * LINK_STRENGTH_K));
+      .strength(l => Math.max(0, ((l.r || 0.9) - 0.65) * LINK_STRENGTH_K));
   }
   Graph.d3Force('charge').strength(-80);
   Graph.d3ReheatSimulation();
