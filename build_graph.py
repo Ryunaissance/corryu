@@ -84,7 +84,8 @@ def main():
         with open(CLASSIF_JSON, encoding='utf-8') as f:
             classif = json.load(f)
         legacy_tickers = {tk for tk, info in classif.items() if info.get('is_legacy')}
-        print(f"   레거시 티커: {len(legacy_tickers)}개")
+        short_history_tickers = {tk for tk, info in classif.items() if 'SHORT_HISTORY' in info.get('legacy_reasons', [])}
+        print(f"   레거시 티커: {len(legacy_tickers)}개 (그 중 짧은 연혁: {len(short_history_tickers)}개)")
 
     # 앵커 티커 집합 (섹터 앵커 + 슈퍼섹터 앵커 포함)
     anchor_tickers = {v['anchor'] for v in SECTOR_DEFS.values() if v.get('anchor')}
@@ -102,6 +103,8 @@ def main():
         }
         if tk in legacy_tickers:
             node['l'] = 1
+        if tk in short_history_tickers:
+            node['sh'] = 1
         if tk in anchor_tickers:
             node['anchor'] = 1
         nodes.append(node)

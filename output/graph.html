@@ -246,6 +246,13 @@
 
   <div class="ctrl-row">
     <label class="ctrl-check">
+      <input type="checkbox" id="hide-short-history">
+      <span>짧은 연혁 제외</span> <span id="sh-count"></span>
+    </label>
+  </div>
+
+  <div class="ctrl-row">
+    <label class="ctrl-check">
       <input type="checkbox" id="super-sector-toggle">
       <span data-i18n="graph.unifiedColor">🌐 주식 시장 통합 색상</span>
     </label>
@@ -326,7 +333,8 @@ let Graph;
 let ETF_META = {};
 let storeMinR   = 0.70;
 let currentR    = DEFAULT_R;
-let hiddenSectors = new Set(); // 해제된 섯터 ID 입니다
+let hiddenSectors = new Set();
+let hideShortHistory = false; // 해제된 섯터 ID 입니다
 let nodeScaleMult = 10.0; // 노드 크기 배율 (슬라이더 제어)
 
 let hoverNode        = null;
@@ -518,7 +526,9 @@ function showLayoutOverlay(show, msg) {
 // ── 필터 적용 (슬라이더 변경 시) ───────────────────────
 function applyFilter(minR) {
   currentR = minR;
-  const visibleNodes = (hideLegacy ? allNodes.filter(n => !n.l) : allNodes)
+  const visibleNodes = allNodes
+    .filter(n => !hideLegacy || !n.l)
+    .filter(n => !hideShortHistory || !n.sh)
     .filter(n => !hiddenSectors.has(n.s));
   const visibleIds   = new Set(visibleNodes.map(n => n.id));
   const filtered     = allLinks.filter(l => l.r >= minR && visibleIds.has(l.s) && visibleIds.has(l.t));
@@ -603,8 +613,10 @@ fetch('graph_data.json')
       });
     }
     function updateLegacyCount() {
-      const c = allNodes.filter(n => n.l).length;
-      document.getElementById('legacy-count').textContent = `(${c}개)`;
+      const lc = allNodes.filter(n => n.l).length;
+      document.getElementById('legacy-count').textContent = `(${lc}개)`;
+      const sc = allNodes.filter(n => n.sh).length;
+      document.getElementById('sh-count').textContent = `(${sc}개)`;
     }
 
     // 1) localStorage 오버라이드 즉시 반영
@@ -782,6 +794,13 @@ document.getElementById('ns-plus' ).addEventListener('click', () => nudgeSlider(
 document.getElementById('hide-legacy').addEventListener('change', e => {
   hideLegacy = e.target.checked;
   // Reset coordinates to prevent gradual scattering when toggling
+  allNodes.forEach(n => { delete n.x; delete n.y; delete n.vx; delete n.vy; });
+  if (Graph) applyFilter(currentR);
+});
+
+// ── 짧은 연혁 토글 ───────────────────────────────────
+document.getElementById('hide-short-history').addEventListener('change', e => {
+  hideShortHistory = e.target.checked;
   allNodes.forEach(n => { delete n.x; delete n.y; delete n.vx; delete n.vy; });
   if (Graph) applyFilter(currentR);
 });
