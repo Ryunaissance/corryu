@@ -578,7 +578,7 @@ function applyFilter(minR) {
   // 2) 링크 거리: r이 낮을수록 이미 링크 인력이 세지므로 distance를 키워 균형 유지
   //    기본 LINK_DIST_K=800 → r=0.95일 때 (1-0.95)*800 = 40px
   //    r=0.70일 때 (1-0.70)*800 = 240px → 충분히 멀어짐
-  const distK = LINK_DIST_K * Math.max(1, (1 - minR) * 5); // 확장성 강화 (3 → 5)
+  const distK = LINK_DIST_K * Math.max(1, (1 - minR) * 8); // 확장성 귱단적 강화 (5 → 8) // 확장성 강화 (3 → 5)
 
   // 3) 링크 강도: 엣지가 많을수록 약하게 해야 뭉침 방지
   const edgeDensity = nEdges / Math.max(1, nNodes);
