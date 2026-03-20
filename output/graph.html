@@ -239,7 +239,7 @@
 
   <div class="ctrl-row">
     <label class="ctrl-check">
-      <input type="checkbox" id="hide-legacy" checked>
+      <input type="checkbox" id="hide-legacy">
       <span data-i18n="graph.hideLegacy">레거시 숨기기</span> <span id="legacy-count"></span>
     </label>
   </div>
@@ -340,7 +340,7 @@ let nodeScaleMult = 10.0; // 노드 크기 배율 (슬라이더 제어)
 let hoverNode        = null;
 let highlightNodeIds = new Set();
 let searchTicker     = '';
-let hideLegacy       = true;
+let hideLegacy       = false;
 let focusSector      = null;   // 레전드 클릭으로 선택된 섹터 ID (or 'SS_<id>')
 let superSectorMode  = false;  // 슈퍼섹터 통합 색상 토글
 let superSectorMeta  = {};     // graph_data.json 에서 로드
