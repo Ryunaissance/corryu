@@ -340,6 +340,7 @@ let nodeScaleMult = 4.0; // 노드 크기 배율 (슬라이더 제어)
 
 let hoverNode        = null;
 let selectedNode     = null;
+let hoverSector      = null;
 let highlightNodeIds = new Set();
 let searchTicker     = '';
 let hideLegacy       = false;
@@ -380,14 +381,15 @@ function getNodeColor(node) {
     if (highlightNodeIds.has(node.id))  return base;
     return base + '22';  // 흐리게
   }
-  if (focusSector) {
+  if (hoverSector || focusSector) {
+    const s = hoverSector || focusSector;
     // 'SS_<id>' 형태이면 슈퍼섹터 소속 전체 하이라이트
-    if (focusSector.startsWith('SS_')) {
-      const ssId = focusSector.slice(3);
+    if (s.startsWith('SS_')) {
+      const ssId = s.slice(3);
       const nodeSS = (sectorMeta[node.s] || {}).ss;
       return nodeSS === ssId ? base : base + '18';
     }
-    return node.s === focusSector ? base : base + '18';
+    return node.s === s ? base : base + '18';
   }
   return base;
 }
@@ -426,10 +428,10 @@ function getLinkColor(link) {
   const sameSector = (sn && tn && sn.s === tn.s);
   const baseColorHex = sameSector ? sectorColor(sn.s) : '#94a3b8';
   
-  if (focusSector) {
-    if ((sn && sn.s === focusSector) || (tn && tn.s === focusSector)) {
-      return hexToRgba(baseColorHex, 0.15 + t * 0.40);
-    }
+  if (hoverSector || focusSector) {
+    const s = hoverSector || focusSector;
+    const active = (sn && sn.s === s) || (tn && tn.s === s);
+    if (active) return hexToRgba(baseColorHex, 0.15 + t * 0.40);
     return 'rgba(255,255,255,0.01)';
   }
 
@@ -542,6 +544,23 @@ function renderLegend() {
         else el.classList.add('dimmed');
       }
     });
+    if (Graph) Graph.refresh();
+  });
+
+  container.addEventListener('mouseover', e => {
+    const item = e.target.closest('.legend-item');
+    if (!item) return;
+    const sid = item.dataset.sid;
+    if (hoverSector !== sid) {
+      hoverSector = sid;
+      if (Graph) Graph.refresh();
+    }
+  });
+
+  container.addEventListener('mouseout', e => {
+    const item = e.target.closest('.legend-item');
+    if (!item) return;
+    hoverSector = null;
     if (Graph) Graph.refresh();
   });
 }
