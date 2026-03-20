@@ -590,12 +590,15 @@ function applyFilter(minR) {
       .strength(l => Math.max(0, ((l.r || 0.9) - 0.65) * LINK_STRENGTH_K * strengthScale));
   }
 
-  // 4) 반발력 적용
+  // 4) Repulsion
   Graph.d3Force('charge').strength(charge);
 
-  // 5) 중심 인력 약화
-  const centerF = Graph.d3Force('center');
-  if (centerF) centerF.strength(0); // 중심 중력 완전 제거 (블랙홀 방지)
+  // 5) Collision (Suggestion 5) - Prevent node overlap
+  Graph.d3Force('collide', d3.forceCollide().radius(n => Math.sqrt(getNodeVal(n)) * 4 + 1.5).iterations(2));
+
+  // 6) Soft Boundary (Suggestion 3) - Keep graph within reach
+  Graph.d3Force('x', d3.forceX().strength(0.015));
+  Graph.d3Force('y', d3.forceY().strength(0.015));
 
   // ── 하이브리드 렌더링 모드 ──────────────────────────────
   if (minR < STATIC_THRESHOLD) {
@@ -604,7 +607,7 @@ function applyFilter(minR) {
     const nodeCount = visibleNodes.length;
     const msg = `레이아웃 계산 중... (${nodeCount.toLocaleString()}개 노드)`;
     showLayoutOverlay(true, msg);
-    Graph.d3AlphaDecay(0.01).d3VelocityDecay(0.4).d3AlphaMin(0.001).cooldownTime(15000); // 더 오래, 더 멀리 까지 배치
+    Graph.d3AlphaDecay(0.02).d3VelocityDecay(0.5).d3AlphaMin(0.002).cooldownTime(10000); // 더 오래, 더 멀리 까지 배치
   } else {
     // 애니메이션 모드: 느린 감쇠로 부드럽게 수렴
     showLayoutOverlay(false);
@@ -684,7 +687,7 @@ fetch('graph_data.json')
       .nodeLabel(() => '')          // 커스텀 툴팁 사용
       .nodeVal(getNodeVal)
       .nodeCanvasObject((node, ctx, globalScale) => {
-        const r = Math.sqrt(getNodeVal(node)) * 4;
+        const r = Math.max(Math.sqrt(getNodeVal(node)) * 4, 3.5 / globalScale);
         const color = getNodeColor(node);
         
         // 그림자 효과 (호버 시에만)
@@ -722,7 +725,7 @@ fetch('graph_data.json')
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         anchorNodes.forEach(node => {
-          const r = Math.sqrt(getNodeVal(node)) * 4;
+          const r = Math.max(Math.sqrt(getNodeVal(node)) * 4, 3.5 / globalScale);
           const x = node.x, y = node.y + r + 3;
           // 배경 박스
           const metrics = ctx.measureText(node.id);
