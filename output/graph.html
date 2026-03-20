@@ -854,14 +854,12 @@ document.getElementById('ns-plus' ).addEventListener('click', () => nudgeSlider(
 document.getElementById('hide-legacy').addEventListener('change', e => {
   hideLegacy = e.target.checked;
   // Reset coordinates to prevent gradual scattering when toggling
-  allNodes.forEach(n => { delete n.x; delete n.y; delete n.vx; delete n.vy; });
   if (Graph) applyFilter(currentR);
 });
 
 // ── 짧은 연혁 토글 ───────────────────────────────────
 document.getElementById('hide-short-history').addEventListener('change', e => {
   hideShortHistory = e.target.checked;
-  allNodes.forEach(n => { delete n.x; delete n.y; delete n.vx; delete n.vy; });
   if (Graph) applyFilter(currentR);
 });
 
