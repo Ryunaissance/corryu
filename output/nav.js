@@ -61,15 +61,30 @@
   async function renderAuth() {
     var authEl = document.getElementById('nav-auth');
     if (!authEl) return;
-    if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) return;
+    
+    function reveal() { document.body.classList.add('auth-loaded'); }
+
+    if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) {
+        reveal();
+        return;
+    }
 
     var user;
-    try { user = await CorryuAuth.getUser(); } catch (e) { return; }
-    if (!user) return;
+    try { user = await CorryuAuth.getUser(); } catch (e) {
+        reveal();
+        return; 
+    }
+    if (!user) {
+        reveal();
+        return;
+    }
 
     var profile;
     try { profile = await CorryuAuth.getProfile(user.id); } catch (e) {}
     var nick = (profile && profile.nickname) || (user.email ? user.email.split('@')[0] : 'User');
+    
+    reveal();
+
     if (_renderedNick === nick) return;
     _renderedNick = nick;
 
