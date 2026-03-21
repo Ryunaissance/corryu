@@ -726,11 +726,11 @@ function loadSector(sectorId) {
     renderSummary();
     let data;
     if (sectorId === 'ALL') {
-        data = Object.values(allData).flat();
+        data = Object.keys(allData).reduce(function(acc, k) { return acc.concat(allData[k]); }, []);
     } else if (sectorId && sectorId.startsWith('SS_')) {
         let ssId = sectorId.slice(3);
         let ss = superSectorDefs[ssId];
-        data = ss ? ss.sub_sectors.flatMap(sid => allData[sid] || []) : [];
+        data = ss ? ss.sub_sectors.reduce(function(acc, sid) { return acc.concat(allData[sid] || []); }, []) : [];
     } else {
         data = allData[sectorId] || [];
     }
@@ -816,7 +816,7 @@ function initDashboard() {
     renderSummary();
 
     table = $('#masterTable').DataTable({
-        data: Object.values(allData).flat(),
+        data: Object.keys(allData).reduce(function(acc, k) { return acc.concat(allData[k]); }, []),
         pageLength: 50,
         deferRender: true,
         lengthMenu: [[25, 50, 100, 200, -1], [25, 50, 100, 200, "All"]],
@@ -1017,7 +1017,7 @@ function initDashboard() {
     });
 
     // ── 체크박스 이벤트 ───────────────────────────────
-    function updateFAB() {
+    window.updateFAB = function updateFAB() {
         let n = selectedTickers.size;
         $('#fab-count').text(n);
         n > 0 ? $('#fab').show() : $('#fab').hide();
@@ -1322,62 +1322,26 @@ function initDashboard() {
 $(document).ready(function() {
     fetch('/etf_data.json')
         .then(function(r) { return r.json(); })
-        .then(async function(d) {
+        .then(function(d) {
             sectorMeta = d.sectorMeta;
             allData = d.allData;
-            snapshotOriginalLegacy(); // 빌드 기본값 스냅샷 (undo 기준점)
-
-            let isAdmin = false;
-            try {
-                // Admin 감지
-                isAdmin = await detectAdmin();
-                applyAdminUI(isAdmin);
-
-                if (isAdmin) {
-                    // Admin: 오버라이드 & 동기화 로직
-                    let ov = getUserOverrides();
-                    const localTs = parseInt(localStorage.getItem('corryu_overrides_ts') || '0');
-                    setSyncStatus('busy');
-                    const remoteOv = await fetchRemoteOverrides();
-                    if (remoteOv && remoteOv._meta) {
-                        if (remoteOv._meta.ts > localTs) {
-                            const { _meta, ...cleanOv } = remoteOv;
-                            ov = cleanOv;
-                            localStorage.setItem(USER_OVERRIDES_KEY, JSON.stringify(ov));
-                            localStorage.setItem('corryu_overrides_ts', String(remoteOv._meta.ts));
-                            setSyncStatus('ok');
-                            showToast('다른 기기의 설정을 불러왔습니다 (' + Object.keys(ov).length + '종목)', 3500);
-                        } else if (localTs > remoteOv._meta.ts && Object.keys(ov).length) {
-                            pushRemoteOverrides(ov);
-                        } else {
-                            setSyncStatus('ok');
-                        }
-                    } else if (!remoteOv && Object.keys(ov).length) {
-                        pushRemoteOverrides(ov);
-                    } else {
-                        setSyncStatus('ok');
-                    }
-                    if (Object.keys(ov).length) applyOverridesToData(ov);
-                } else {
-                    // 비Admin: 레거시 상태 제거 — 모든 ETF가 Active로 표시
-                    stripLegacyForNonAdmin();
+            // 빌드 기본값 스냅샷 저장
+            for (var sid in allData) {
+                if (!allData.hasOwnProperty(sid)) continue;
+                for (var i=0; i<allData[sid].length; i++) {
+                    allData[sid][i]._orig_legacy = allData[sid][i].is_legacy;
                 }
-            } catch(authErr) {
-                console.warn('[CORRYU] Auth/sync init failed (non-fatal):', authErr);
-                // Auth 실패해도 대시보드는 반드시 렌더링
-                try { stripLegacyForNonAdmin(); } catch(e) {}
             }
 
-            try { applySmhCorr(); } catch(e) { console.warn('[CORRYU] SMH corr failed:', e); }
-            try { recalcSectorMeta(); } catch(e) { console.warn('[CORRYU] recalcSectorMeta failed:', e); }
-            try { await I18n.init(); } catch(e) { console.warn('[CORRYU] i18n init failed:', e); }
+            // 1. 기본 상태(비로그인)로 데이터 즉시 준비
+            stripLegacyForNonAdmin();
+            try { applySmhCorr(); } catch(e) {}
+            try { recalcSectorMeta(); } catch(e) {}
 
-            // ★ initDashboard는 항상 실행 — 위의 어떤 단계가 실패해도 테이블은 렌더링
+            // 2. 무조건 대시보드 먼저 렌더링!
             initDashboard();
 
-            if (isAdmin) setInterval(pollRemoteSync, 30000);
-
-            // 언어 전환 시 탭·섹터명 즉시 재렌더링
+            // 언어 전환기 리스너 (백그라운드에서 트리거됨)
             document.addEventListener('i18n:ready', function() {
                 renderACTabs();
                 renderSectorTabs();
@@ -1385,9 +1349,65 @@ $(document).ready(function() {
                 updateFAB();
                 if (typeof table !== 'undefined') table.rows().invalidate('data').draw(false);
             });
+
+            // 3. 백그라운드 비동기 작업 (Admin, i18n, 동기화)
+            setTimeout(async function() {
+                try {
+                    await I18n.init();
+                } catch(e) {}
+
+                try {
+                    const isAdmin = await detectAdmin();
+                    applyAdminUI(isAdmin);
+
+                    if (isAdmin) {
+                        // 어드민인 경우 원래 레거시 상태 복구
+                        for (var sid in allData) {
+                            if (!allData.hasOwnProperty(sid)) continue;
+                            for (var i=0; i<allData[sid].length; i++) {
+                                allData[sid][i].is_legacy = allData[sid][i]._orig_legacy;
+                            }
+                        }
+
+                        let ov = getUserOverrides();
+                        const localTs = parseInt(localStorage.getItem('corryu_overrides_ts') || '0');
+                        setSyncStatus('busy');
+                        const remoteOv = await fetchRemoteOverrides();
+                        if (remoteOv && remoteOv._meta) {
+                            if (remoteOv._meta.ts > localTs) {
+                                // 안전한 Object.assign으로 복사 대체 (객체 distructuring 이슈 방지)
+                                var cleanOv = Object.assign({}, remoteOv);
+                                delete cleanOv._meta;
+                                ov = cleanOv;
+                                localStorage.setItem(USER_OVERRIDES_KEY, JSON.stringify(ov));
+                                localStorage.setItem('corryu_overrides_ts', String(remoteOv._meta.ts));
+                                setSyncStatus('ok');
+                                showToast('다른 기기의 설정을 불러왔습니다 (' + Object.keys(ov).length + '종목)', 3500);
+                            } else if (localTs > remoteOv._meta.ts && Object.keys(ov).length) {
+                                pushRemoteOverrides(ov);
+                            } else {
+                                setSyncStatus('ok');
+                            }
+                        } else if (!remoteOv && Object.keys(ov).length) {
+                            pushRemoteOverrides(ov);
+                        } else {
+                            setSyncStatus('ok');
+                        }
+                        
+                        if (Object.keys(ov).length) applyOverridesToData(ov);
+                        recalcSectorMeta();
+                        renderSectorTabs();
+                        renderSummary();
+                        table.rows().invalidate('data').draw(false);
+                        setInterval(pollRemoteSync, 30000);
+                    }
+                } catch(authErr) {
+                    console.warn('[CORRYU] Background sync failed:', authErr);
+                }
+            }, 50);
         })
         .catch(function(err) {
-            console.error('[CORRYU] 대시보드 데이터 로드 실패:', err);
+            console.error('[CORRYU] 데이터 파싱 실패:', err);
         });
 });
 </script>
