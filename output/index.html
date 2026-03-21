@@ -149,10 +149,8 @@ table.dataTable tbody tr.row-watchlist.row-selected { background: rgba(59,130,24
 .nav-right { display:flex; align-items:center; gap:8px; flex-shrink:0; margin-left:16px; position:relative; z-index:2; }
 #lang-switcher { padding:4px 10px; border-radius:7px; background:rgba(255,255,255,0.05); color:#94a3b8; border:1px solid rgba(255,255,255,0.1); font-size:0.76rem; font-weight:700; cursor:pointer; transition:all 0.15s; font-family:inherit; }
 #lang-switcher:hover { background:rgba(255,255,255,0.1); color:#e2e8f0; }
-#nav-auth { display:flex; align-items:center; gap:6px; opacity:0; pointer-events:none; transition:opacity 0.2s ease; }
-body.auth-loaded #nav-auth { opacity:1; pointer-events:auto; }
-#nav-mob-login-btn { opacity:0; pointer-events:none; transition:opacity 0.2s ease; }
-body.auth-loaded #nav-mob-login-btn { opacity:1; pointer-events:auto; }
+#nav-auth { display:flex; align-items:center; gap:6px; min-height:28px; }
+#nav-mob-auth { display:flex; flex-direction:column; gap:4px; min-height:36px; }
 #nav-user-nick { font-size:0.78rem; font-weight:700; color:#93c5fd; max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-decoration:none; border-radius:6px; padding:2px 6px; transition:background 0.15s; }
 #nav-user-nick:hover { background:rgba(59,130,246,0.12); }
 #nav-logout-btn { padding:4px 10px; border-radius:7px; background:rgba(248,113,113,0.08); color:#f87171; border:1px solid rgba(248,113,113,0.2); font-size:0.74rem; font-weight:700; cursor:pointer; transition:all 0.15s; font-family:inherit; pointer-events:auto; position:relative; z-index:10; }
@@ -180,9 +178,7 @@ body.auth-loaded #nav-mob-login-btn { opacity:1; pointer-events:auto; }
     </div>
     <div class="nav-right">
       <button id="lang-switcher" onclick="I18n.setLocale(I18n.locale()==='ko'?'en':'ko')">EN</button>
-      <div id="nav-auth">
-        <a href="/login" id="nav-login-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg><span data-i18n="nav.login">로그인</span></a>
-      </div>
+      <div id="nav-auth"></div>
       <button class="theme-toggle" aria-label="라이트 모드로 전환" title="라이트 모드" onclick="Theme.toggle()"><svg class="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg><svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
       <button id="nav-mob-btn" class="nav-mob-btn" aria-label="메뉴"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="17" y2="6"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="14" x2="17" y2="14"/></svg></button>
     </div>
@@ -201,7 +197,7 @@ body.auth-loaded #nav-mob-login-btn { opacity:1; pointer-events:auto; }
   <div class="mob-drawer-divider"></div>
   <div class="mob-drawer-bottom">
     <button class="mob-lang-btn" onclick="I18n.setLocale(I18n.locale()==='ko'?'en':'ko')">EN / 한</button>
-    <a href="/login" id="nav-mob-login-btn" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;background:rgba(59,130,246,0.12);color:#60a5fa;border:1px solid rgba(59,130,246,0.3);font-size:0.82rem;font-weight:700;text-decoration:none;transition:all 0.15s"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg><span data-i18n="nav.login">로그인</span></a>
+    <div id="nav-mob-auth"></div>
   </div>
 </div>
 <div id="nav-mob-overlay" class="nav-mob-overlay"></div>
