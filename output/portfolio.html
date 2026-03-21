@@ -483,48 +483,7 @@ function showToast(msg, type='info') {
 (function(){var btn=document.getElementById('nav-mob-btn'),drawer=document.getElementById('nav-mob-drawer'),overlay=document.getElementById('nav-mob-overlay');if(!btn||!drawer)return;function open(){drawer.classList.add('open');if(overlay)overlay.classList.add('open');document.body.classList.add('mob-menu-open');btn.setAttribute('aria-expanded','true');}function close(){drawer.classList.remove('open');if(overlay)overlay.classList.remove('open');document.body.classList.remove('mob-menu-open');btn.setAttribute('aria-expanded','false');}btn.addEventListener('click',function(){drawer.classList.contains('open')?close():open();});if(overlay)overlay.addEventListener('click',close);drawer.querySelectorAll('a').forEach(function(a){a.addEventListener('click',close);});document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});})();
 </script>
 
-<script>
-// ═══════════════════════════════════════════════════════════════════════
-// 🔐 Navbar 인증 상태 자동화
-// ═══════════════════════════════════════════════════════════════════════
-(async function initNavAuth() {
-  if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) return;
-
-  const authEl = document.getElementById('nav-auth');
-  if (!authEl) return;
-  let _renderedNick = null;
-
-  async function renderAuth() {
-    var user;
-    try { user = await CorryuAuth.getUser(); } catch(e) { return; }
-    if (!user) return;
-    var profile;
-    try { profile = await CorryuAuth.getProfile(user.id); } catch(e) {}
-    var nick = (profile && profile.nickname) || (user.email ? user.email.split('@')[0] : 'User');
-    if (_renderedNick === nick) return;
-    _renderedNick = nick;
-    // We try to get correct I18n, else fallback to "로그아웃"
-    var logoutTxt = (typeof I18n !== 'undefined') ? I18n.t('nav.logout') : '로그아웃';
-    if (!logoutTxt || logoutTxt.indexOf('nav.logout')!==-1) logoutTxt = '로그아웃';
-    authEl.innerHTML =
-      '<a id="nav-user-nick" href="/profile" title="' + nick + '">' + nick + '</a>' +
-      '<button id="nav-logout-btn" data-i18n="nav.logout">' + logoutTxt + '</button>';
-  }
-
-  CorryuAuth.onAuthChange(function(event) {
-    var mobLoginBtn = document.getElementById('nav-mob-login-btn');
-    if (event === 'SIGNED_IN' && mobLoginBtn) mobLoginBtn.style.display = 'none';
-    if (event === 'SIGNED_OUT') {
-      _renderedNick = null;
-      window.location.reload();
-    } else {
-      renderAuth();
-    }
-  });
-
-  await renderAuth();
-})();
-</script>
+<script src="/nav.js"></script>
 </body>
 
 </html>

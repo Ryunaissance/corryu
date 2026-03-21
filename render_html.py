@@ -1429,37 +1429,11 @@ $(document).ready(function() {{
 }});
 </script>
 
-<!-- ── 모바일 햄버거 메뉴 ── -->
-<script>
-(function() {{
-  var btn     = document.getElementById('nav-mob-btn');
-  var drawer  = document.getElementById('nav-mob-drawer');
-  var overlay = document.getElementById('nav-mob-overlay');
-  if (!btn || !drawer) return;
-  function openMenu() {{
-    drawer.classList.add('open');
-    if (overlay) overlay.classList.add('open');
-    document.body.classList.add('mob-menu-open');
-    btn.setAttribute('aria-expanded', 'true');
-  }}
-  function closeMenu() {{
-    drawer.classList.remove('open');
-    if (overlay) overlay.classList.remove('open');
-    document.body.classList.remove('mob-menu-open');
-    btn.setAttribute('aria-expanded', 'false');
-  }}
-  btn.addEventListener('click', function() {{
-    drawer.classList.contains('open') ? closeMenu() : openMenu();
-  }});
-  if (overlay) overlay.addEventListener('click', closeMenu);
-  drawer.querySelectorAll('a').forEach(function(a) {{ a.addEventListener('click', closeMenu); }});
-  document.addEventListener('keydown', function(e) {{ if (e.key === 'Escape') closeMenu(); }});
-}})();
-</script>
+<script src="/nav.js"></script>
 
 <script>
 // ═══════════════════════════════════════════════════════════════════════
-// ❤️ 인기 종목 랭킹 (ticker_likes)
+// ❤️ 인기 종목 랭킹 (ticker_likes) — index.html only
 // ═══════════════════════════════════════════════════════════════════════
 (async function initTrending() {{
   if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) return;
@@ -1521,67 +1495,8 @@ $(document).ready(function() {{
   await Promise.all([loadWeekly(), loadMonthly()]);
   setInterval(() => {{ loadWeekly(); loadMonthly(); }}, 30 * 60 * 1000);
 }})();
-
-// ═══════════════════════════════════════════════════════════════════════
-// 🔐 Navbar 인증 상태
-// ═══════════════════════════════════════════════════════════════════════
-(async function initNavAuth() {{
-  if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) return;
-
-  const authEl = document.getElementById('nav-auth');
-  if (!authEl) return;
-  let _renderedNick = null;
-
-  authEl.addEventListener('click', function(e) {{
-    if (e.target.closest('#nav-logout-btn')) {{
-      e.preventDefault();
-      e.stopPropagation();
-      doLogout();
-    }}
-  }});
-
-  async function doLogout() {{
-    var btn = document.getElementById('nav-logout-btn');
-    if (btn) {{ btn.disabled = true; btn.textContent = '로그아웃 중…'; }}
-    try {{
-      await Promise.race([
-        CorryuAuth.signOut(),
-        new Promise(function(r) {{ setTimeout(r, 2000); }})
-      ]);
-    }} catch(e) {{ console.warn('[CORRYU] logout error:', e); }}
-    window.location.reload();
-  }}
-
-  window._navLogout = doLogout;
-
-  async function renderAuth() {{
-    var user;
-    try {{ user = await CorryuAuth.getUser(); }} catch(e) {{ return; }}
-    if (!user) return;
-    var profile;
-    try {{ profile = await CorryuAuth.getProfile(user.id); }} catch(e) {{}}
-    var nick = (profile && profile.nickname) || (user.email ? user.email.split('@')[0] : 'User');
-    if (_renderedNick === nick) return;
-    _renderedNick = nick;
-    authEl.innerHTML =
-      '<a id="nav-user-nick" href="/profile" title="' + nick + '">' + nick + '</a>' +
-      '<button id="nav-logout-btn" data-i18n="nav.logout">' + I18n.t('nav.logout') + '</button>';
-  }}
-
-  CorryuAuth.onAuthChange(function(event) {{
-    var mobLoginBtn = document.getElementById('nav-mob-login-btn');
-    if (event === 'SIGNED_IN' && mobLoginBtn) mobLoginBtn.style.display = 'none';
-    if (event === 'SIGNED_OUT') {{
-      _renderedNick = null;
-      window.location.reload();
-    }} else {{
-      renderAuth();
-    }}
-  }});
-
-  await renderAuth();
-}})();
 </script>
+
 
 <script>
 // ═══════════════════════════════════════════════════════════════════════
