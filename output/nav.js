@@ -83,6 +83,23 @@
     try { profile = await CorryuAuth.getProfile(user.id); } catch (e) {}
     var nick = (profile && profile.nickname) || (user.email ? user.email.split('@')[0] : 'User');
     
+    // Hide mobile login and inject mobile logout if it doesn't exist
+    var mobLoginBtn = document.getElementById('nav-mob-login-btn');
+    if (mobLoginBtn) {
+        mobLoginBtn.style.display = 'none';
+        if (!document.getElementById('nav-mob-logout-btn')) {
+            var mobLogout = document.createElement('a');
+            mobLogout.href = '#';
+            mobLogout.id = 'nav-mob-logout-btn';
+            mobLogout.className = 'mob-link mob-logout-link';
+            mobLogout.style.color = '#f87171';
+            mobLogout.style.cursor = 'pointer';
+            mobLogout.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg><span data-i18n="nav.logout">' + (window.I18n ? window.I18n.t('nav.logout') : '로그아웃') + '</span>';
+            mobLogout.onclick = function(e) { e.preventDefault(); doLogout(); };
+            mobLoginBtn.parentNode.insertBefore(mobLogout, mobLoginBtn.nextSibling);
+        }
+    }
+
     reveal();
 
     if (_renderedNick === nick) return;
