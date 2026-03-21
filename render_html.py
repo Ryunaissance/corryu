@@ -497,7 +497,11 @@ function getSuperSectorMeta(ssId) {{
     let metas = ss.sub_sectors.map(sid => sectorMeta[sid] || {{}});
     return {{
         count:  metas.reduce((s,m) => s+(m.count||0), 0),
-        afunction applySmhCorr() {{
+        active: metas.reduce((s,m) => s+(m.active||0), 0)
+    }};
+}}
+
+function applySmhCorr() {{
     try {{
         const smhData = JSON.parse(localStorage.getItem('corryu_smh_corr') || 'null');
         if (!smhData) return;
