@@ -17,3 +17,8 @@ __pycache__/
 *.pyo
 .vercel/
 .claude/
+node_modules/
+.venv/
+.env
+.ipynb_checkpoints/
+*.log
