@@ -1465,6 +1465,7 @@ $(document).ready(function() {{
   if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) return;
 
   const section = document.getElementById('trending-section');
+  if (!section) return;
   section.style.display = 'block';
 
   const TOP_N = 5;

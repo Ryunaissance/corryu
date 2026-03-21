@@ -230,7 +230,7 @@ table.dataTable tbody tr.row-watchlist.row-selected { background: rgba(59,130,24
           Total <strong style="color:var(--text-primary)" id="hdr-total">1,650</strong> ETFs
           <span id="hdr-legacy-label"> · <span id="hdr-legacy">681</span> legacy · <strong style="color:#4ade80" id="hdr-active">969</strong> active</span>
           &nbsp;·&nbsp; <strong style="color:var(--text-primary)">23</strong> Sectors
-          &nbsp;·&nbsp; Updated <span style="color:#94a3b8">2026-03-20</span>
+          &nbsp;·&nbsp; Updated <span style="color:#94a3b8">2026-03-21</span>
         </p>
       </div>
     </div>
@@ -1415,6 +1415,7 @@ $(document).ready(function() {
   if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) return;
 
   const section = document.getElementById('trending-section');
+  if (!section) return;
   section.style.display = 'block';
 
   const TOP_N = 5;
@@ -1480,6 +1481,28 @@ $(document).ready(function() {
   const authEl = document.getElementById('nav-auth');
   if (!authEl) return;
   let _renderedNick = null;
+
+  authEl.addEventListener('click', function(e) {
+    if (e.target.closest('#nav-logout-btn')) {
+      e.preventDefault();
+      e.stopPropagation();
+      doLogout();
+    }
+  });
+
+  async function doLogout() {
+    var btn = document.getElementById('nav-logout-btn');
+    if (btn) { btn.disabled = true; btn.textContent = '로그아웃 중…'; }
+    try {
+      await Promise.race([
+        CorryuAuth.signOut(),
+        new Promise(function(r) { setTimeout(r, 2000); })
+      ]);
+    } catch(e) { console.warn('[CORRYU] logout error:', e); }
+    window.location.reload();
+  }
+
+  window._navLogout = doLogout;
 
   async function renderAuth() {
     var user;
