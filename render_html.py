@@ -183,13 +183,6 @@ table.dataTable tbody tr.row-watchlist.row-selected {{ background: rgba(59,130,2
 #btn-reset {{ color: #fbbf24; border-color: rgba(251,191,36,0.2); background: rgba(251,191,36,0.05); }}
 #btn-reset:hover {{ background: rgba(251,191,36,0.12) !important; color: #fde68a !important; }}
 
-/* GitHub 동기화 */
-.sync-dot {{ width: 7px; height: 7px; border-radius: 50%; background: #475569; display: inline-block; flex-shrink: 0; }}
-.sync-dot.ok {{ background: #4ade80; }}
-.sync-dot.err {{ background: #f87171; }}
-.sync-dot.busy {{ background: #fbbf24; animation: syncPulse 1s ease-in-out infinite; }}
-@keyframes syncPulse {{ 0%, 100% {{ opacity: 1; }} 50% {{ opacity: 0.35; }} }}
-
 /* Filter controls */
 .filter-input {{ background: rgba(20,24,38,0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e2e8f0; padding: 6px 10px; font-size: 0.82rem; width: 90px; }}
 .filter-input:focus {{ outline: none; border-color: var(--accent); }}
@@ -326,7 +319,6 @@ table.dataTable tbody tr.row-watchlist.row-selected {{ background: rgba(59,130,2
                 <div style="border-left:1px solid rgba(255,255,255,0.1);padding-left:12px;display:flex;gap:6px;align-items:center">
                     <button id="btn-undo" class="btn-history" disabled title="Ctrl+Z" data-i18n="btn.undo">↩ 실행취소</button>
                     <button id="btn-reset" class="btn-history" data-i18n="btn.reset" data-i18n-title="btn.reset.title">⟳ 초기화</button>
-                    <button id="sync-status" class="btn-history" data-i18n-title="btn.sync.title"><span class="sync-dot" id="sync-dot"></span>&nbsp;<span id="sync-label" data-i18n="btn.sync">동기화</span></button>
                 </div>
             </div>
         </div>
@@ -435,7 +427,7 @@ function applyAdminUI(isAdmin) {{
     if (!isAdmin) {{
         $('#filterLegacy').closest('label').hide();
         $('#fab-btn-legacy, #fab-btn-unlegacy').hide();
-        $('#btn-undo, #btn-reset, #sync-status').hide();
+        $('#btn-undo, #btn-reset').hide();
         var $ll = $('#hdr-legacy-label');
         if ($ll.length) $ll.hide();
     }}
@@ -813,51 +805,6 @@ function showToast(msg, durationMs) {{
     el.textContent = msg;
     el.style.opacity = '1';
     _toastTimer = setTimeout(function() {{ el.style.opacity = '0'; }}, durationMs || 3000);
-}}
-
-// ── GitHub 다기기 동기화 (서버사이드 PAT, /api/sync 사용) ────
-function setSyncStatus(s) {{
-    const dot = document.getElementById('sync-dot');
-    const lbl = document.getElementById('sync-label');
-    if (!dot || !lbl) return;
-    dot.className = 'sync-dot' + (s && s !== 'off' ? ' ' + s : '');
-    const map = {{ ok: 'sync.ok', err: 'sync.err', busy: 'sync.busy' }};
-    lbl.textContent = map[s] ? I18n.t(map[s]) : I18n.t('btn.sync');
-}}
-
-async function fetchRemoteOverrides() {{
-    try {{
-        const r = await fetch('/api/sync?t=' + Date.now());
-        if (!r.ok) return null;
-        const d = await r.json();
-        _ghSha = d.sha;
-        return d.content;  // {{ _meta: {{ts}}, ...overrides }}
-    }} catch(e) {{ return null; }}
-}}
-
-let _ghSha = null;
-async function pushRemoteOverrides(ov) {{
-    setSyncStatus('busy');
-    try {{
-        const body = {{ overrides: ov }};
-        if (_ghSha) body.sha = _ghSha;
-        const r = await fetch('/api/sync', {{
-            method: 'POST',
-            headers: {{ 'Content-Type': 'application/json' }},
-            body: JSON.stringify(body),
-        }});
-        if (r.ok) {{
-            const d = await r.json();
-            _ghSha = d.sha;
-            setSyncStatus('ok');
-        }} else if (r.status === 409) {{
-            _ghSha = null;
-            setSyncStatus('err');
-            showToast('동기화 충돌 — 페이지를 새로고침하세요', 4000);
-        }} else {{
-            setSyncStatus('err');
-        }}
-    }} catch(e) {{ setSyncStatus('err'); }}
 }}
 
 function initDashboard() {{
@@ -1347,25 +1294,6 @@ function initDashboard() {{
             undoLegacyAction();
         }}
     }});
-    // ── GitHub 동기화 버튼: 클릭 시 수동 동기화 체크 ──────────
-    $('#sync-status').on('click', async function() {{
-        setSyncStatus('busy');
-        const remoteOv = await fetchRemoteOverrides();
-        if (!remoteOv) {{ setSyncStatus('err'); showToast('동기화 서버에 연결할 수 없습니다', 3000); return; }}
-        if (remoteOv._meta) {{
-            const localTs = parseInt(localStorage.getItem('corryu_overrides_ts') || '0');
-            if (remoteOv._meta.ts > localTs) {{
-                showToast('다른 기기의 최신 설정이 있습니다 — 페이지를 새로고침하세요', 4000);
-                setSyncStatus('ok');
-            }} else {{
-                setSyncStatus('ok');
-                showToast('이미 최신 상태입니다', 2000);
-            }}
-        }} else {{
-            setSyncStatus('ok');
-        }}
-    }});
-
     updateUndoBtn();
 }}
 
@@ -1420,39 +1348,14 @@ $(document).ready(function() {{
                         }}
 
                         let ov = getUserOverrides();
-                        const localTs = parseInt(localStorage.getItem('corryu_overrides_ts') || '0');
-                        setSyncStatus('busy');
-                        const remoteOv = await fetchRemoteOverrides();
-                        if (remoteOv && remoteOv._meta) {{
-                            if (remoteOv._meta.ts > localTs) {{
-                                // 안전한 Object.assign으로 복사 대체 (객체 distructuring 이슈 방지)
-                                var cleanOv = Object.assign({{}}, remoteOv);
-                                delete cleanOv._meta;
-                                ov = cleanOv;
-                                localStorage.setItem(USER_OVERRIDES_KEY, JSON.stringify(ov));
-                                localStorage.setItem('corryu_overrides_ts', String(remoteOv._meta.ts));
-                                setSyncStatus('ok');
-                                showToast('다른 기기의 설정을 불러왔습니다 (' + Object.keys(ov).length + '종목)', 3500);
-                            }} else if (localTs > remoteOv._meta.ts && Object.keys(ov).length) {{
-                                pushRemoteOverrides(ov);
-                            }} else {{
-                                setSyncStatus('ok');
-                            }}
-                        }} else if (!remoteOv && Object.keys(ov).length) {{
-                            pushRemoteOverrides(ov);
-                        }} else {{
-                            setSyncStatus('ok');
-                        }}
-                        
                         if (Object.keys(ov).length) applyOverridesToData(ov);
                         recalcSectorMeta();
                         renderSectorTabs();
                         renderSummary();
                         table.rows().invalidate('data').draw(false);
-                        setInterval(pollRemoteSync, 30000);
                     }}
                 }} catch(authErr) {{
-                    console.warn('[CORRYU] Background sync failed:', authErr);
+                    console.warn('[CORRYU] Background init failed:', authErr);
                 }}
             }}, 50);
         }})
