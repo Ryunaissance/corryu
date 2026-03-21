@@ -1,7 +1,4 @@
 {
-  "btn.undo"           : "↩ 실행취소",
-  "btn.reset"          : "⟳ 초기화",
-  "btn.reset.title"    : "모든 사용자 오버라이드를 빌드 기본값으로 초기화",
   "btn.save"           : "저장",
   "btn.sync"           : "동기화",
   "btn.sync.title"     : "다기기 동기화",

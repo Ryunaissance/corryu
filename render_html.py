@@ -176,13 +176,6 @@ table.dataTable tbody tr.row-watchlist.row-selected {{ background: rgba(59,130,2
 .smb.cur {{ border-color:rgba(59,130,246,0.5); background:rgba(59,130,246,0.1); color:#93c5fd; }}
 .smg {{ font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#334155; padding:14px 0 5px 2px; }}
 
-/* History buttons */
-.btn-history {{ display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; border-radius: 7px; font-size: 0.78rem; font-weight: 600; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color: #94a3b8; cursor: pointer; transition: all 0.15s; }}
-.btn-history:hover:not(:disabled) {{ background: rgba(255,255,255,0.1); color: #e2e8f0; }}
-.btn-history:disabled {{ opacity: 0.3; cursor: not-allowed; }}
-#btn-reset {{ color: #fbbf24; border-color: rgba(251,191,36,0.2); background: rgba(251,191,36,0.05); }}
-#btn-reset:hover {{ background: rgba(251,191,36,0.12) !important; color: #fde68a !important; }}
-
 /* Filter controls */
 .filter-input {{ background: rgba(20,24,38,0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #e2e8f0; padding: 6px 10px; font-size: 0.82rem; width: 90px; }}
 .filter-input:focus {{ outline: none; border-color: var(--accent); }}
@@ -316,9 +309,6 @@ table.dataTable tbody tr.row-watchlist.row-selected {{ background: rgba(59,130,2
                     <span>Min Sortino</span>
                     <input type="number" id="filterSortino" class="filter-input" placeholder="0" value="" step="0.1">
                 </div>
-                <div style="border-left:1px solid rgba(255,255,255,0.1);padding-left:12px;display:flex;gap:6px;align-items:center">
-                    <button id="btn-undo" class="btn-history" disabled title="Ctrl+Z" data-i18n="btn.undo">↩ 실행취소</button>
-                    <button id="btn-reset" class="btn-history" data-i18n="btn.reset" data-i18n-title="btn.reset.title">⟳ 초기화</button>
                 </div>
             </div>
         </div>
@@ -427,7 +417,6 @@ function applyAdminUI(isAdmin) {{
     if (!isAdmin) {{
         $('#filterLegacy').closest('label').hide();
         $('#fab-btn-legacy, #fab-btn-unlegacy').hide();
-        $('#btn-undo, #btn-reset').hide();
         var $ll = $('#hdr-legacy-label');
         if ($ll.length) $ll.hide();
     }}
@@ -508,33 +497,7 @@ function getSuperSectorMeta(ssId) {{
     let metas = ss.sub_sectors.map(sid => sectorMeta[sid] || {{}});
     return {{
         count:  metas.reduce((s,m) => s+(m.count||0), 0),
-        active: metas.reduce((s,m) => s+(m.active||0), 0),
-        legacy: metas.reduce((s,m) => s+(m.legacy||0), 0),
-    }};
-}}
-
-function recalcSectorMeta() {{
-    for (const sid of Object.keys(sectorMeta)) {{
-        const etfs = allData[sid] || [];
-        sectorMeta[sid].count  = etfs.length;
-        sectorMeta[sid].active = etfs.filter(e => !e.is_legacy).length;
-        sectorMeta[sid].legacy = etfs.filter(e =>  e.is_legacy).length;
-    }}
-    let totalETFs   = Object.values(sectorMeta).reduce((s,m) => s+(m.count||0),  0);
-    let totalActive = Object.values(sectorMeta).reduce((s,m) => s+(m.active||0), 0);
-    let totalLegacy = Object.values(sectorMeta).reduce((s,m) => s+(m.legacy||0), 0);
-    $('#hdr-total').text(totalETFs.toLocaleString());
-    $('#hdr-active').text(totalActive.toLocaleString());
-    $('#hdr-legacy').text(totalLegacy.toLocaleString());
-}}
-
-// ── 실행취소 히스토리 ─────────────────────────────────
-let undoHistory = [];
-const MAX_UNDO_STEPS = 30;
-let originalLegacyState = {{}};
-let originalSectorState = {{}};  // {{ ticker: sid }} — 빌드 기본 섹터 스냅샷
-
-function applySmhCorr() {{
+        afunction applySmhCorr() {{
     try {{
         const smhData = JSON.parse(localStorage.getItem('corryu_smh_corr') || 'null');
         if (!smhData) return;
@@ -544,20 +507,6 @@ function applySmhCorr() {{
             }}
         }}
     }} catch(e) {{}}
-}}
-
-function snapshotOriginalLegacy() {{
-    for (const sid of Object.keys(allData)) {{
-        for (const etf of allData[sid]) {{
-            originalLegacyState[etf.ticker] = {{
-                is_legacy:      etf.is_legacy,
-                legacy_detail:  (etf.legacy_detail  || []).slice(),
-                legacy_reasons: (etf.legacy_reasons || []).slice(),
-                r_anchor:       etf.r_anchor
-            }};
-            originalSectorState[etf.ticker] = sid;  // 빌드 기본 섹터 저장
-        }}
-    }}
 }}
 
 // 모든 섹터에서 ticker로 ETF 검색 → {{ etf, sid }} | null
@@ -578,15 +527,15 @@ function applyOverridesToData(ov) {{
     // ② 모든 섹터 배열 초기화 후 원래 섹터에 재배치 + 레거시 상태 원복
     for (const sid of Object.keys(allData)) allData[sid] = [];
     for (const [ticker, etf] of Object.entries(etfMap)) {{
-        const origSid = originalSectorState[ticker];
+        const origSid = etf._original_sector || etf._build_sector;
         if (!origSid || allData[origSid] === undefined) continue;
-        const orig = originalLegacyState[ticker];
-        if (orig) {{
-            etf.is_legacy      = orig.is_legacy;
-            etf._user_override = false;
-            etf.legacy_detail  = orig.legacy_detail.slice();
-            etf.legacy_reasons = orig.legacy_reasons.slice();
-            if (orig.r_anchor !== undefined) etf.r_anchor = orig.r_anchor;
+        if (!etf._user_override) {{
+            etf.is_legacy      = etf._orig_legacy;
+            etf.legacy_detail  = etf._orig_legacy_detail ? etf._orig_legacy_detail.slice() : [];
+            etf.legacy_reasons = etf._orig_legacy_reasons ? etf._orig_legacy_reasons.slice() : [];
+        }}
+        if (!etf._user_override_r_anchor) {{
+            etf.r_anchor = etf._orig_r_anchor;
         }}
         delete etf._user_sector;
         delete etf._original_sector;
@@ -604,15 +553,16 @@ function applyOverridesToData(ov) {{
     }}
     // ④ 섹터 이동 오버라이드 적용
     for (const [ticker, o] of Object.entries(ov)) {{
-        if (!o.sector || o.sector === originalSectorState[ticker]) continue;
-        const origSid = originalSectorState[ticker];
+        const buildSid = etfMap[ticker] ? etfMap[ticker]._build_sector : null;
+        if (!o.sector || o.sector === buildSid) continue;
+        const currentFound = findETFAnywhere(ticker);
+        if (!currentFound) continue;
+        const {{ etf, sid: oldSid, idx }} = currentFound;
         const newSid  = o.sector;
         if (allData[newSid] === undefined) continue;
-        const idx = origSid && allData[origSid] ? allData[origSid].findIndex(e => e.ticker === ticker) : -1;
-        if (idx === -1) continue;
-        const [etf] = allData[origSid].splice(idx, 1);
+        allData[oldSid].splice(idx, 1);
         etf._user_sector    = newSid;
-        etf._original_sector = origSid;
+        etf._original_sector = oldSid;
         allData[newSid].push(etf);
     }}
     // ⑤ r_anchor 오버라이드 적용
@@ -621,44 +571,8 @@ function applyOverridesToData(ov) {{
         const found = findETFAnywhere(ticker);
         if (!found) continue;
         found.etf.r_anchor = o.r_anchor;
+        found.etf._user_override_r_anchor = true;
     }}
-}}
-
-function pushUndo() {{
-    undoHistory.push(JSON.stringify(getUserOverrides()));
-    if (undoHistory.length > MAX_UNDO_STEPS) undoHistory.shift();
-    updateUndoBtn();
-}}
-
-function updateUndoBtn() {{
-    const n = undoHistory.length;
-    const $b = $('#btn-undo');
-    $b.prop('disabled', n === 0);
-    $b.text(n > 0 ? '↩ 실행취소 (' + n + ')' : '↩ 실행취소');
-}}
-
-function undoLegacyAction() {{
-    if (!undoHistory.length) return;
-    const prevOv = JSON.parse(undoHistory.pop());
-    saveUserOverrides(prevOv);
-    applyOverridesToData(prevOv);
-    recalcSectorMeta();
-    renderSectorTabs();
-    renderSummary();
-    if (typeof table !== 'undefined') loadSector(state.activeSector);
-    updateUndoBtn();
-}}
-
-function resetAllOverrides() {{
-    if (!confirm('모든 사용자 설정(레거시·카테고리 이동)을 빌드 기본값으로 초기화할까요?')) return;
-    undoHistory = [];
-    saveUserOverrides({{}});
-    applyOverridesToData({{}});
-    recalcSectorMeta();
-    renderSectorTabs();
-    renderSummary();
-    if (typeof table !== 'undefined') loadSector(state.activeSector);
-    updateUndoBtn();
 }}
 
 function renderSectorTabs() {{
@@ -1058,7 +972,6 @@ function initDashboard() {{
     // ── FAB 액션 ─────────────────────────────────────
     function applyLegacyAction(setLegacy) {{
         if (!_isAdmin || selectedTickers.size === 0) return;
-        pushUndo();
         let ov = getUserOverrides();
         selectedTickers.forEach(function(ticker) {{
             // 섹터 오버라이드가 있으면 유지한 채 is_legacy만 업데이트
@@ -1116,7 +1029,6 @@ function initDashboard() {{
     function applySectorMove(newSectorId) {{
         if (!newSectorId || selectedTickers.size === 0) return;
         const tickersToRecompute = [];
-        pushUndo();
         let ov = getUserOverrides();
         selectedTickers.forEach(function(ticker) {{
             const found = findETFAnywhere(ticker);
@@ -1136,7 +1048,7 @@ function initDashboard() {{
             // allData에서 이동
             allData[oldSid] = allData[oldSid].filter(e => e.ticker !== ticker);
             etf._user_sector     = newSectorId;
-            etf._original_sector = originalSectorState[ticker];
+            etf._original_sector = etf._build_sector; // Store the build-time original sector
             if (!allData[newSectorId]) allData[newSectorId] = [];
             allData[newSectorId].push(etf);
             // localStorage 저장 (기존 is_legacy 보존)
@@ -1286,15 +1198,6 @@ function initDashboard() {{
     }});
 
     // ── 실행취소 / 초기화 ─────────────────────────────
-    $('#btn-undo').on('click', undoLegacyAction);
-    $('#btn-reset').on('click', resetAllOverrides);
-    $(document).on('keydown', function(e) {{
-        if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {{
-            e.preventDefault();
-            undoLegacyAction();
-        }}
-    }});
-    updateUndoBtn();
 }}
 
 $(document).ready(function() {{
