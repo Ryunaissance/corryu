@@ -479,7 +479,7 @@ function setLoading(on) {
   if (!CorryuAuth.isConfigured) return;
   const user = await CorryuAuth.getUser();
   if (user) {
-    const redirect = new URLSearchParams(location.search).get('redirect') || '/index';
+    const redirect = new URLSearchParams(location.search).get('redirect') || '/index.html';
     location.href = redirect;
   }
 })();

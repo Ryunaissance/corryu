@@ -82,7 +82,7 @@ window.CorryuAuth = {
     if (!_sb) throw new Error('Supabase가 연결되지 않았습니다.');
     const { data, error } = await _sb.auth.signInWithOAuth({
       provider: provider.toLowerCase(),
-      options: { redirectTo: window.location.origin + '/index' }
+      options: { redirectTo: window.location.origin + '/index.html' }
     });
     if (error) throw error;
     return data;
@@ -91,7 +91,7 @@ window.CorryuAuth = {
   async resetPassword(email) {
     if (!_sb) throw new Error('Supabase가 연결되지 않았습니다.');
     const { error } = await _sb.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + '/login'
+      redirectTo: window.location.origin + '/login.html'
     });
     if (error) throw error;
   },
