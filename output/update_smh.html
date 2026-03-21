@@ -293,28 +293,6 @@ async function startFetch() {
   if (!authEl) return;
   let _renderedNick = null;
 
-  authEl.addEventListener('click', function(e) {
-    if (e.target.closest('#nav-logout-btn')) {
-      e.preventDefault();
-      e.stopPropagation();
-      doLogout();
-    }
-  });
-
-  async function doLogout() {
-    var btn = document.getElementById('nav-logout-btn');
-    if (btn) { btn.disabled = true; btn.textContent = '로그아웃 중…'; }
-    try {
-      await Promise.race([
-        CorryuAuth.signOut(),
-        new Promise(function(r) { setTimeout(r, 2000); })
-      ]);
-    } catch(e) { console.warn('[CORRYU] logout error:', e); }
-    window.location.reload();
-  }
-
-  window._navLogout = doLogout;
-
   async function renderAuth() {
     var user;
     try { user = await CorryuAuth.getUser(); } catch(e) { return; }

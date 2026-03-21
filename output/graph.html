@@ -563,8 +563,6 @@ function showLayoutOverlay(show, msg) {
 // ── 필터 적용 (슬라이더 변경 시) ───────────────────────
 function applyFilter(minR) {
   currentR = minR;
-  // 임계값 변경 시 좌표림 리셋하여 일관성 있는 레이아웃 보장
-  allNodes.forEach(n => { delete n.x; delete n.y; delete n.vx; delete n.vy; });
   const visibleNodes = allNodes
     .filter(n => !hideLegacy || !n.l)
     .filter(n => !hideShortHistory || !n.sh)

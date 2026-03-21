@@ -477,9 +477,13 @@ async function renderChart() {
   // Init LW Chart on first call
   if (!lwCompareChart) {
     container.innerHTML = '';
+    // 명시적으로 차트 컨테이너 크기 지정, 0이면 기본값 사용
+    const w = container.clientWidth || window.innerWidth - 60;
+    const h = 240;
+    
     lwCompareChart = LightweightCharts.createChart(container, {
-      width:  container.clientWidth,
-      height: 240,
+      width:  w,
+      height: h,
       layout: { background: { type: 'solid', color: 'transparent' }, textColor: '#94a3b8' },
       grid:   { vertLines: { color: 'rgba(148,163,184,0.1)' }, horzLines: { color: 'rgba(148,163,184,0.1)' } },
       rightPriceScale: { borderColor: 'rgba(148,163,184,0.2)' },
@@ -670,28 +674,6 @@ document.addEventListener('i18n:ready', () => { renderAll(); });
   const authEl = document.getElementById('nav-auth');
   if (!authEl) return;
   let _renderedNick = null;
-
-  authEl.addEventListener('click', function(e) {
-    if (e.target.closest('#nav-logout-btn')) {
-      e.preventDefault();
-      e.stopPropagation();
-      doLogout();
-    }
-  });
-
-  async function doLogout() {
-    var btn = document.getElementById('nav-logout-btn');
-    if (btn) { btn.disabled = true; btn.textContent = '로그아웃 중…'; }
-    try {
-      await Promise.race([
-        CorryuAuth.signOut(),
-        new Promise(function(r) { setTimeout(r, 2000); })
-      ]);
-    } catch(e) { console.warn('[CORRYU] logout error:', e); }
-    window.location.reload();
-  }
-
-  window._navLogout = doLogout;
 
   async function renderAuth() {
     var user;

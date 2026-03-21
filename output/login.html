@@ -442,7 +442,7 @@ async function emailLogin(e) {
       await CorryuAuth.signIn(email, password);
       showToast('✅ 로그인 성공!');
       // 이전 페이지 또는 대시보드로 이동
-      const redirect = new URLSearchParams(location.search).get('redirect') || '/index';
+      const redirect = new URLSearchParams(location.search).get('redirect') || '/index.html';
       setTimeout(() => { location.href = redirect; }, 800);
     }
   } catch(err) {

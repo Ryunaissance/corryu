@@ -310,14 +310,6 @@ async function getSupabaseUser() {
   return await CorryuAuth.getUser();
 }
 
-async function logout() {
-  if (!confirm('로그아웃하시겠습니까?')) return;
-  if (typeof CorryuAuth !== 'undefined' && CorryuAuth.isConfigured) {
-    await CorryuAuth.signOut();
-  }
-  location.reload();
-}
-
 // ── ETF 데이터 ────────────────────────────────────────
 let allData = {};
 fetch('/etf_data.json').then(r=>r.json()).then(async data => {
@@ -394,6 +386,8 @@ function calculatePortfolio(fromButton = false) {
 
   valid.forEach(r => {
     const etf = allData[r.ticker.toUpperCase()];
+    if (!etf) return; // DB에 없거나 잘못된 티커는 계산에서 제외
+
     const w = parseFloat(r.weight) / totalW;
     wCAGR    += (etf.cagr    || 0) * w;
     wVol     += (etf.vol     || 0) * w;
@@ -401,8 +395,14 @@ function calculatePortfolio(fromButton = false) {
     if (!etf.short_history && etf.z_score !== null && etf.z_score !== undefined) {
       wZScore += etf.z_score * w; zCount++;
     }
-    items.push({ ticker: etf.ticker, weight: (parseFloat(r.weight)/totalW*100).toFixed(1) });
+    items.push({ ticker: etf.ticker, weight: (w * 100).toFixed(1) });
   });
+
+  if (items.length === 0) {
+    clearSummary();
+    if (fromButton) showToast('유효한 티커 데이터가 없습니다.', 'error');
+    return;
+  }
 
   const fmt = (v, d=1) => (v>0?'+':'')+v.toFixed(d)+'%';
   document.getElementById('summary-cagr').textContent    = fmt(wCAGR);
@@ -493,28 +493,6 @@ function showToast(msg, type='info') {
   const authEl = document.getElementById('nav-auth');
   if (!authEl) return;
   let _renderedNick = null;
-
-  authEl.addEventListener('click', function(e) {
-    if (e.target.closest('#nav-logout-btn')) {
-      e.preventDefault();
-      e.stopPropagation();
-      doLogout();
-    }
-  });
-
-  async function doLogout() {
-    var btn = document.getElementById('nav-logout-btn');
-    if (btn) { btn.disabled = true; btn.textContent = '로그아웃 중…'; }
-    try {
-      await Promise.race([
-        CorryuAuth.signOut(),
-        new Promise(function(r) { setTimeout(r, 2000); })
-      ]);
-    } catch(e) { console.warn('[CORRYU] logout error:', e); }
-    window.location.reload();
-  }
-
-  window._navLogout = doLogout;
 
   async function renderAuth() {
     var user;

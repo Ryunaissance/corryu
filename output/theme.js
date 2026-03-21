@@ -61,3 +61,24 @@
   // 전역 노출
   window.Theme = { toggle: toggle, get: getTheme, apply: applyTheme };
 })();
+
+  // ── Global Logout Handler ──
+  document.addEventListener('click', async function(e) {
+    var logoutBtn = e.target.closest('#nav-logout-btn') || e.target.closest('.btn-logout') || e.target.closest('[data-action="logout"]');
+    if (logoutBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!confirm('로그아웃하시겠습니까?')) return;
+      logoutBtn.disabled = true;
+      logoutBtn.textContent = '로그아웃 중…';
+      if (window.CorryuAuth && window.CorryuAuth.isConfigured) {
+        try {
+          await Promise.race([
+            window.CorryuAuth.signOut(),
+            new Promise(function(r) { setTimeout(r, 2000); })
+          ]);
+        } catch(err) { console.warn('[CORRYU] logout error:', err); }
+      }
+      window.location.reload();
+    }
+  });
