@@ -1370,7 +1370,7 @@ function initDashboard() {{
 }}
 
 $(document).ready(function() {{
-    fetch('etf_data.json')
+    fetch('/etf_data.json')
         .then(function(r) {{ return r.json(); }})
         .then(async function(d) {{
             sectorMeta = d.sectorMeta;
