@@ -1377,44 +1377,54 @@ $(document).ready(function() {{
             allData = d.allData;
             snapshotOriginalLegacy(); // 빌드 기본값 스냅샷 (undo 기준점)
 
-            // Admin 감지
-            const isAdmin = await detectAdmin();
-            applyAdminUI(isAdmin);
+            let isAdmin = false;
+            try {{
+                // Admin 감지
+                isAdmin = await detectAdmin();
+                applyAdminUI(isAdmin);
 
-            if (isAdmin) {{
-                // Admin: 오버라이드 & 동기화 로직
-                let ov = getUserOverrides();
-                const localTs = parseInt(localStorage.getItem('corryu_overrides_ts') || '0');
-                setSyncStatus('busy');
-                const remoteOv = await fetchRemoteOverrides();
-                if (remoteOv && remoteOv._meta) {{
-                    if (remoteOv._meta.ts > localTs) {{
-                        const {{ _meta, ...cleanOv }} = remoteOv;
-                        ov = cleanOv;
-                        localStorage.setItem(USER_OVERRIDES_KEY, JSON.stringify(ov));
-                        localStorage.setItem('corryu_overrides_ts', String(remoteOv._meta.ts));
-                        setSyncStatus('ok');
-                        showToast('다른 기기의 설정을 불러왔습니다 (' + Object.keys(ov).length + '종목)', 3500);
-                    }} else if (localTs > remoteOv._meta.ts && Object.keys(ov).length) {{
+                if (isAdmin) {{
+                    // Admin: 오버라이드 & 동기화 로직
+                    let ov = getUserOverrides();
+                    const localTs = parseInt(localStorage.getItem('corryu_overrides_ts') || '0');
+                    setSyncStatus('busy');
+                    const remoteOv = await fetchRemoteOverrides();
+                    if (remoteOv && remoteOv._meta) {{
+                        if (remoteOv._meta.ts > localTs) {{
+                            const {{ _meta, ...cleanOv }} = remoteOv;
+                            ov = cleanOv;
+                            localStorage.setItem(USER_OVERRIDES_KEY, JSON.stringify(ov));
+                            localStorage.setItem('corryu_overrides_ts', String(remoteOv._meta.ts));
+                            setSyncStatus('ok');
+                            showToast('다른 기기의 설정을 불러왔습니다 (' + Object.keys(ov).length + '종목)', 3500);
+                        }} else if (localTs > remoteOv._meta.ts && Object.keys(ov).length) {{
+                            pushRemoteOverrides(ov);
+                        }} else {{
+                            setSyncStatus('ok');
+                        }}
+                    }} else if (!remoteOv && Object.keys(ov).length) {{
                         pushRemoteOverrides(ov);
                     }} else {{
                         setSyncStatus('ok');
                     }}
-                }} else if (!remoteOv && Object.keys(ov).length) {{
-                    pushRemoteOverrides(ov);
+                    if (Object.keys(ov).length) applyOverridesToData(ov);
                 }} else {{
-                    setSyncStatus('ok');
+                    // 비Admin: 레거시 상태 제거 — 모든 ETF가 Active로 표시
+                    stripLegacyForNonAdmin();
                 }}
-                if (Object.keys(ov).length) applyOverridesToData(ov);
-            }} else {{
-                // 비Admin: 레거시 상태 제거 — 모든 ETF가 Active로 표시
-                stripLegacyForNonAdmin();
+            }} catch(authErr) {{
+                console.warn('[CORRYU] Auth/sync init failed (non-fatal):', authErr);
+                // Auth 실패해도 대시보드는 반드시 렌더링
+                try {{ stripLegacyForNonAdmin(); }} catch(e) {{}}
             }}
 
-            applySmhCorr();           // localStorage SMH 상관계수 적용
-            recalcSectorMeta();       // 오버라이드 반영해 카운트 갱신
-            await I18n.init();        // i18n 초기화 (저장된 언어 로드)
+            try {{ applySmhCorr(); }} catch(e) {{ console.warn('[CORRYU] SMH corr failed:', e); }}
+            try {{ recalcSectorMeta(); }} catch(e) {{ console.warn('[CORRYU] recalcSectorMeta failed:', e); }}
+            try {{ await I18n.init(); }} catch(e) {{ console.warn('[CORRYU] i18n init failed:', e); }}
+
+            // ★ initDashboard는 항상 실행 — 위의 어떤 단계가 실패해도 테이블은 렌더링
             initDashboard();
+
             if (isAdmin) setInterval(pollRemoteSync, 30000);
 
             // 언어 전환 시 탭·섹터명 즉시 재렌더링
@@ -1425,6 +1435,9 @@ $(document).ready(function() {{
                 updateFAB();
                 if (typeof table !== 'undefined') table.rows().invalidate('data').draw(false);
             }});
+        }})
+        .catch(function(err) {{
+            console.error('[CORRYU] 대시보드 데이터 로드 실패:', err);
         }});
 }});
 </script>
