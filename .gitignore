@@ -10,6 +10,9 @@ archive/
 # raw/ 파일은 Git에 포함 (parquet ~10MB, append-only 원본 데이터)
 # raw/ 는 gitignore 하지 않음
 
+# 개별 ETF JSON — Vercel 빌드 시 build_etf_pages.py가 etf_data.json으로부터 자동 생성
+output/etf-data/
+
 # 시스템
 .DS_Store
 __pycache__/
