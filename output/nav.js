@@ -70,7 +70,7 @@
           desktopLinks +
         '</div>' +
         '<div id="nav-auth"></div>' +
-        '<button class="theme-toggle" onclick="Theme.toggle()" aria-label="라이트 모드로 전환" title="라이트 모드">' + S.sun + S.moon + '</button>' +
+        '<button class="theme-toggle" aria-label="라이트 모드로 전환" title="라이트 모드">' + S.sun + S.moon + '</button>' +
         '<button id="nav-mob-btn" class="nav-mob-btn" aria-label="메뉴">' + S.burger + '</button>' +
       '</div>';
   }

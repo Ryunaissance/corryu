@@ -50,12 +50,14 @@
     });
   } catch (_) {}
 
-  // DOM 준비 후 버튼 이벤트 바인딩
+  // 이벤트 위임: 동적 주입(nav.js) 포함 모든 .theme-toggle 버튼 처리
+  // DOMContentLoaded 개별 바인딩 대신 document 레벨 단일 핸들러 사용
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('.theme-toggle')) toggle();
+  });
+
   document.addEventListener('DOMContentLoaded', function () {
     applyTheme(getTheme()); // 아이콘 상태 재적용
-    document.querySelectorAll('.theme-toggle').forEach(function (btn) {
-      btn.addEventListener('click', toggle);
-    });
   });
 
   // 전역 노출
