@@ -7,6 +7,10 @@
  * 4. supabase_migration.sql 을 SQL Editor에서 실행하세요
  * ─────────────────────────────────────────────────────────
  */
+// ⚠️ 의도적 하드코딩 — 이 값은 Supabase anon (publishable) key입니다.
+// anon key는 브라우저에 노출되도록 설계된 공개 키(RLS 정책으로 보호됨)이므로
+// 환경변수 패턴이 아닌 하드코딩이 정상입니다. 절대 수정하지 마세요.
+// 참고: https://supabase.com/docs/guides/api/api-keys
 const SUPABASE_URL = 'https://pksehljuhuowmhzgetxp.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_f5GvapL-1ARW_Q6f64uCow_FuCpxem2';
 

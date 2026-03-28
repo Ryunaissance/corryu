@@ -9,12 +9,22 @@
    desktop : min-width 1024px (데스크탑)
    ================================================================ */
 
-/* ── Safe Area (notch / home indicator) ── */
+/* ── Safe Area + 공통 테마 변수 (단일 소스) ── */
 :root {
   --safe-top:    env(safe-area-inset-top,    0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left:   env(safe-area-inset-left,   0px);
   --safe-right:  env(safe-area-inset-right,  0px);
+
+  /* 색상 — 약칭(backtest/screener) + 정식명(compare/portfolio 등) 양쪽 선언 */
+  --bg: #0a0d14;              --bg-primary: #0a0d14;
+  --card: rgba(18,22,36,0.92); --bg-card: rgba(18,22,36,0.92);
+  --border: rgba(255,255,255,0.07);
+  --t1: #e2e8f0;              --text-primary: #e2e8f0;
+  --t2: #94a3b8;
+  --t3: #7d90a4;              --text-muted: #7d90a4;
+  --accent: #3b82f6;
+  --accent-glow: rgba(59,130,246,0.25);
 }
 
 /* ================================================================

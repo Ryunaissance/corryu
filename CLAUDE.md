@@ -17,6 +17,8 @@
 | 전체 재계산 | `scripts/compute_all.py` | **단일 진입점**: `python scripts/compute_all.py` |
 | 초기 다운로드 | `scripts/fetch_initial.py` | 최초 1회: yfinance → `raw/*.parquet` |
 | 일별 업데이트 | `scripts/fetch_daily.py` | 매일: 최신 가격·메타 → parquet 추가 |
+| 대시보드 JS | `output/dashboard-*.js` | 4개 모듈 분리 (state, overrides, likes, entry) |
+| 네비게이션 | `output/nav.js` | DRY 준수, 모든 페이지 공통 주입 |
 | HTML 렌더러 | `render_html.py` | 템플릿→HTML 변환, pandas 불필요, 단독 실행 가능 |
 | MECE 검증 | `src/verify.py` | 빌드 시 자동 실행, 30개 앵커 스팟체크 포함 |
 
@@ -187,11 +189,21 @@ scripts/compute_all.py
 
 ---
 
-## 주의사항
+## 프론트엔드 아키텍처
 
-- `render_html.py`는 pandas 없이 동작 — `src/` 모듈과 독립적
-- `PROTECT_EQUITIES` 수정 시 분류 결과 전체에 영향, 반드시 `spot_check()` 확인
-- `graph_data.json`은 2MB로 크기가 큼 — 그래프 관련 코드 수정 후 `build_graph.py` 재실행 필요
-- 레거시 면제(`LEGACY_EXEMPTIONS`)는 앵커 ETF 자동 생성 — 직접 수정 불필요
-- 섹터 S23(레버리지 롱)은 폐지됨 — 레버리지 상품은 기초자산 섹터로 상관계수 분류
-- `raw/` 파일은 Git에 포함 (~10MB parquet) — GitHub Actions에서 자동 commit·push
+### JS 모듈화 (Dashboard)
+AI가 안전하게 수정할 수 있도록 `dashboard.js`를 4개 유닛으로 분리함. 수정 시 해당 도메인 파일만 수정할 것.
+
+1.  **`dashboard-state.js`**: 전역 상태(`var`), 데이터 필터 상태, Admin 로직, 공유 유틸리티. (**가장 먼저 로드**)
+2.  **`dashboard-overrides.js`**: `localStorage` 오버라이드 적용, 섹터 이동 모달, YF API 기반 `r_anchor` 재계산.
+3.  **`dashboard.js`**: `DataTable` 초기화 및 컬럼 정의, 탭/필터 이벤트 핸들러. (**메인 엔트리**)
+4.  **`dashboard-likes.js`**: 좋아요 버튼 기능, 인기 종목 랭킹(IIFE), Supabase Auth 연동.
+
+### CSS 가이드
+- **`responsive.css`**: 레이아웃, 공통 글래스모피즘, 네비게이션, 모바일 드로어 스타일.
+- **`dashboard.css`**: 대시보드 전용(`DataTable` 커스텀, 통계 카드, FAB) 스타일.
+- **인라인 스타일**: 특수한 경우만 사용하되, 가급적 CSS 변수(`var(--bg)`) 참조할 것.
+
+### 네비게이션 (DRY)
+- `nav.js`의 `allLinks` 배열이 모든 메뉴의 단일 진실 원천임. 메뉴 추가 시 루프에서 자동 반영됨.
+- 모든 링크는 `data-i18n` 속성을 가져야 함.

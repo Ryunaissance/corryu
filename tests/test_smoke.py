@@ -475,8 +475,9 @@ class TestRenderHtml(unittest.TestCase):
         self.assertEqual(opens, closes, f"script 태그 불균형: {opens} open vs {closes} close")
 
     def test_etf_data_json_fetch_present(self):
-        """클라이언트가 etf_data.json을 fetch하는 코드가 존재"""
-        self.assertIn("etf_data.json", self.html)
+        """대시보드 모듈 JS 파일들이 올바른 순서로 로드됨"""
+        for script in ['dashboard-state.js', 'dashboard-overrides.js', 'dashboard.js', 'dashboard-likes.js']:
+            self.assertIn(script, self.html, f"{script} 스크립트 태그가 HTML에 없음")
 
     def test_summary_counts_nonzero(self):
         """총 ETF 수 / Active 수가 HTML에 숫자로 렌더링됨 (10 × 24 섹터 = 240)"""

@@ -14,18 +14,10 @@
 <link href="/responsive.css" rel="stylesheet">
 <script src="/i18n.js"></script>
 <style>
-:root {
-  --bg-primary: #0a0d14;
-  --bg-card: rgba(20,24,38,0.85);
-  --border: rgba(255,255,255,0.07);
-  --text-primary: #e2e8f0;
-  --text-muted: #7d90a4;
-  --accent: #3b82f6;
-  --accent-glow: rgba(59,130,246,0.3);
-}
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
+  --bg-card: rgba(20,24,38,0.85);
   background: var(--bg-primary);
   color: var(--text-primary);
   font-family: 'Inter', -apple-system, sans-serif;
@@ -304,39 +296,9 @@ footer {
 <div class="gradient-line" style="height:3px;position:fixed;top:0;left:0;right:0;z-index:200"></div>
 
 <!-- Navbar -->
-<nav>
-  <div class="nav-inner">
-    <a href="/landing" class="nav-logo" style="text-decoration:none">
-      <span class="text-gradient">CORRYU</span>
-    </a>
-    <div class="nav-links">
-      <a href="#features" class="nav-link">기능</a>
-      <a href="#preview" class="nav-link">미리보기</a>
-      <a href="/index" class="nav-link">대시보드</a>
-    </div>
-    <div class="nav-actions">
-      <button id="lang-switcher"
-        onclick="I18n.setLocale(I18n.locale()==='ko'?'en':'ko')"
-        class="btn-ghost">EN</button>
-      <a href="/login" class="btn-ghost nav-landing-desktop">로그인</a>
-      <a href="/login" class="btn-primary nav-landing-desktop">무료 시작</a>
-      <button class="theme-toggle" aria-label="라이트 모드로 전환" title="라이트 모드"><svg class="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg><svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
-<button id="nav-mob-btn" class="nav-mob-btn" aria-label="메뉴" aria-expanded="false">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-    </div>
-  </div>
-</nav>
-<div id="nav-mob-drawer" class="nav-mob-drawer" style="top:62px">
-  <a href="#features"  class="mob-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>기능</a>
-  <a href="#preview"   class="mob-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>미리보기</a>
-  <a href="/index"     class="mob-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>대시보드</a>
-  <div class="mob-drawer-divider"></div>
-  <div class="mob-drawer-bottom">
-    <a href="/login" class="btn-primary" style="text-align:center;flex:1;padding:10px">무료 시작</a>
-  </div>
-</div>
-<div id="nav-mob-overlay" class="nav-mob-overlay" style="top:62px"></div>
+<nav id="nav-root" data-nav-title=""></nav>
+<div id="nav-mob-drawer" class="nav-mob-drawer" style="top:59px"></div>
+<div id="nav-mob-overlay" class="nav-mob-overlay" style="top:59px"></div>
 
 <!-- ── Hero ── -->
 <section class="hero">
@@ -557,9 +519,6 @@ footer {
 window.addEventListener('DOMContentLoaded', () => {
   I18n.init();
 });
-</script>
-<script>
-(function(){var btn=document.getElementById('nav-mob-btn'),drawer=document.getElementById('nav-mob-drawer'),overlay=document.getElementById('nav-mob-overlay');if(!btn||!drawer)return;function open(){drawer.classList.add('open');if(overlay)overlay.classList.add('open');document.body.classList.add('mob-menu-open');btn.setAttribute('aria-expanded','true');}function close(){drawer.classList.remove('open');if(overlay)overlay.classList.remove('open');document.body.classList.remove('mob-menu-open');btn.setAttribute('aria-expanded','false');}btn.addEventListener('click',function(){drawer.classList.contains('open')?close():open();});if(overlay)overlay.addEventListener('click',close);drawer.querySelectorAll('a').forEach(function(a){a.addEventListener('click',close);});document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});})();
 </script>
 </body>
 </html>

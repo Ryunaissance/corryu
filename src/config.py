@@ -11,10 +11,10 @@ RAW_DIR = os.path.join(BASE_DIR, 'raw')           # 원본 데이터 (parquet, a
 OUTPUT_DIR = os.path.join(BASE_DIR, 'output')
 
 # 하위 호환용 (구 pkl/csv 경로 — 더 이상 사용 안 함)
-DATA_PROCESSED = os.path.join(BASE_DIR, 'data_processed')
-DATA_SCRAPED = os.path.join(BASE_DIR, 'data_scraped')
-CORR_MONTHLY_CSV = os.path.join(BASE_DIR, 'correlation_matrix_monthly.csv')
-CORR_DAILY_CSV = os.path.join(BASE_DIR, 'correlation_matrix.csv')
+# DATA_PROCESSED = os.path.join(BASE_DIR, 'data_processed')  # DEPRECATED
+# DATA_SCRAPED = os.path.join(BASE_DIR, 'data_scraped')      # DEPRECATED
+# CORR_MONTHLY_CSV = os.path.join(BASE_DIR, 'correlation_matrix_monthly.csv') # DEPRECATED
+# CORR_DAILY_CSV = os.path.join(BASE_DIR, 'correlation_matrix.csv')     # DEPRECATED
 
 # ── 성과 지표 파라미터 ────────────────────────────────
 # Sortino 비율 계산 시 사용하는 연간 무위험 수익률 (MAR)
