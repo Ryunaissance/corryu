@@ -99,7 +99,6 @@
 
         var rect = input.getBoundingClientRect();
         drop.style.top = (rect.bottom + window.scrollY + 4) + 'px';
-        drop.style.maxHeight = '280px';
         drop.style.overflowY = 'auto';
         if (window.innerWidth <= 767) {
           // 모바일: 좌우 16px 마진 제외 전체 너비
@@ -136,15 +135,13 @@
           drop.appendChild(el);
         });
 
+        // 인풋박스 아래 남은 공간에 맞게 maxHeight 동적 설정
+        var availH = window.innerHeight - rect.bottom - 8;
+        drop.style.maxHeight = Math.max(availH, 120) + 'px';
+
         document.body.appendChild(drop);
         _active = drop;
         activeIdx = -1;
-
-        // 화면 아래 넘치는지 체크 후 위로 플립
-        var dRect = drop.getBoundingClientRect();
-        if (dRect.bottom > window.innerHeight - 8) {
-          drop.style.top = (rect.top + window.scrollY - dRect.height - 4) + 'px';
-        }
       }
 
       function hide() {
