@@ -164,7 +164,7 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
         <div class="heatmap-wrap" id="heatmap-container">
           <div class="empty-state"><span>—</span></div>
         </div>
-        <div class="chart-disclaimer" style="margin-top:10px" data-i18n="corr.disclaimer.matrix">※ 섹터 앵커 상관계수 및 팩터 모델 기반 추정값입니다.</div>
+        <div class="chart-disclaimer" style="margin-top:10px" data-i18n="corr.disclaimer.matrix">※ 최근 5년 월간 수익률 기반 Pearson 상관계수. 데이터 부족 시 섹터 추정값 사용.</div>
       </div>
 
     </div>
@@ -237,7 +237,41 @@ function getSectorGroup(sid) {
   return 'other';
 }
 
-const GC = { // group-group base correlations
+// ── 실데이터 상관계수 ─────────────────────────────────
+var corrReturns = null;  // {dates, returns} — 로드 후 세팅
+
+fetch('/corr_returns.json')
+  .then(r => r.json())
+  .then(d => {
+    corrReturns = d.returns;
+    // 이미 ETF가 선택된 상태라면 히트맵/인사이트 갱신
+    if (selected.length >= 2) { renderHeatmap(); renderInsights(); }
+  })
+  .catch(() => { /* 실패 시 추정값 폴백 */ });
+
+function pearsonCorr(tA, tB) {
+  if (!corrReturns) return null;
+  const ra = corrReturns[tA], rb = corrReturns[tB];
+  if (!ra || !rb) return null;
+  // 두 시리즈 모두 유효한 인덱스만 사용
+  const pairs = [];
+  for (let i = 0; i < ra.length; i++) {
+    if (ra[i] !== null && rb[i] !== null) pairs.push([ra[i], rb[i]]);
+  }
+  if (pairs.length < 12) return null;
+  const n = pairs.length;
+  const mx = pairs.reduce((s, p) => s + p[0], 0) / n;
+  const my = pairs.reduce((s, p) => s + p[1], 0) / n;
+  let num = 0, dx2 = 0, dy2 = 0;
+  for (const [x, y] of pairs) {
+    const dx = x - mx, dy = y - my;
+    num += dx * dy; dx2 += dx * dx; dy2 += dy * dy;
+  }
+  const denom = Math.sqrt(dx2 * dy2);
+  return denom === 0 ? null : Math.max(-0.99, Math.min(0.99, num / denom));
+}
+
+const GC = { // group-group base correlations (폴백용)
   eq_broad:   { eq_broad:0.88, eq_tech:0.82, eq_health:0.73, eq_finance:0.80, eq_intl:0.72, eq_small:0.82, eq_energy:0.64, eq_re:0.65, bond_safe:-0.10, bond_hy:0.52, gold:0.05, crypto:0.17, inverse:-0.88, other:0.45 },
   eq_tech:    { eq_broad:0.82, eq_tech:0.93, eq_health:0.64, eq_finance:0.71, eq_intl:0.64, eq_small:0.75, eq_energy:0.52, eq_re:0.57, bond_safe:-0.12, bond_hy:0.47, gold:0.02, crypto:0.22, inverse:-0.92, other:0.40 },
   eq_health:  { eq_broad:0.73, eq_tech:0.64, eq_health:0.91, eq_finance:0.68, eq_intl:0.60, eq_small:0.68, eq_energy:0.50, eq_re:0.58, bond_safe:0.12,  bond_hy:0.44, gold:0.10, crypto:0.12, inverse:-0.70, other:0.38 },
@@ -265,21 +299,20 @@ function hashPair(t1, t2) {
 
 function getCorrelation(A, B) {
   if (A.ticker === B.ticker) return 1.0;
+  // 실데이터 우선
+  const real = pearsonCorr(A.ticker, B.ticker);
+  if (real !== null) return real;
+  // 폴백: 섹터 그룹 기반 추정
   const gA = getSectorGroup(A._sid || 'other');
   const gB = getSectorGroup(B._sid || 'other');
   let base = (GC[gA]?.[gB]) ?? (GC[gB]?.[gA]) ?? 0.35;
-
-  // 같은 섹터라면 r_anchor로 스케일
   if (A._sid && A._sid === B._sid) {
     const rA = Math.abs(A.r_anchor ?? 0.85);
     const rB = Math.abs(B.r_anchor ?? 0.85);
     base = base * Math.sqrt(rA * rB);
   }
-
-  // 시드 기반 노이즈 ±0.07
   const rand = seededRand(hashPair(A.ticker, B.ticker));
   const noise = (rand() + rand() - 1) * 0.07;
-
   return Math.max(-0.99, Math.min(0.99, base + noise));
 }
 

@@ -201,6 +201,12 @@ def main():
     build_backtest_data_main()
     print('✅ backtest_data.json 생성 완료')
 
+    # ── 6d. 상관계수 월간 수익률 데이터 생성 ────────────────────────
+    print('\n=== build_corr_data: 월간 수익률 JSON 생성 ===')
+    from build_corr_data import main as build_corr_data_main
+    build_corr_data_main()
+    print('✅ corr_returns.json 생성 완료')
+
     # ── 7. HTML 생성 ─────────────────────────────────────────────
     print('\n[7/7] HTML 생성...')
     render_script = str(ROOT / 'render_html.py')
