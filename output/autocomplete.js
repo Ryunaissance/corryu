@@ -98,7 +98,7 @@
         drop.className = 'ac-drop';
 
         var rect = input.getBoundingClientRect();
-        drop.style.top = (rect.bottom + window.scrollY + 4) + 'px';
+        drop.style.top = (rect.bottom + 4) + 'px';
         drop.style.overflowY = 'auto';
         if (window.innerWidth <= 767) {
           // 모바일: 좌우 16px 마진 제외 전체 너비
@@ -107,7 +107,7 @@
           drop.style.width = 'auto';
         } else {
           // PC: 입력박스 기준 정렬, 너비 제한 없음 (full name 표시)
-          drop.style.left  = (rect.left + window.scrollX) + 'px';
+          drop.style.left  = rect.left + 'px';
           drop.style.width = 'max-content';
           drop.style.minWidth = rect.width + 'px';
         }
