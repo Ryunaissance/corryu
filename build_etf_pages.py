@@ -16,8 +16,9 @@ from datetime import datetime
 
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-ETF_DATA_PATH = os.path.join(ROOT, 'output', 'etf_data.json')
-ETF_DIR = os.path.join(ROOT, 'output', 'etf-data')
+ETF_DATA_PATH    = os.path.join(ROOT, 'output', 'etf_data.json')
+HOLDINGS_PATH    = os.path.join(ROOT, 'data_scraped', 'holdings.json')
+ETF_DIR          = os.path.join(ROOT, 'output', 'etf-data')
 
 
 def build_etf_pages():
@@ -25,6 +26,19 @@ def build_etf_pages():
 
     with open(ETF_DATA_PATH, encoding='utf-8') as f:
         raw = json.load(f)
+
+    # 구성종목 데이터 로드 (월 1회 수집, 없으면 빈 dict)
+    holdings_data = {}
+    holdings_as_of = ''
+    if os.path.exists(HOLDINGS_PATH):
+        try:
+            with open(HOLDINGS_PATH, encoding='utf-8') as f:
+                h = json.load(f)
+            holdings_data   = h.get('data', {})
+            holdings_as_of  = h.get('as_of', '')
+            print(f"  holdings: {sum(1 for v in holdings_data.values() if v)}개 ETF 보유 (기준일: {holdings_as_of})")
+        except Exception as e:
+            print(f"  holdings 로드 실패: {e}")
 
     all_data = raw.get('allData', raw)
     as_of = raw.get('as_of', '')
@@ -38,7 +52,11 @@ def build_etf_pages():
             ticker = etf.get('ticker', '').upper().strip()
             if not ticker:
                 continue
-            out = {'ticker': ticker, 'sid': sid, 'etf': etf, 'as_of': as_of}
+            out = {
+                'ticker': ticker, 'sid': sid, 'etf': etf, 'as_of': as_of,
+                'holdings': holdings_data.get(ticker) or [],
+                'holdings_as_of': holdings_as_of,
+            }
             path = os.path.join(ETF_DIR, f'{ticker}.json')
             with open(path, 'w', encoding='utf-8') as f:
                 json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
