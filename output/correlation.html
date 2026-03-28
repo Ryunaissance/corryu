@@ -51,14 +51,15 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
 .error-msg { font-size: 0.75rem; color: #f87171; min-height: 16px; margin-top: 6px; }
 
 /* ── 2-column layout ── */
-.analysis-grid { display: grid; grid-template-columns: 380px 1fr; gap: 14px; margin-bottom: 14px; }
+.analysis-grid { display: grid; grid-template-columns: minmax(0, 380px) 1fr; gap: 14px; margin-bottom: 14px; }
 @media(max-width:1000px) { .analysis-grid { grid-template-columns: 1fr; } }
 
 /* ── Stats table ── */
 .card { padding: 20px 22px; }
 .card-title { font-size: 0.73rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
 .card-title::after { content:''; flex:1; height:1px; background:var(--border); }
-.stats-table { width: 100%; border-collapse: collapse; }
+.stats-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.stats-table { width: 100%; border-collapse: collapse; min-width: 320px; }
 .stats-table th { font-size: 0.68rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 5px 8px; text-align: right; border-bottom: 1px solid var(--border); }
 .stats-table th:first-child { text-align: left; }
 .stats-table td { padding: 8px 8px; font-size: 0.84rem; font-weight: 700; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.025); font-variant-numeric: tabular-nums; }
@@ -396,6 +397,7 @@ function renderStats() {
   }).join('');
 
   document.getElementById('stats-table-container').innerHTML = `
+    <div class="stats-table-wrap">
     <table class="stats-table">
       <thead><tr>
         <th>ETF</th>
@@ -406,7 +408,8 @@ function renderStats() {
         <th>AUM</th>
       </tr></thead>
       <tbody>${rows}</tbody>
-    </table>`;
+    </table>
+    </div>`;
 }
 
 // ── 상관계수 히트맵 ───────────────────────────────────
