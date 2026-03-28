@@ -17,7 +17,10 @@
 | 전체 재계산 | `scripts/compute_all.py` | **단일 진입점**: `python scripts/compute_all.py` |
 | 초기 다운로드 | `scripts/fetch_initial.py` | 최초 1회: yfinance → `raw/*.parquet` |
 | 일별 업데이트 | `scripts/fetch_daily.py` | 매일: 최신 가격·메타 → parquet 추가 |
-| ETF 개별 JSON | `build_etf_pages.py` | `etf_data.json` → `output/etf-data/{TICKER}.json` (compute_all.py에서 자동 호출) |
+| ETF 개별 JSON | `build_etf_pages.py` | `etf_data.json` → `output/etf-data/{TICKER}.json` (compute_all.py에서 자동 호출, Vercel 빌드 시에도 실행) |
+| 배당률 수집 | `scripts/fetch_dividend_yields.py` | 수동 실행: yfinance → data_scraped/ (필요 시만) |
+| 수수료 수집 | `scripts/fetch_expense_ratios.py` | 수동 실행: yfinance → data_scraped/ (필요 시만) |
+| DB 스키마 | `supabase/migration.sql` | Supabase SQL Editor에서 최초 1회 실행 |
 | HTML 렌더러 | `render_html.py` | 템플릿→HTML 변환, pandas 불필요, 단독 실행 가능 |
 | MECE 검증 | `src/verify.py` | 빌드 시 자동 실행, 30개 앵커 스팟체크 포함 |
 
