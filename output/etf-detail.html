@@ -613,7 +613,7 @@ nav {
         <!-- 데이터 기준 안내 -->
         <div class="data-note">
           <div style="font-weight:700;color:#475569;margin-bottom:6px;font-size:0.75rem" data-i18n="detail.data.note">📋 데이터 안내</div>
-          <div><span data-i18n="detail.datadate">데이터 기준일:</span> <strong id="note-datadate" style="color:#94a3b8">2026-02-26</strong></div>
+          <div><span data-i18n="detail.datadate">데이터 기준일:</span> <strong id="note-datadate" style="color:#94a3b8">—</strong></div>
           <div style="margin-top:4px" data-i18n="detail.data.line1">Z-Score·RSI·52W Range 등 분석 지표는 CORRYU가 직접 산출한 수치입니다.</div>
           <div style="margin-top:4px" data-i18n="detail.data.line2">수수료·구성종목 비율은 예시 데이터이며, 실제와 다를 수 있습니다.</div>
           <div style="margin-top:4px" data-i18n="detail.data.line3">본 자료는 투자 권유가 아닙니다. 투자 판단은 본인의 책임입니다.</div>
@@ -1495,8 +1495,8 @@ function renderPage(etf, sectorId) {
   document.getElementById('h-name').textContent   = etf.name;
   document.getElementById('h-aum').textContent     = fmtAUM(etf.aum);
   document.getElementById('h-desc').textContent    = supp.desc || I18n.t('detail.desc.pending');
-  document.getElementById('h-datadate').textContent = '2026-02-26';
-  document.getElementById('note-datadate').textContent = '2026-02-26';
+  document.getElementById('h-datadate').textContent = '—';
+  document.getElementById('note-datadate').textContent = '—';
 
   const badgesHtml =
     `<span class="badge badge-sector">${sector}</span>` +
@@ -1644,6 +1644,12 @@ function _applyEtfData(found, foundSid) {
       initPriceChart(document.getElementById('chart-container'), hist, currentChartType);
       updatePerfFromHistory();
       buildSubCharts();
+      // 가격 히스토리 마지막 날짜를 기준일로 업데이트
+      const lastDate = hist[hist.length - 1]?.date;
+      if (lastDate) {
+        document.getElementById('h-datadate').textContent = lastDate;
+        document.getElementById('note-datadate').textContent = lastDate;
+      }
     }
   });
   document.addEventListener('i18n:ready', () => {
