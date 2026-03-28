@@ -1,6 +1,6 @@
 {
   "outputDirectory": "output",
-  "buildCommand": "python build_etf_pages.py && python build_backtest_data.py",
+  "buildCommand": "python build_etf_pages.py",
   "cleanUrls": true,
   "rewrites": [
     { "source": "/", "destination": "/landing" },
