@@ -196,7 +196,7 @@ function initDashboard() {
                     var isMine = myPortfolio.includes(d);
                     var cls = isMine ? 'text-yellow-400 text-base' : 'text-blue-300';
                     var h = '<button class="star-btn" data-like="' + d + '" title="좋아요">♡</button>';
-                    h += '<span class="' + cls + '">' + d + '</span>';
+                    h += '<a href="/etf-detail?ticker=' + d + '" class="' + cls + '" style="text-decoration:none;font-weight:800">' + d + '</a>';
                     if (row.short_history) h += '<span class="badge-short" title="상장 3년 미만">짧은연혁</span>';
                     return h;
                 }
