@@ -24,7 +24,7 @@
 
     /* ── 컨트롤 패널 ── */
     #controls {
-      position: fixed; top: 14px; left: 14px; z-index: 100;
+      position: fixed; top: 73px; left: 14px; z-index: 100;
       background: rgba(13,17,23,0.90);
       border: 1px solid #30363d;
       border-radius: 10px;
@@ -78,11 +78,11 @@
 
     /* ── 레전드 ── */
     #legend {
-      position: fixed; top: 14px; right: 14px; z-index: 100;
+      position: fixed; top: 73px; right: 14px; z-index: 100;
       background: rgba(13,17,23,0.90);
       border: 1px solid #30363d;
       border-radius: 10px; padding: 12px 14px;
-      max-height: calc(100vh - 28px); overflow-y: auto;
+      max-height: calc(100vh - 87px); overflow-y: auto;
       backdrop-filter: blur(10px); min-width: 185px;
     }
     #legend::-webkit-scrollbar { width: 4px; }
@@ -162,14 +162,6 @@
       white-space: nowrap;
     }
 
-    /* ── 홈 링크 ── */
-    #home-link {
-      position: fixed; bottom: 14px; left: 14px; z-index: 100;
-      font-size: 11px; color: #8b949e; text-decoration: none;
-      background: rgba(13,17,23,0.88); border: 1px solid #30363d;
-      border-radius: 6px; padding: 5px 10px; transition: color 0.15s;
-    }
-    #home-link:hover { color: #60a5fa; border-color: #60a5fa; }
 
     /* ── 모바일 패널 토글 ── */
     #mob-panel-toggle {
@@ -181,10 +173,9 @@
     }
     @media (max-width: 767px) {
       #mob-panel-toggle { display: flex; }
-      #controls { display: none; left: 0; top: 0; right: 0; border-radius: 0; min-width: unset; max-height: 60vh; overflow-y: auto; }
+      #controls { display: none; left: 0; top: 59px; right: 0; border-radius: 0; min-width: unset; max-height: 60vh; overflow-y: auto; }
       #controls.mob-visible { display: block; }
       #legend { display: none; }
-      #home-link { bottom: calc(14px + env(safe-area-inset-bottom, 0px)); left: 14px; }
       #hint { display: none; }
     }
 
@@ -218,10 +209,8 @@
 
 <!-- 컨트롤 패널 -->
 <div id="controls">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+  <div style="margin-bottom:12px">
     <h1 data-i18n="graph.title">ETF 상관관계 그래프</h1>
-    <button class="theme-toggle" aria-label="라이트 모드로 전환" title="라이트 모드" style="margin-left:auto;width:30px;height:30px;border-radius:7px"><svg class="theme-icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg><svg class="theme-icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
-    <button id="lang-switcher" onclick="I18n.setLocale(I18n.locale()==='ko'?'en':'ko')" style="padding:3px 9px;border-radius:6px;background:rgba(255,255,255,0.06);color:#8b949e;border:1px solid rgba(255,255,255,0.1);font-size:10px;font-weight:700;cursor:pointer;letter-spacing:0.05em">EN</button>
   </div>
 
   <div class="ctrl-row">
@@ -309,9 +298,6 @@
 
 <!-- 하단 힌트 -->
 <div id="hint" data-i18n-html="graph.hint.nav">r = 1 이면 가깝게 · r = −1 이면 멀게 &nbsp;|&nbsp; 스크롤로 줌 · 드래그로 이동</div>
-
-<!-- 홈 -->
-<a href="/" id="home-link" data-i18n="btn.dashboard">← 대시보드</a>
 
 <!-- 에러 -->
 <div id="error-screen">
