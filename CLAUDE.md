@@ -190,6 +190,79 @@ scripts/compute_all.py
 
 ---
 
+## 프론트엔드 아키텍처
+
+### JS 모듈화 — Dashboard (4개 파일)
+
+로드 순서가 곧 의존성 순서. **반드시 이 순서대로 로드됨** (`output/index.html` `<script>` 태그 순서 확인).
+
+| 순서 | 파일 | 역할 | 핵심 전역 |
+|------|------|------|-----------|
+| 1 | `dashboard-state.js` | 전역 상태(`var`), 필터 상태, Admin 로직, 공유 유틸 | `allData`, `currentSector`, `isAdmin` |
+| 2 | `dashboard-overrides.js` | localStorage 오버라이드, 섹터 이동 모달, YF API r_anchor 재계산 | — |
+| 3 | `dashboard.js` | DataTable 초기화, 컬럼 정의, 탭/필터 이벤트 | — |
+| 4 | `dashboard-likes.js` | 좋아요 버튼, 인기 종목 랭킹(IIFE), Supabase Auth | — |
+
+### JS 모듈화 — ETF 상세 페이지 (5개 파일)
+
+`output/etf-detail.html`에서 다음 순서로 로드. **순서 변경 금지**.
+
+| 순서 | 파일 | 역할 | 핵심 전역 |
+|------|------|------|-----------|
+| 1 | `etf-detail-data.js` | 정적 보조 데이터: `SUPP`, `SECTOR_NAMES`, `inferIssuer()` | `SUPP`, `SECTOR_NAMES` |
+| 2 | `etf-detail-charts.js` | 공유 상태 + 차트 함수 (LightweightCharts) | `currentETF`, `priceHistory`, `lwChart`, `currentChartType`, `activeIndicators` |
+| 3 | `etf-detail-render.js` | 포맷 헬퍼, `renderPage()`, `loadPriceHistory()`, `updatePerfFromHistory()` | — |
+| 4 | `etf-detail.js` | 진입점: URL 파싱, 관심종목, 검색, 데이터 fetch 부트스트랩 | `TICKER`, `watchlist` |
+| 5 | `etf-detail-comments.js` | 댓글 CRUD + 좋아요 (두 개의 IIFE) | — |
+
+### ⚠️ 크로스 파일 전역 변수 패턴
+
+여러 스크립트 파일에서 공유해야 하는 변수는 반드시 **`var`** 로 선언해야 함.
+
+```javascript
+// ✅ 올바름 — window 프로퍼티가 되어 다른 파일에서 접근 가능
+var currentETF = null;
+var priceHistory = null;
+
+// ❌ 잘못됨 — 모듈 스코프에 갇혀 다른 script 파일에서 접근 불가
+let currentETF = null;   // 다른 파일에서 ReferenceError
+const TICKER = 'SPY';    // 다른 파일에서 ReferenceError
+```
+
+이 프로젝트는 번들러 없이 vanilla JS 멀티 파일 구조이므로 공유 상태는 `var` 필수.
+함수·객체 등 불변 선언도 마찬가지 (`var` 또는 `window.XXX = ...` 패턴).
+
+### 네비게이션 (DRY — 단일 진실의 원천)
+
+- `nav.js`의 `allLinks` 배열이 **모든 페이지 메뉴의 유일한 원천**.
+- 메뉴 추가/변경은 `allLinks`만 수정하면 데스크탑·모바일 드로어 모두 자동 반영.
+- 모바일 드로어(`nav-mob-drawer`)는 **HTML에 하드코딩하지 말 것** — `nav.js`의 `injectMobileDrawer()`가 런타임에 동적 생성.
+- HTML의 `nav-mob-drawer` div는 항상 빈 채로 두거나 주석만:
+  ```html
+  <div id="nav-mob-drawer" class="nav-mob-drawer">
+    <!-- nav.js의 injectMobileDrawer()가 allLinks 배열로 동적 생성 -->
+  </div>
+  ```
+
+### Supabase 인증 클라이언트 (`output/supabase-client.js`)
+
+```javascript
+const SUPABASE_URL = 'https://pksehljuhuowmhzgetxp.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_...';
+```
+
+**하드코딩이 의도적이며 올바름.** anon (publishable) key는 브라우저 노출용으로 설계된 공개 키이며, 보안은 Supabase RLS(Row Level Security) 정책으로 보장됨. 환경변수로 바꾸지 말 것. 참고: https://supabase.com/docs/guides/api/api-keys
+
+### CSS 구조
+
+| 파일 | 역할 |
+|------|------|
+| `responsive.css` | 레이아웃, 글래스모피즘, 네비게이션, 모바일 드로어 공통 스타일 |
+| `dashboard.css` | DataTable 커스텀, 통계 카드, FAB (대시보드 전용) |
+| 인라인 `<style>` | 각 페이지 전용 스타일 — CSS 변수(`var(--bg)` 등) 참조 권장 |
+
+---
+
 ## 주의사항
 
 - `render_html.py`는 pandas 없이 동작 — `src/` 모듈과 독립적
