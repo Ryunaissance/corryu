@@ -606,6 +606,15 @@ fetch('/etf_data.json')
     renderChips();
     renderAll();
     I18n.init();
+    // 자동완성 연결 (데이터 로드 완료 후)
+    if (window.TickerAC) {
+      TickerAC.init(
+        document.getElementById('add-input'),
+        function(q) { return acFilter(q, allData); },
+        function(ticker) { addTicker(ticker); },
+        { multiWord: true }
+      );
+    }
   })
   .catch(() => { showError(I18n.t('compare.error.load')); });
 
@@ -617,6 +626,7 @@ document.getElementById('add-input').addEventListener('keydown', e => {
 // 언어 변경 시 동적으로 생성된 텍스트 재렌더링
 document.addEventListener('i18n:ready', () => { renderAll(); });
 </script>
+<script src="/autocomplete.js"></script>
 <script src="/nav.js"></script>
 </body>
 

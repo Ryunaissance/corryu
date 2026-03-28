@@ -52,6 +52,19 @@ function renderRows() {
     </div>`).join('');
   document.getElementById('add-row-btn').style.display = rows.length >= 10 ? 'none' : 'flex';
   updateWeightSum();
+  // 자동완성 초기화 (renderRows 호출마다 새 input 생성되므로 재연결)
+  if (window.TickerAC && Object.keys(allData).length) {
+    document.querySelectorAll('.ticker-inp').forEach(function(inp) {
+      TickerAC.init(inp,
+        function(q) { return acFilter(q, allData); },
+        function(ticker, name, el) {
+          el.value = ticker;
+          var id = parseInt(el.closest('[data-id]').dataset.id);
+          updateRow(id, 'ticker', ticker);
+        }
+      );
+    });
+  }
 }
 
 function updateRow(id, field, val) {
@@ -551,6 +564,17 @@ Promise.all([
   }
   lb.style.width = '100%';
   setTimeout(() => { lb.style.width = '0'; lb.style.transition = 'none'; }, 400);
+  // 벤치마크 입력 자동완성
+  if (window.TickerAC) {
+    TickerAC.init(
+      document.getElementById('bench-input'),
+      function(q) { return acFilter(q, allData); },
+      function(ticker) {
+        document.getElementById('bench-input').value = ticker;
+      }
+    );
+    renderRows(); // 포트폴리오 행 자동완성도 초기 연결
+  }
   loadFromURL();
   I18n.init();
 }).catch(() => setErr(I18n.t('bt.error.load')));

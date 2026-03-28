@@ -614,6 +614,14 @@ fetch('/etf_data.json')
     }
 
     I18n.init();
+    // 자동완성 연결 (데이터 로드 완료 후)
+    if (window.TickerAC) {
+      TickerAC.init(
+        document.getElementById('add-input'),
+        function(q) { return acFilter(q, allData); },
+        function(ticker) { addTicker(ticker); }
+      );
+    }
   })
   .catch(() => showError(I18n.t('corr.error.load')));
 
@@ -621,6 +629,7 @@ document.addEventListener('i18n:ready', () => {
   if (selected.length >= 2) renderAll();
 });
 </script>
+<script src="/autocomplete.js"></script>
 <script src="/nav.js"></script>
 </body>
 
