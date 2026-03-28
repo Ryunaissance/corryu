@@ -14,6 +14,8 @@ const PRESETS_DEF = {
 // 상태
 // ─────────────────────────────────────────────────────────────────────────────
 let allData = {};
+let btData  = {};          // 실제 연도별 수익률 {TICKER: {YEAR: return}}
+let DATA_END_YEAR = 2025;  // backtest_data.json 마지막 연도 (로드 후 갱신)
 let period  = 5;
 let lastResult = null;
 
@@ -90,40 +92,17 @@ function loadPreset(key) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 시뮬레이션 엔진 (결정론적 팩터 모델)
+// 실데이터 수익률 조회 (backtest_data.json 기반)
 // ─────────────────────────────────────────────────────────────────────────────
-function hashStr(s) {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
-  return Math.abs(h);
-}
-
-function lcg(seed) {
-  let s = Math.abs(seed % 2147483647) || 1;
-  return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
-}
-
-// Normal(mean, std) via Box-Muller
-function randNorm(mean, std, seed) {
-  const rng = lcg(seed);
-  const u1 = Math.max(rng(), 1e-10);
-  const u2 = rng();
-  const z = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-  return mean + z * std;
-}
-
-function simReturn(etf, year) {
-  const seed = hashStr(etf.ticker + ':y' + year);
-  // 연간 수익률: Normal(CAGR, Vol) — 단년도 변동성은 더 크게
-  const mu  = (etf.cagr || 10) / 100;
-  const sig = (etf.vol  || 15) / 100;
-  return randNorm(mu, sig, seed);
-}
-
-function simBenchmark(ticker, year) {
+function getActualReturn(ticker, year) {
+  const rec = btData[ticker];
+  if (rec) {
+    const v = rec[String(year)];
+    if (v !== undefined) return v;
+  }
+  // 데이터 없는 연도(상장 전 등) → ETF의 전체기간 CAGR로 대체
   const etf = allData[ticker];
-  if (!etf) return randNorm(0.10, 0.15, hashStr(ticker + ':y' + year));
-  return simReturn(etf, year);
+  return etf ? (etf.cagr || 10) / 100 : 0.10;
 }
 
 // DCA 주기 토글
@@ -146,27 +125,28 @@ function runBacktest() {
   const totalW = holdings.reduce((s, h) => s + h.weight, 0);
   if (Math.abs(totalW - 1) > 0.005) { setErr(I18n.t('bt.error.weight', { w: (totalW*100).toFixed(1) })); return; }
 
-  const initVal     = parseFloat(document.getElementById('init-sel').value);
-  const benchTicker = document.getElementById('bench-sel').value;
-  const dcaFreq     = document.getElementById('dca-freq').value;
-  const dcaAmount   = dcaFreq !== 'none' ? (parseFloat(document.getElementById('dca-amt').value) || 0) : 0;
-  const hasDCA      = dcaFreq !== 'none' && dcaAmount > 0;
+  const initVal = parseFloat(document.getElementById('init-sel').value);
+  const rawBench = document.getElementById('bench-input').value.trim().toUpperCase();
+  const benchTicker = rawBench || 'none';
+  if (benchTicker !== 'none' && !btData[benchTicker] && !allData[benchTicker]) {
+    setErr(`벤치마크 티커 "${benchTicker}"를 찾을 수 없습니다.`); return;
+  }
+  const dcaFreq   = document.getElementById('dca-freq').value;
+  const dcaAmount = dcaFreq !== 'none' ? (parseFloat(document.getElementById('dca-amt').value) || 0) : 0;
+  const hasDCA    = dcaFreq !== 'none' && dcaAmount > 0;
 
-  const currYear  = 2025;
+  const currYear  = DATA_END_YEAR + 1; // 마지막 완성 연도 다음 = 시뮬레이션 상한
   const startYear = currYear - period;
 
-  // 연간 수익률 사전 생성 (결정론적, 월별 시뮬레이션에서 재사용)
+  // 연도별 실수익률 사전 빌드
   const pre = {}; // "TICKER:YEAR" → annual return
   for (const h of holdings) {
     for (let y = startYear; y < currYear; y++)
-      pre[h.etf.ticker + ':' + y] = simReturn(h.etf, y);
+      pre[h.etf.ticker + ':' + y] = getActualReturn(h.etf.ticker, y);
   }
   if (benchTicker !== 'none') {
-    const bEtf = allData[benchTicker];
     for (let y = startYear; y < currYear; y++)
-      pre[benchTicker + ':' + y] = bEtf
-        ? simReturn(bEtf, y)
-        : randNorm(0.10, 0.15, hashStr(benchTicker + ':y' + y));
+      pre[benchTicker + ':' + y] = getActualReturn(benchTicker, y);
   }
 
   // DCA 적립 간격 (월 단위)
@@ -552,12 +532,22 @@ addRow('SPY', 60);
 addRow('BND', 40);
 
 const lb = document.getElementById('lb');
-lb.style.width = '40%';
-fetch('/etf_data.json').then(r => r.json()).then(data => {
-  const sectors = data.allData || data;
+lb.style.width = '20%';
+Promise.all([
+  fetch('/etf_data.json').then(r => r.json()),
+  fetch('/backtest_data.json').then(r => r.json()),
+]).then(([etfJson, btJson]) => {
+  // ETF 메타 로드
+  const sectors = etfJson.allData || etfJson;
   for (const [sid, etfs] of Object.entries(sectors)) {
     if (!Array.isArray(etfs)) continue;
     for (const etf of etfs) allData[etf.ticker] = { ...etf, _sid: sid };
+  }
+  // 실수익률 데이터 로드
+  btData = btJson;
+  // 마지막 완성 연도 계산 (SPY 기준, 없으면 기본값 유지)
+  if (btData['SPY']) {
+    DATA_END_YEAR = Math.max(...Object.keys(btData['SPY']).map(Number));
   }
   lb.style.width = '100%';
   setTimeout(() => { lb.style.width = '0'; lb.style.transition = 'none'; }, 400);

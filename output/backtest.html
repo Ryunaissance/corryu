@@ -189,11 +189,13 @@ nav{position:fixed;top:3px;left:0;right:0;z-index:100;background:rgba(10,13,20,0
         </div>
         <div class="sg-item">
           <label data-i18n="bt.label.benchmark">벤치마크</label>
-          <select class="sg-select" id="bench-sel">
-            <option value="SPY">S&amp;P 500 (SPY)</option>
-            <option value="QQQ">NASDAQ 100 (QQQ)</option>
-            <option value="none" data-i18n="bt.bench.none">없음</option>
-          </select>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <input type="text" class="sg-select" id="bench-input"
+                   placeholder="SPY" maxlength="10" value="SPY"
+                   style="text-transform:uppercase;letter-spacing:0.04em"
+                   oninput="this.value=this.value.toUpperCase()">
+            <span style="font-size:0.74rem;color:#64748b" data-i18n="bt.bench.hint">아무 티커 입력 · 빈칸=없음</span>
+          </div>
         </div>
       </div>
 
