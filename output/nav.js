@@ -134,8 +134,8 @@
       });
     }
 
-    CorryuAuth.onAuthChange(function (event) {
-      if (event === 'SIGNED_OUT') {
+    CorryuAuth.onAuthChange(function (event, session) {
+      if (event === 'SIGNED_OUT' && !session) {
         _renderedNick = null;
         window.location.reload();
       } else {

@@ -519,38 +519,6 @@ function renderLegend() {
   }
   const container = document.getElementById('legend-items');
   container.innerHTML = html;
-
-  container.addEventListener('click', e => {
-    // Toggle button
-    const toggleBtn = e.target.closest('.legend-toggle');
-    if (toggleBtn) {
-      e.stopPropagation();
-      const sid = toggleBtn.dataset.toggle;
-      if (hiddenSectors.has(sid)) {
-        hiddenSectors.delete(sid);
-      } else {
-        hiddenSectors.add(sid);
-      }
-      renderLegend();
-      if (Graph) applyFilter(currentR);
-      return;
-    }
-    // Focus sector on legend click
-    const item = e.target.closest('.legend-item');
-    if (!item) return;
-    const sid = item.dataset.sid;
-    focusSector = focusSector === sid ? null : sid;
-    container.querySelectorAll('.legend-item').forEach(el => {
-      el.classList.remove('active', 'dimmed');
-      if (focusSector) {
-        if (el.dataset.sid === focusSector) el.classList.add('active');
-        else el.classList.add('dimmed');
-      }
-    });
-    if (Graph) Graph.refresh();
-  });
-
-
 }
 
 // ── 레이아웃 오버레이 제어 ────────────────────────────
@@ -563,6 +531,25 @@ function showLayoutOverlay(show, msg) {
 // ── 필터 적용 (슬라이더 변경 시) ───────────────────────
 function applyFilter(minR) {
   currentR = minR;
+
+  // 신규 등장 노드 좌표 초기화 (레거시 토글 시 undefined → (0,0) 폭발 방지)
+  const currentlyVisibleIds = new Set(
+    (Graph && Graph.graphData ? Graph.graphData().nodes : []).map(n => n.id)
+  );
+  let cx = 0, cy = 0, cnt = 0;
+  allNodes.forEach(n => {
+    if (currentlyVisibleIds.has(n.id) && n.x !== undefined) {
+      cx += n.x; cy += n.y; cnt++;
+    }
+  });
+  if (cnt > 0) { cx /= cnt; cy /= cnt; }
+  allNodes.forEach(n => {
+    if (!currentlyVisibleIds.has(n.id) && n.x === undefined) {
+      n.x = cx + (Math.random() - 0.5) * 100;
+      n.y = cy + (Math.random() - 0.5) * 100;
+    }
+  });
+
   const visibleNodes = allNodes
     .filter(n => !hideLegacy || !n.l)
     .filter(n => !hideShortHistory || !n.sh)
@@ -685,8 +672,34 @@ fetch('graph_data.json')
 
     renderLegend();
 
-    // ── Legend Hover Highlights (New Delegated) ─────────
+    // ── Legend Click (단일 등록 — renderLegend 내부 중복 등록 방지) ───
     const legendContainer = document.getElementById('legend-items');
+    legendContainer.addEventListener('click', e => {
+      const toggleBtn = e.target.closest('.legend-toggle');
+      if (toggleBtn) {
+        e.stopPropagation();
+        const sid = toggleBtn.dataset.toggle;
+        if (hiddenSectors.has(sid)) hiddenSectors.delete(sid);
+        else hiddenSectors.add(sid);
+        renderLegend();
+        if (Graph) applyFilter(currentR);
+        return;
+      }
+      const item = e.target.closest('.legend-item');
+      if (!item) return;
+      const sid = item.dataset.sid;
+      focusSector = focusSector === sid ? null : sid;
+      legendContainer.querySelectorAll('.legend-item').forEach(el => {
+        el.classList.remove('active', 'dimmed');
+        if (focusSector) {
+          if (el.dataset.sid === focusSector) el.classList.add('active');
+          else el.classList.add('dimmed');
+        }
+      });
+      if (Graph) Graph.refresh();
+    });
+
+    // ── Legend Hover Highlights (New Delegated) ─────────
     legendContainer.addEventListener('mouseover', e => {
       const item = e.target.closest('.legend-item');
       const sid = item ? item.dataset.sid : null;

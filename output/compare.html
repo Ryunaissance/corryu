@@ -272,18 +272,25 @@ let priceHistoryCache = {};     // { ticker: [{date, adj_close}] }
 
 async function loadCompareHistory(ticker) {
   if (priceHistoryCache[ticker]) return priceHistoryCache[ticker];
-  if (!window._sb) return null;
-  const { data, error } = await window._sb
-    .from('etf_prices')
-    .select('date, adj_close')
-    .eq('ticker', ticker)
-    .order('date', { ascending: true })
-    .limit(10000);
-  if (!error && data && data.length >= 5) {
+  try {
+    const res = await fetch(`/api/yf?ticker=${encodeURIComponent(ticker)}&range=20y&interval=1d`);
+    if (!res.ok) return null;
+    const json = await res.json();
+    const result = json?.chart?.result?.[0];
+    if (!result) return null;
+    const timestamps = result.timestamp;
+    const closes = result.indicators?.adjclose?.[0]?.adjclose
+                   ?? result.indicators?.quote?.[0]?.close;
+    if (!timestamps || !closes || timestamps.length < 5) return null;
+    const data = timestamps.map((ts, i) => ({
+      date: new Date(ts * 1000).toISOString().split('T')[0],
+      adj_close: closes[i]
+    })).filter(d => d.adj_close != null);
     priceHistoryCache[ticker] = data;
     return data;
+  } catch (e) {
+    return null;
   }
-  return null;
 }
 function getPeriodStartStr() {
   if (customRange) return customRange.start;

@@ -319,7 +319,7 @@ fetch('/etf_data.json').then(r=>r.json()).then(async data => {
   }
   await loadSavedPortfolio();
   calculatePortfolio();
-}).catch(() => {});
+}).catch(() => showToast('ETF 데이터 로드 실패. 새로고침해주세요.', 'error'));
 
 // ── 포트폴리오 행 ─────────────────────────────────────
 let rows = [{ ticker: '', weight: '', amount: '' }];
@@ -457,7 +457,9 @@ async function loadSavedPortfolio() {
 function showToast(msg, type='info') {
   const t = document.createElement('div');
   t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:8px;font-size:0.82rem;font-weight:600;z-index:9999;backdrop-filter:blur(12px);' +
-    (type==='success' ? 'background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.3);color:#4ade80;' : 'background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:#60a5fa;');
+    (type==='success' ? 'background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.3);color:#4ade80;' :
+     type==='error'   ? 'background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.3);color:#f87171;' :
+                        'background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);color:#60a5fa;');
   t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 2800);
