@@ -205,7 +205,7 @@ function initDashboard() {
                 data: 'name', className: 'text-left text-xs text-gray-400',
                 render: function (d, type, row) {
                     if (type !== 'display') return d;
-                    var h = '<div class="leading-tight">' + d + '</div>';
+                    var h = '<a href="/etf-detail?ticker=' + row.ticker + '" class="leading-tight" style="color:inherit;text-decoration:none;display:block">' + d + '</a>';
                     if (myPortfolio.includes(row.ticker)) {
                         h += '<div class="mt-1"><span class="mine-badge">MY</span></div>';
                     }
