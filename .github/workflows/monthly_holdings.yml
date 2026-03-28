@@ -1,0 +1,52 @@
+name: ETF 구성종목 월 1회 수집
+
+on:
+  # 매월 1일 UTC 01:00 (KST 10:00)
+  schedule:
+    - cron: '0 1 1 * *'
+
+  # 수동 실행 (필요 시)
+  workflow_dispatch:
+
+jobs:
+  fetch-holdings:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install --upgrade yfinance pandas numpy pyarrow
+
+      - name: Fetch holdings (월 1회)
+        run: python scripts/fetch_holdings.py
+
+      - name: Rebuild per-ticker ETF JSON (holdings 포함)
+        run: python build_etf_pages.py
+
+      - name: Commit and push
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add data_scraped/holdings.json
+          git add output/etf-data/
+
+          if git diff --cached --quiet; then
+            echo "변경사항 없음 — 커밋 생략"
+          else
+            git commit -m "monthly: $(date -u +'%Y-%m') 구성종목 업데이트 [automated]"
+            git push
+          fi
