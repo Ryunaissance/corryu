@@ -432,16 +432,10 @@ nav {
     </button>
   </div>
 </nav>
-<div id="nav-mob-drawer" class="nav-mob-drawer" style="top:59px">
-  <a href="/index"       class="mob-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>대시보드</a>
-  <a href="/screener"    class="mob-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>스크리너</a>
-  <a href="/backtest"    class="mob-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>백테스트</a>
-  <a href="/correlation" class="mob-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="12" cy="16" r="2"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="9" y1="10" x2="11" y2="14"/><line x1="15" y1="10" x2="13" y2="14"/></svg>상관관계</a>
-  <a href="/compare"     class="mob-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>비교</a>
-  <a href="/portfolio"   class="mob-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>포트폴리오</a>
-  <a href="/graph"       class="mob-link"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><line x1="7" y1="11.5" x2="17" y2="6.5"/><line x1="7" y1="12.5" x2="17" y2="17.5"/></svg>그래프</a>
+<div id="nav-mob-drawer" class="nav-mob-drawer">
+  <!-- nav.js의 injectMobileDrawer()가 allLinks 배열로 동적 생성 (단일 진실의 원천) -->
 </div>
-<div id="nav-mob-overlay" class="nav-mob-overlay" style="top:59px"></div>
+<div id="nav-mob-overlay" class="nav-mob-overlay"></div>
 
 <!-- ── 메인 ── -->
 <div class="main-wrap">
@@ -708,11 +702,1416 @@ nav {
 
 </div><!-- /main-wrap -->
 
-<script src="/etf-detail-data.js"></script>
-<script src="/etf-detail-charts.js"></script>
-<script src="/etf-detail-render.js"></script>
-<script src="/etf-detail.js"></script>
-<script src="/etf-detail-comments.js"></script>
+<script>
+// ── 보조 데이터 (수수료·발행사·구성종목 등 etf_data.json에 없는 정보) ─────────
+const SUPP = {
+  'SPY':  { exp:'0.0945%', issuer:'State Street Global Advisors', bench:'S&P 500',           structure:'UIT', div:'분기 배당', divYield:'1.24%', numH:503,
+            desc:'S&P 500 지수를 추종하는 세계 최초·최대 규모의 ETF. 미국 대형주 500개를 시가총액 가중 방식으로 보유합니다.',
+            holdings:[['AAPL','Apple Inc.',7.32],['MSFT','Microsoft Corp.',6.81],['NVDA','NVIDIA Corp.',5.94],['AMZN','Amazon.com Inc.',3.78],['META','Meta Platforms',2.65],['GOOGL','Alphabet Class A',2.10],['GOOG','Alphabet Class C',1.82],['BRK.B','Berkshire Hathaway B',1.63],['LLY','Eli Lilly & Co.',1.52],['JPM','JPMorgan Chase',1.47]],
+            perf:{'1M':2.3,'3M':5.1,'YTD':8.7,'1Y':22.4,'3Y_ann':12.1,'5Y_ann':14.7} },
+  'QQQ':  { exp:'0.20%',  issuer:'Invesco',                       bench:'Nasdaq-100',         structure:'Open-End',  div:'분기 배당', divYield:'0.55%', numH:101,
+            desc:'Nasdaq-100 지수를 추종하며 기술·성장주 중심으로 구성된 ETF. FAANG 및 대형 기술주 비중이 높습니다.',
+            holdings:[['AAPL','Apple Inc.',9.15],['MSFT','Microsoft Corp.',8.44],['NVDA','NVIDIA Corp.',7.92],['AMZN','Amazon.com Inc.',5.02],['META','Meta Platforms',4.81],['GOOGL','Alphabet Class A',2.72],['GOOG','Alphabet Class C',2.58],['TSLA','Tesla Inc.',2.35],['AVGO','Broadcom Inc.',2.21],['COST','Costco Wholesale',1.86]],
+            perf:{'1M':3.1,'3M':7.8,'YTD':12.3,'1Y':28.5,'3Y_ann':15.4,'5Y_ann':19.2} },
+  'IVV':  { exp:'0.03%',  issuer:'BlackRock (iShares)',           bench:'S&P 500',             structure:'Open-End',  div:'분기 배당', divYield:'1.26%', numH:503,
+            desc:'iShares Core S&P 500 ETF. 0.03%의 최저 수수료로 S&P 500 지수를 추종합니다.',
+            holdings:[['AAPL','Apple Inc.',7.32],['MSFT','Microsoft Corp.',6.81],['NVDA','NVIDIA Corp.',5.94],['AMZN','Amazon.com Inc.',3.78],['META','Meta Platforms',2.65],['GOOGL','Alphabet Class A',2.10],['GOOG','Alphabet Class C',1.82],['BRK.B','Berkshire Hathaway B',1.63],['LLY','Eli Lilly & Co.',1.52],['JPM','JPMorgan Chase',1.47]],
+            perf:{'1M':2.3,'3M':5.1,'YTD':8.7,'1Y':22.4,'3Y_ann':12.1,'5Y_ann':14.7} },
+  'VOO':  { exp:'0.03%',  issuer:'Vanguard',                      bench:'S&P 500',             structure:'Open-End',  div:'분기 배당', divYield:'1.25%', numH:503,
+            desc:'Vanguard S&P 500 ETF. 업계 최저 수준의 수수료로 S&P 500 지수를 추종합니다.',
+            holdings:[['AAPL','Apple Inc.',7.31],['MSFT','Microsoft Corp.',6.80],['NVDA','NVIDIA Corp.',5.93],['AMZN','Amazon.com Inc.',3.77],['META','Meta Platforms',2.64],['GOOGL','Alphabet Class A',2.09],['GOOG','Alphabet Class C',1.81],['BRK.B','Berkshire Hathaway B',1.62],['LLY','Eli Lilly & Co.',1.51],['JPM','JPMorgan Chase',1.46]],
+            perf:{'1M':2.3,'3M':5.1,'YTD':8.7,'1Y':22.3,'3Y_ann':12.0,'5Y_ann':14.6} },
+  'VTI':  { exp:'0.03%',  issuer:'Vanguard',                      bench:'CRSP US Total Market',structure:'Open-End',  div:'분기 배당', divYield:'1.35%', numH:3615,
+            desc:'미국 전체 주식 시장(대형·중형·소형주 포함)에 한 번에 투자하는 Total Market ETF.',
+            holdings:[['AAPL','Apple Inc.',6.42],['MSFT','Microsoft Corp.',5.96],['NVDA','NVIDIA Corp.',5.21],['AMZN','Amazon.com Inc.',3.31],['META','Meta Platforms',2.32],['GOOGL','Alphabet Class A',1.84],['BRK.B','Berkshire Hathaway B',1.64],['GOOG','Alphabet Class C',1.59],['LLY','Eli Lilly & Co.',1.33],['JPM','JPMorgan Chase',1.28]],
+            perf:{'1M':2.1,'3M':4.8,'YTD':8.2,'1Y':21.8,'3Y_ann':11.7,'5Y_ann':14.3} },
+  'GLD':  { exp:'0.40%',  issuer:'State Street Global Advisors', bench:'LBMA Gold Price',      structure:'Grantor Trust', div:'무배당', divYield:'0%', numH:1,
+            desc:'실물 금 가격을 추종하는 세계 최대 금 ETF. 주당 약 1/10 트로이온스의 금을 보유합니다.',
+            holdings:[['GOLD','Physical Gold (0.1 oz/share)',100.0]],
+            perf:{'1M':1.8,'3M':9.2,'YTD':11.4,'1Y':18.7,'3Y_ann':8.3,'5Y_ann':11.2} },
+  'TLT':  { exp:'0.15%',  issuer:'BlackRock (iShares)',           bench:'ICE US Treasury 20+Y', structure:'Open-End', div:'월 배당', divYield:'4.12%', numH:26,
+            desc:'만기 20년 이상 미국 장기 국채를 추종하는 ETF. 금리 하락 시 수익, 금리 상승 시 손실이 두드러집니다.',
+            holdings:[['UST1','US Treasury 4.500% 2054',15.2],['UST2','US Treasury 4.125% 2054',9.8],['UST3','US Treasury 3.875% 2053',8.7],['UST4','US Treasury 4.250% 2052',7.3],['UST5','US Treasury 3.000% 2048',6.1],['UST6','US Treasury 2.250% 2052',5.4],['UST7','US Treasury 3.625% 2053',5.2],['UST8','US Treasury 1.875% 2051',4.8],['UST9','US Treasury 2.375% 2049',4.3],['UST10','US Treasury 2.875% 2049',3.9]],
+            perf:{'1M':-1.2,'3M':-3.4,'YTD':-4.1,'1Y':-8.3,'3Y_ann':-12.4,'5Y_ann':-6.8} },
+  'XLK':  { exp:'0.09%',  issuer:'State Street Global Advisors', bench:'S&P Technology Select Sector', structure:'Open-End', div:'분기 배당', divYield:'0.68%', numH:67,
+            desc:'S&P 500 내 기술 섹터 기업을 모두 담은 ETF. 소프트웨어·하드웨어·반도체 기업을 포함합니다.',
+            holdings:[['MSFT','Microsoft Corp.',22.81],['AAPL','Apple Inc.',20.05],['NVDA','NVIDIA Corp.',17.42],['AVGO','Broadcom Inc.',4.62],['ORCL','Oracle Corp.',3.18],['CSCO','Cisco Systems',3.05],['ADBE','Adobe Inc.',2.34],['CRM','Salesforce Inc.',2.21],['ACN','Accenture PLC',2.14],['AMD','Advanced Micro Devices',1.97]],
+            perf:{'1M':4.2,'3M':9.8,'YTD':15.4,'1Y':34.2,'3Y_ann':18.6,'5Y_ann':22.8} },
+  'XLF':  { exp:'0.09%',  issuer:'State Street Global Advisors', bench:'S&P Financials Select Sector', structure:'Open-End', div:'분기 배당', divYield:'1.68%', numH:72,
+            desc:'S&P 500 내 금융 섹터(은행·보험·투자은행·카드)를 추종하는 ETF.',
+            holdings:[['BRK.B','Berkshire Hathaway B',13.24],['JPM','JPMorgan Chase',12.81],['V','Visa Inc.',8.34],['MA','Mastercard Inc.',7.12],['BAC','Bank of America',4.62],['WFC','Wells Fargo',4.21],['GS','Goldman Sachs',3.84],['MS','Morgan Stanley',3.41],['SPGI','S&P Global Inc.',2.95],['BLK','BlackRock Inc.',2.78]],
+            perf:{'1M':1.8,'3M':4.2,'YTD':7.1,'1Y':18.4,'3Y_ann':10.2,'5Y_ann':12.1} },
+  'XLV':  { exp:'0.09%',  issuer:'State Street Global Advisors', bench:'S&P Healthcare Select Sector', structure:'Open-End', div:'분기 배당', divYield:'1.42%', numH:63,
+            desc:'S&P 500 내 헬스케어 섹터(제약·바이오·의료기기·보험)를 추종하는 ETF.',
+            holdings:[['LLY','Eli Lilly & Co.',12.84],['UNH','UnitedHealth Group',11.42],['JNJ','Johnson & Johnson',8.35],['ABBV','AbbVie Inc.',7.23],['MRK','Merck & Co.',6.84],['TMO','Thermo Fisher',4.21],['DHR','Danaher Corp.',3.82],['ABT','Abbott Laboratories',3.41],['PFE','Pfizer Inc.',3.12],['AMGN','Amgen Inc.',2.94]],
+            perf:{'1M':0.8,'3M':2.4,'YTD':4.1,'1Y':10.2,'3Y_ann':8.4,'5Y_ann':10.8} },
+  'XLE':  { exp:'0.09%',  issuer:'State Street Global Advisors', bench:'S&P Energy Select Sector', structure:'Open-End', div:'분기 배당', divYield:'3.42%', numH:22,
+            desc:'S&P 500 내 에너지 섹터(정유·가스·정제·서비스)를 추종하는 ETF.',
+            holdings:[['XOM','Exxon Mobil Corp.',23.74],['CVX','Chevron Corp.',18.32],['COP','ConocoPhillips',6.84],['EOG','EOG Resources',5.21],['MPC','Marathon Petroleum',4.87],['SLB','SLB (Schlumberger)',4.62],['PSX','Phillips 66',4.38],['VLO','Valero Energy',3.95],['OXY','Occidental Petroleum',3.42],['KMI','Kinder Morgan',2.87]],
+            perf:{'1M':-1.4,'3M':-2.8,'YTD':-3.2,'1Y':4.2,'3Y_ann':22.4,'5Y_ann':16.8} },
+  'IWM':  { exp:'0.19%',  issuer:'BlackRock (iShares)',           bench:'Russell 2000',        structure:'Open-End', div:'분기 배당', divYield:'1.23%', numH:2000,
+            desc:'미국 소형주 약 2,000개로 구성된 Russell 2000 지수를 추종합니다. 미국 내수 경기에 민감합니다.',
+            holdings:[['SMCI','Super Micro Computer',0.52],['MTSI','MACOM Technology',0.41],['VIRT','Virtu Financial',0.38],['SPSC','SPS Commerce',0.36],['MGNI','Magnite Inc.',0.34],['AEIS','Advanced Energy Ind.',0.33],['TMDX','TransMedics Group',0.32],['SKYW','SkyWest Inc.',0.31],['CTRE','CareTrust REIT',0.30],['HALO','Halozyme Therapeutics',0.29]],
+            perf:{'1M':1.2,'3M':3.4,'YTD':5.8,'1Y':14.2,'3Y_ann':6.4,'5Y_ann':9.1} },
+  'VEA':  { exp:'0.05%',  issuer:'Vanguard',                      bench:'FTSE Dev. All Cap ex US', structure:'Open-End', div:'반기 배당', divYield:'2.98%', numH:3900,
+            desc:'미국·캐나다를 제외한 선진국 주식(유럽·일본·호주 등)에 투자하는 ETF.',
+            holdings:[['NESN','Nestlé S.A.',1.82],['ASML','ASML Holding',1.74],['NOVN','Novartis AG',1.41],['RHHBY','Roche Holding',1.38],['SAP','SAP SE',1.35],['TM','Toyota Motor',1.31],['RDSA','Shell plc',1.24],['AZN','AstraZeneca',1.22],['SIE','Siemens AG',1.18],['HSBC','HSBC Holdings',1.14]],
+            perf:{'1M':1.8,'3M':4.1,'YTD':6.3,'1Y':10.4,'3Y_ann':5.2,'5Y_ann':7.8} },
+  'VWO':  { exp:'0.08%',  issuer:'Vanguard',                      bench:'FTSE Emerging Markets', structure:'Open-End', div:'반기 배당', divYield:'3.42%', numH:5600,
+            desc:'중국·인도·브라질·한국 등 신흥국 주식 시장에 투자하는 ETF.',
+            holdings:[['TSM','Taiwan Semiconductor',5.84],['BABA','Alibaba Group',3.42],['TCS','Tata Consultancy',2.18],['RELI','Reliance Industries',2.04],['PDD','PDD Holdings',1.94],['SMSN','Samsung Electronics',1.87],['JD','JD.com Inc.',1.52],['BIDU','Baidu Inc.',1.41],['INFY','Infosys Ltd.',1.32],['MBT','Mobile TeleSystems',1.24]],
+            perf:{'1M':1.4,'3M':3.8,'YTD':5.2,'1Y':8.4,'3Y_ann':2.1,'5Y_ann':4.8} },
+  'VNQ':  { exp:'0.13%',  issuer:'Vanguard',                      bench:'MSCI US IMI Real Estate 25/50', structure:'Open-End', div:'분기 배당', divYield:'3.85%', numH:163,
+            desc:'미국 부동산 투자신탁(REITs)과 부동산 관련 기업에 투자하는 ETF.',
+            holdings:[['PLD','Prologis Inc.',5.91],['AMT','American Tower',4.83],['EQIX','Equinix Inc.',4.12],['WELL','Welltower Inc.',3.47],['SPG','Simon Property Group',3.22],['DLR','Digital Realty',2.98],['PSA','Public Storage',2.76],['O','Realty Income Corp.',2.65],['CCI','Crown Castle',2.41],['WY','Weyerhaeuser',2.14]],
+            perf:{'1M':1.4,'3M':3.8,'YTD':4.2,'1Y':12.3,'3Y_ann':2.8,'5Y_ann':7.4} },
+  'HYG':  { exp:'0.48%',  issuer:'BlackRock (iShares)',           bench:'iBoxx USD Liquid HY', structure:'Open-End', div:'월 배당', divYield:'5.82%', numH:1195,
+            desc:'미국 투기등급(하이일드) 회사채를 추종하는 ETF. 높은 배당 수익률과 신용 리스크가 특징.',
+            holdings:[['HY01','T-Mobile USA 3.875% 2030',0.58],['HY02','Telecom Italia 5.303% 2034',0.45],['HY03','Carnival Corp. 6.000% 2029',0.43],['HY04','Ford Motor 4.750% 2043',0.41],['HY05','CCO Holdings 4.500% 2032',0.38],['HY06','Netflix Inc. 4.875% 2030',0.36],['HY07','Centene Corp. 4.625% 2029',0.35],['HY08','Bausch Health 5.250% 2030',0.33],['HY09','DISH DBS 5.875% 2024',0.32],['HY10','Pitney Bowes 6.350% 2037',0.31]],
+            perf:{'1M':0.8,'3M':2.1,'YTD':1.9,'1Y':8.7,'3Y_ann':4.2,'5Y_ann':4.8} },
+  'BND':  { exp:'0.03%',  issuer:'Vanguard',                      bench:'Bloomberg US Aggregate', structure:'Open-End', div:'월 배당', divYield:'3.72%', numH:10418,
+            desc:'미국 투자등급 채권 전체(국채·회사채·MBS)를 추종하는 종합 채권 ETF.',
+            holdings:[['UST','US Treasury Notes/Bonds',44.21],['GNMA','GNMA (정부 모기지)',20.14],['FNMA','Fannie Mae MBS',15.38],['CORP','Investment Grade Corp',12.41],['FHLMC','Freddie Mac MBS',5.83],['ABS','Asset-Backed Securities',2.03]],
+            perf:{'1M':0.4,'3M':1.2,'YTD':0.8,'1Y':2.3,'3Y_ann':-1.8,'5Y_ann':0.4} },
+  'GBTC': { exp:'1.50%',  issuer:'Grayscale Investments',         bench:'Bitcoin Price',        structure:'Spot BTC ETF', div:'무배당', divYield:'0%', numH:1,
+            desc:'미국 SEC 승인 현물 비트코인 ETF. 비트코인을 직접 보유하며, BTC 가격을 1:1로 추종합니다.',
+            holdings:[['BTC','Bitcoin (BTC)',100.0]],
+            perf:{'1M':12.4,'3M':38.7,'YTD':45.2,'1Y':124.3,'3Y_ann':28.4,'5Y_ann':48.7} },
+  'SQQQ': { exp:'0.95%',  issuer:'ProShares',                     bench:'Nasdaq-100 × −3',      structure:'Open-End', div:'분기 배당', divYield:'3.21%', numH:0,
+            desc:'Nasdaq-100 지수의 일일 수익률 ×−3배를 추종하는 인버스 레버리지 ETF. 단기 하락 베팅·헤징 목적.',
+            holdings:[],
+            perf:{'1M':-8.9,'3M':-21.4,'YTD':-34.2,'1Y':-67.4,'3Y_ann':-42.8,'5Y_ann':-51.3} },
+  'PEY':  { exp:'0.53%',  issuer:'Invesco',                       bench:'NASDAQ US Dividend Achievers 50', structure:'Open-End', div:'월 배당', divYield:'4.87%', numH:50,
+            desc:'미국 고배당 우량주 50개를 선별해 배당 성장 실적에 따라 투자하는 ETF. 월 배당이 특징.',
+            holdings:[['ALT','Altria Group Inc.',2.42],['T','AT&T Inc.',2.35],['LEG','Leggett & Platt',2.31],['UVV','Universal Corp.',2.28],['HEP','Holly Energy Partners',2.24],['BKH','Black Hills Corp.',2.21],['ESS','Essex Property Trust',2.18],['OHI','Omega Healthcare',2.15],['LAMR','Lamar Advertising',2.12],['NNN','National Retail Prop.',2.09]],
+            perf:{'1M':0.8,'3M':2.4,'YTD':3.2,'1Y':8.4,'3Y_ann':4.2,'5Y_ann':7.8} },
+  'UYR':  { exp:'0.95%',  issuer:'ProShares',                     bench:'Dow Jones US Real Estate × 2', structure:'Open-End', div:'분기 배당', divYield:'1.84%', numH:30,
+            desc:'미국 부동산(REITs) 지수의 일일 수익률 ×2배를 추종하는 레버리지 ETF.',
+            holdings:[['PLD','Prologis (레버리지)',5.91],['AMT','American Tower (레버리지)',4.83],['EQIX','Equinix (레버리지)',4.12]],
+            perf:{'1M':2.8,'3M':7.6,'YTD':8.4,'1Y':22.1,'3Y_ann':3.2,'5Y_ann':9.8} },
+  'IWF':  { exp:'0.19%',  issuer:'BlackRock (iShares)',           bench:'Russell 1000 Growth',  structure:'Open-End', div:'분기 배당', divYield:'0.52%', numH:415,
+            desc:'Russell 1000 성장주 지수를 추종하는 ETF. 기술·헬스케어·소비재 대형 성장주 중심.',
+            holdings:[['NVDA','NVIDIA Corp.',12.34],['AAPL','Apple Inc.',12.21],['MSFT','Microsoft Corp.',11.84],['AMZN','Amazon.com',6.42],['META','Meta Platforms',5.81],['GOOGL','Alphabet Class A',4.12],['TSLA','Tesla Inc.',3.84],['AVGO','Broadcom Inc.',3.21],['GOOG','Alphabet Class C',2.95],['LLY','Eli Lilly',2.84]],
+            perf:{'1M':3.4,'3M':8.2,'YTD':13.1,'1Y':32.4,'3Y_ann':16.8,'5Y_ann':20.4} },
+};
+
+// ── ETF 이름 첫 단어(브랜드)로 발행사 추론 ─────────────────
+// ETF 명명 규칙: 맨 처음 단어 = 발행사 브랜드
+const _ISSUER_PREFIX = {
+  // ── 대형 (100개+) ────────────────────────────────────
+  'iShares':        'BlackRock (iShares)',
+  'Ishares':        'BlackRock (iShares)',
+  'Invesco':        'Invesco',
+  'SPDR':           'State Street Global Advisors',
+  'Vanguard':       'Vanguard',
+  'WisdomTree':     'WisdomTree',
+  'Wisdomtree':     'WisdomTree',
+  'ProShares':      'ProShares',
+  'Proshares':      'ProShares',
+  'First':          'First Trust',       // "First Trust ..."
+  'FT':             'First Trust',       // "FT Cboe Vest ..."
+  'Global':         'Global X (Mirae Asset)', // "Global X ..."
+  'VanEck':         'VanEck',
+  'Vaneck':         'VanEck',
+  'Fidelity':       'Fidelity Investments',
+  'JPMorgan':       'JPMorgan Asset Management',
+  'Jpmorgan':       'JPMorgan Asset Management',
+  'Direxion':       'Direxion',
+  'Schwab':         'Charles Schwab',
+  // ── 중형 (20~99개) ───────────────────────────────────
+  'Avantis':        'Avantis Investors',
+  'Dimensional':    'Dimensional Fund Advisors',
+  'Goldman':        'Goldman Sachs Asset Management',
+  'Franklin':       'Franklin Templeton',
+  'Xtrackers':      'DWS (Xtrackers)',
+  'Nuveen':         'Nuveen',
+  'ALPS':           'ALPS Advisors',
+  'AdvisorShares':  'AdvisorShares',
+  'Roundhill':      'Roundhill Investments',
+  'Daily':          'Roundhill Investments',   // "Daily 2X ..." (Roundhill)
+  'YieldMax':       'YieldMax',
+  'Yieldmax':       'YieldMax',
+  'MicroSectors':    'REX Shares (MicroSectors)',
+  'MicroSectors\u2122':  'REX Shares (MicroSectors)', // MicroSectors™
+  'MicroSectorsTM':  'REX Shares (MicroSectors)',
+  'MicroSectorsTM':  'REX Shares (MicroSectors)', // MicroSectorsTM (without ™)
+  'Microsectors':    'REX Shares (MicroSectors)',
+  'U.S.':            'US Global Investors',            // "U.S. Global Jets ETF" 등
+  'ALPS/CoreCommodity': 'ALPS Advisors',               // "ALPS/CoreCommodity Natural Resources"
+  'Pacer':          'Pacer Financial',
+  'The':            'State Street Global Advisors', // "The ... Select Sector SPDR"
+  'Amplify':        'Amplify ETFs',
+  'NEOS':           'NEOS Investment Management',
+  'Neos':           'NEOS Investment Management',
+  // ── 소형 (10~19개) ───────────────────────────────────
+  'Tema':           'Tema ETFs',
+  'VictoryShares':  'VictoryShares',
+  'Victoryshares':  'VictoryShares',
+  'Themes':         'Themes ETFs',
+  'KraneShares':    'KraneShares',
+  'ARK':            'ARK Investment Management',
+  'PIMCO':          'PIMCO',
+  'T.':             'T. Rowe Price',             // "T. Rowe Price ..."
+  'Innovator':      'Innovator Capital Management',
+  'Macquarie':      'Macquarie Asset Management',
+  'abrdn':          'abrdn',
+  'Sprott':         'Sprott Asset Management',
+  'Volatility':     'Volatility Shares',
+  'Teucrium':       'Teucrium Trading',
+  'American':       'American Century Investments',
+  'Strive':         'Strive Asset Management',
+  'Harbor':         'Harbor Capital Advisors',
+  'GraniteShares':  'GraniteShares',
+  'Putnam':         'Franklin Templeton',
+  'Janus':          'Janus Henderson',
+  'Grayscale':      'Grayscale Investments',
+  'Bitwise':        'Bitwise Asset Management',
+  'Defiance':       'Defiance ETFs',
+  'CoinShares':     'CoinShares',
+  // ── 소수 (1~9개) ─────────────────────────────────────
+  'Robo':           'ROBO Global',
+  'BNY':            'BNY Mellon',
+  'Zacks':          'Zacks Investment Management',
+  'RiverFront':     'RiverFront Investment Group',
+  'VistaShares':    'VistaShares',
+  'Eaton':          'Eaton Vance',
+  '2x':             'Volatility Shares',
+  '-1x':            'Volatility Shares',
+  'One':            'Volatility Shares',        // "One+One S&P 500 and Bitcoin ETF"
+  'Davis':          'Davis Advisors',
+  'ClearBridge':    'ClearBridge Investments',
+  'Tortoise':       'Tortoise Capital',
+  'USCF':           'USCF Investments',
+  'Alerian':        'SS&C (Alerian)',
+  'United':         'United States Commodity Funds',
+  'State':          'State Street Global Advisors',
+  'Principal':      'Principal Global Investors',
+  'US':             'US Global Investors',
+  'Transatlantic':  'Transatlantic Capital',
+  'Point':          'Point Bridge Capital',
+  'Barclays':       'Barclays',
+  'Procure':        'Procure Asset Management',
+  "Barron's":       'ALPS Advisors',
+  'Cambria':        'Cambria Investment Management',
+  'Western':        'Franklin Templeton',
+  'UBS':            'UBS',
+  'Select':         'State Street Global Advisors',
+  'Listed':         'Teucrium',               // "Listed Funds Trust / Teucrium"
+  'Solana':         'REX Shares',
+  '21Shares':       '21Shares',
+  '21shares':       '21Shares',
+  'Fortuna':        'Fortuna Funds',
+};
+function inferIssuer(name) {
+  if (!name) return '';
+  const w = name.trim().split(/\s+/);
+  // "T. Rowe Price" — 첫 단어가 "T."이면 두 번째 단어로 보완
+  if (w[0] === 'T.' && w[1] === 'Rowe') return 'T. Rowe Price';
+  // "Goldman Sachs" — 발행사로 표기
+  if (w[0] === 'Goldman' && w[1] === 'Sachs') return 'Goldman Sachs Asset Management';
+  // "BNY Mellon" — 발행사로 표기
+  if (w[0] === 'BNY' && w[1] === 'Mellon') return 'BNY Mellon';
+  return _ISSUER_PREFIX[w[0]] || '';
+}
+
+// 섹터 ID → 이름 매핑 (간소화)
+const SECTOR_NAMES = {
+  S01:'📈 US 대형주',S02:'💻 테크놀로지',S03:'🏥 헬스케어',S04:'🏦 금융',S05:'🛍️ 경기소비재',
+  S06:'🛒 필수소비재',S07:'🏭 산업재',S08:'⚡ 유틸리티',S09:'📡 커뮤니케이션',S10:'⛏️ 소재',
+  S11:'🌍 국제선진국',S12:'🌏 신흥국',S13:'📊 중소형주',S14:'🏛️ 투자등급채권',S15:'💵 단기채/현금성',
+  S16:'⚠️ 하이일드',S17:'📈 TIPS/인플레이션',S18:'✨ 금/귀금속',S19:'🛢️ 에너지/원자재',
+  S20:'🏘️ 부동산/REITs',S21:'₿ 가상자산',S22:'📉 인버스/숏',S24:'🧩 테마/특수목적'
+};
+
+// ── URL에서 ticker 추출 ────────────────────────────
+const params = new URLSearchParams(location.search);
+const TICKER = (params.get('ticker') || 'SPY').toUpperCase().trim();
+
+document.getElementById('nav-breadcrumb').textContent = '/ ' + TICKER;
+// 백테스트 링크에 현재 티커를 100% 비중으로 프리셋
+document.getElementById('nav-backtest-link').href = `/backtest?portfolio=${TICKER}:100`;
+document.title = TICKER + ' ETF 상세 — CORRYU';
+
+// ── Watchlist (localStorage) ──────────────────────
+const watchlist = new Set(JSON.parse(localStorage.getItem('corryu_watchlist') || '[]'));
+function toggleWatchlist() {
+  if (watchlist.has(TICKER)) watchlist.delete(TICKER);
+  else watchlist.add(TICKER);
+  localStorage.setItem('corryu_watchlist', JSON.stringify([...watchlist]));
+  updateStarBtn();
+}
+function updateStarBtn() {
+  const btn = document.getElementById('star-hero-btn');
+  if (!btn) return;
+  if (watchlist.has(TICKER)) {
+    btn.textContent = '★ 관심종목';
+    btn.classList.add('starred');
+  } else {
+    btn.textContent = '☆ 관심종목 추가';
+    btn.classList.remove('starred');
+  }
+}
+
+// ── 검색 ─────────────────────────────────────────
+document.getElementById('nav-search-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') goToTicker();
+});
+function goToTicker() {
+  const val = document.getElementById('nav-search-input').value.trim().toUpperCase();
+  if (val) location.href = '/etf-detail?ticker=' + encodeURIComponent(val);
+}
+
+
+// ── 렌더링 함수들 ──────────────────────────────────
+function fmtAUM(v) {
+  if (!v) return '—';
+  const m = v / 1e6;
+  return m >= 1000 ? '$' + (m/1000).toFixed(1) + 'B' : '$' + Math.round(m) + 'M';
+}
+function fmtPct(v, dec=1) {
+  if (v === null || v === undefined) return '—';
+  return (v > 0 ? '+' : '') + v.toFixed(dec) + '%';
+}
+function fmtNum(v, dec=2) {
+  if (v === null || v === undefined) return '—';
+  return v.toFixed(dec);
+}
+function fmtExpRatio(v) {
+  if (v === null || v === undefined) return '';
+  // v는 소수 형식 (예: 0.0003 → "0.03%")
+  const pct = v * 100;
+  return pct < 0.01 ? pct.toFixed(4) + '%' : pct.toFixed(2) + '%';
+}
+function metricColor(key, val) {
+  if (val === null || val === undefined) return 'val-neutral';
+  if (key === 'z_score')   return val <= -1.5 ? 'val-neg' : val >= 2.0 ? 'val-pos' : 'val-neutral';
+  if (key === 'rsi')       return val <= 30 ? 'val-neg' : val >= 70 ? 'val-pos' : 'val-neutral';
+  if (key === 'range_52w') return val <= 20 ? 'val-neg' : val >= 80 ? 'val-pos' : 'val-neutral';
+  if (key === 'ma200_pct') return val <= -10 ? 'val-neg' : val >= 15 ? 'val-pos' : 'val-neutral';
+  if (key === 'mdd_52w')   return val <= -20 ? 'val-pos' : 'val-neutral';
+  if (key === 'cagr')      return val >= 15 ? 'val-good' : val < 0 ? 'val-pos' : 'val-neutral';
+  if (key === 'sortino')   return val >= 1.2 ? 'val-purple' : val < 0 ? 'val-pos' : 'val-neutral';
+  if (key === 'r_anchor')  return Math.abs(val) >= 0.7 ? 'val-pos' : 'val-neutral';
+  return 'val-neutral';
+}
+
+function renderGauge(val, min, max, color) {
+  const pct = Math.max(0, Math.min(100, ((val - min) / (max - min)) * 100));
+  return `<div class="gauge-wrap"><div class="gauge-bar"><div class="gauge-fill" style="width:${pct.toFixed(1)}%;background:${color}"></div></div></div>`;
+}
+
+function seededRand(seed) {
+  let s = Math.abs(seed) % 2147483647 || 1;
+  return () => { s = s * 16807 % 2147483647; return (s - 1) / 2147483646; };
+}
+function generatePrices(ticker, cagr, vol, n) {
+  const seed = [...ticker].reduce((acc, c, i) => acc + c.charCodeAt(0) * (i * 31 + 7), 42);
+  const rand = seededRand(seed);
+  const mu  = (cagr || 10) / 100 / 252;
+  const sig = (vol  || 18) / 100 / Math.sqrt(252);
+  let prices = [100];
+  for (let i = 1; i < n; i++) {
+    let z = 0;
+    for (let j = 0; j < 12; j++) z += rand();
+    z = (z - 6);
+    prices.push(prices[i - 1] * Math.exp(mu - 0.5 * sig * sig + sig * z));
+  }
+  return prices;
+}
+
+let currentETF = null;
+let priceHistory = null;
+let lwChart = null;
+let lwSeries = null;
+let currentChartType = 'line';
+let activeIndicators = { ma20:false, ma50:false, ma200:true, bb:false, volume:false, rsi:true, zscore:true, range52w:false, mdd:false };
+let overlaySeriesMap = {};
+let subChartMap = {};
+let isSyncing = false;
+
+const OVERLAY_CONF = {
+  ma20:  { color:'#f59e0b', period:20  },
+  ma50:  { color:'#3b82f6', period:50  },
+  ma200: { color:'#a78bfa', period:200 },
+};
+const SUBCHART_CONF = {
+  volume:   { label:'Volume',    height:60,  color:'#60a5fa', refs:[] },
+  rsi:      { label:'RSI',       height:90,  color:'#f59e0b', refs:[{v:70,c:'rgba(248,113,113,0.45)'},{v:30,c:'rgba(96,165,250,0.45)'}] },
+  zscore:   { label:'Z-Score',   height:90,  color:'#a78bfa', refs:[{v:2,c:'rgba(248,113,113,0.45)'},{v:0,c:'rgba(148,163,184,0.18)'},{v:-2,c:'rgba(96,165,250,0.45)'}] },
+  range52w: { label:'52W Range', height:80,  color:'#34d399', refs:[{v:80,c:'rgba(248,113,113,0.45)'},{v:20,c:'rgba(96,165,250,0.45)'}] },
+  mdd:      { label:'MDD',       height:80,  color:'#f87171', refs:[{v:-10,c:'rgba(251,191,36,0.45)'},{v:-20,c:'rgba(248,113,113,0.45)'}] },
+};
+
+// ── 실가격 히스토리 로드 (Supabase etf_prices, 페이지네이션으로 전체 이력) ───
+async function loadPriceHistory(ticker) {
+  if (!window._sb) return null;
+  const PAGE = 1000;
+  let all = [], page = 0;
+  while (true) {
+    const from = page * PAGE, to = from + PAGE - 1;
+    const { data, error } = await window._sb
+      .from('etf_prices')
+      .select('date, open, high, low, close, adj_close, volume')
+      .eq('ticker', ticker)
+      .order('date', { ascending: true })
+      .range(from, to);
+    if (error || !data?.length) break;
+    all.push(...data);
+    if (data.length < PAGE) break;  // 마지막 페이지
+    page++;
+  }
+  return all.length >= 20 ? all : null;
+}
+
+// ── 기간별 수익률 계산 ──────────────────────────────────────
+function calcPeriodReturn(history, calDays) {
+  const now = history[history.length - 1].close;
+  const cutDate = new Date();
+  cutDate.setDate(cutDate.getDate() - calDays);
+  const cutStr = cutDate.toISOString().split('T')[0];
+  for (let i = history.length - 2; i >= 0; i--) {
+    if (history[i].date <= cutStr) return (now / history[i].close - 1) * 100;
+  }
+  return null;
+}
+function calcYTD(history) {
+  const now = history[history.length - 1].close;
+  const ytdStr = new Date().getFullYear() + '-01-01';
+  const base = history.find(p => p.date >= ytdStr);
+  return base ? (now / base.close - 1) * 100 : null;
+}
+function calcAnnReturn(history, years) {
+  const now = history[history.length - 1].close;
+  const cutDate = new Date();
+  cutDate.setFullYear(cutDate.getFullYear() - years);
+  const cutStr = cutDate.toISOString().split('T')[0];
+  const base = history.find(p => p.date >= cutStr);
+  if (!base) return null;
+  return (Math.pow(now / base.close, 1 / years) - 1) * 100;
+}
+function updatePerfFromHistory() {
+  if (!priceHistory || !currentETF) return;
+  const h = priceHistory;
+  const ret = {
+    '1M':     calcPeriodReturn(h, 30),
+    '3M':     calcPeriodReturn(h, 91),
+    'YTD':    calcYTD(h),
+    '1Y':     calcPeriodReturn(h, 365),
+    '3Y_ann': calcAnnReturn(h, 3),
+    '5Y_ann': calcAnnReturn(h, 5),
+  };
+  const periods = [
+    { key: '1M',     labelKey: 'detail.perf.period.1M',    ann: false },
+    { key: '3M',     labelKey: 'detail.perf.period.3M',    ann: false },
+    { key: 'YTD',    labelKey: 'detail.perf.period.YTD',   ann: false },
+    { key: '1Y',     labelKey: 'detail.perf.period.1Y',    ann: false },
+    { key: '3Y_ann', labelKey: 'detail.perf.period.3Y_ann',ann: true },
+    { key: '5Y_ann', labelKey: 'detail.perf.period.5Y_ann',ann: true },
+  ];
+  document.getElementById('perf-table-body').innerHTML = periods.map(p => {
+    const v = ret[p.key];
+    const cls = v === null ? 'ret-na' : v >= 0 ? 'ret-pos' : 'ret-neg';
+    const annLabel = p.ann ? I18n.t('detail.perf.ann') : I18n.t('detail.perf.accumulated');
+    return `<tr>
+      <td class="perf-period">${I18n.t(p.labelKey)}</td>
+      <td class="${cls}">${v === null ? '—' : fmtPct(v)}</td>
+      <td style="color:var(--text-muted);font-size:0.75rem">${annLabel}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Lightweight Charts 기반 인터랙티브 차트 ─────────────────
+function initPriceChart(container, data, type) {
+  if (!container || !data || data.length < 2) return;
+  if (lwChart) { try { lwChart.remove(); } catch(e) {} lwChart = null; lwSeries = null; }
+  overlaySeriesMap = {};
+
+  const hasSubCharts = Object.keys(SUBCHART_CONF).some(k => activeIndicators[k]);
+  lwChart = LightweightCharts.createChart(container, {
+    width:  container.clientWidth,
+    height: container.clientHeight || 300,
+    layout: { background: { type:'solid', color:'transparent' }, textColor:'#64748b', fontFamily:"'Inter',monospace", fontSize:11 },
+    grid: { vertLines: { color:'rgba(255,255,255,0.04)' }, horzLines: { color:'rgba(255,255,255,0.04)' } },
+    crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+    rightPriceScale: { borderColor:'rgba(255,255,255,0.08)' },
+    timeScale: { borderColor:'rgba(255,255,255,0.08)', timeVisible:false, visible: !hasSubCharts },
+    handleScroll: { mouseWheel:true, pressedMouseMove:true, horzTouchDrag:true },
+    handleScale: { mouseWheel:true, pinch:true },
+  });
+
+  if (type === 'candle') {
+    lwSeries = lwChart.addCandlestickSeries({ upColor:'#4ade80', downColor:'#f87171', borderUpColor:'#4ade80', borderDownColor:'#f87171', wickUpColor:'#4ade80', wickDownColor:'#f87171' });
+    lwSeries.setData(data.map(d => ({ time:d.date, open:d.open??d.close, high:d.high??d.close, low:d.low??d.close, close:d.close })));
+  } else {
+    lwSeries = lwChart.addAreaSeries({ lineColor:'#4ade80', topColor:'rgba(74,222,128,0.15)', bottomColor:'rgba(74,222,128,0)', lineWidth:2, priceLineVisible:false, crosshairMarkerVisible:true });
+    lwSeries.setData(data.map(d => ({ time:d.date, value:d.close })));
+  }
+
+  const overAdj = data.map(d => d.close);
+  ['ma20','ma50','ma200'].forEach(key => {
+    if (!activeIndicators[key]) return;
+    const cfg = OVERLAY_CONF[key];
+    const s = lwChart.addLineSeries({ color:cfg.color, lineWidth:1.5, priceLineVisible:false, crosshairMarkerVisible:false, lastValueVisible:false });
+    s.setData(calcMASeries(overAdj, cfg.period));
+    overlaySeriesMap[key] = s;
+  });
+  if (activeIndicators.bb) {
+    const bb = calcBBData(overAdj);
+    const addLine = (d, c, ls) => { const s = lwChart.addLineSeries({ color:c, lineWidth:1, priceLineVisible:false, crosshairMarkerVisible:false, lastValueVisible:false, lineStyle:ls }); s.setData(d); return s; };
+    overlaySeriesMap.bbUpper = addLine(bb.upper, 'rgba(96,165,250,0.65)', 0);
+    overlaySeriesMap.bbLower = addLine(bb.lower, 'rgba(96,165,250,0.65)', 0);
+    overlaySeriesMap.bbMid   = addLine(bb.mid,   'rgba(71,85,105,0.8)',   2);
+  }
+
+  const lastDate = data[data.length - 1].date;
+  const oneYAgo = new Date(lastDate); oneYAgo.setFullYear(oneYAgo.getFullYear() - 1);
+  const fromStr = oneYAgo.toISOString().split('T')[0];
+  if (data.some(d => d.date <= fromStr)) lwChart.timeScale().setVisibleRange({ from: fromStr, to: lastDate });
+  else lwChart.timeScale().fitContent();
+
+  function updateRangeReturn() {
+    const range = lwChart.timeScale().getVisibleRange();
+    if (!range) return;
+    const fromD = data.find(d => d.date >= range.from);
+    let toD = null;
+    for (let i = data.length - 1; i >= 0; i--) { if (data[i].date <= range.to) { toD = data[i]; break; } }
+    if (!fromD || !toD || fromD === toD) return;
+    const ret = (toD.close / fromD.close - 1) * 100;
+    const pctEl = document.getElementById('chart-pct');
+    if (pctEl) { pctEl.textContent = (ret >= 0 ? '+' : '') + ret.toFixed(1) + '%'; pctEl.className = 'chart-pct ' + (ret >= 0 ? 'ret-pos' : 'ret-neg'); }
+    const lblEl = document.getElementById('chart-period-label');
+    if (lblEl) lblEl.textContent = fromD.date + ' ~ ' + toD.date;
+  }
+  lwChart.timeScale().subscribeVisibleTimeRangeChange(range => {
+    updateRangeReturn();
+    if (!range || isSyncing) return;
+    isSyncing = true;
+    Object.values(subChartMap).forEach(sc => { try { sc.chart.timeScale().setVisibleRange(range); } catch(e) {} });
+    isSyncing = false;
+  });
+  setTimeout(updateRangeReturn, 80);
+
+  const tooltip = document.getElementById('price-tooltip');
+  lwChart.subscribeCrosshairMove(param => {
+    if (!tooltip) return;
+    if (!param.time || !param.point || !lwSeries || !param.seriesData.get(lwSeries)) { tooltip.style.display = 'none'; return; }
+    const pt = param.seriesData.get(lwSeries);
+    let html;
+    if (type === 'candle') {
+      const up = pt.close >= pt.open, c = up ? '#4ade80' : '#f87171';
+      html = `<div style="color:#475569;font-size:0.7rem;margin-bottom:3px">${param.time}</div><table style="border-spacing:0 2px">
+        <tr><td style="color:#475569;padding-right:10px">O</td><td style="color:${c};font-weight:700">${pt.open.toFixed(2)}</td></tr>
+        <tr><td style="color:#475569;padding-right:10px">H</td><td style="color:#4ade80">${pt.high.toFixed(2)}</td></tr>
+        <tr><td style="color:#475569;padding-right:10px">L</td><td style="color:#f87171">${pt.low.toFixed(2)}</td></tr>
+        <tr><td style="color:#475569;padding-right:10px">C</td><td style="color:${c};font-weight:700">${pt.close.toFixed(2)}</td></tr></table>`;
+    } else {
+      html = `<div style="color:#475569;font-size:0.7rem;margin-bottom:2px">${param.time}</div><div style="color:#4ade80;font-weight:800;font-size:1rem">${pt.value.toFixed(2)}</div>`;
+    }
+    tooltip.innerHTML = html; tooltip.style.display = 'block';
+    let x = param.point.x + 14, y = Math.max(4, param.point.y - 10);
+    if (x + 140 > container.clientWidth) x = param.point.x - 144;
+    tooltip.style.left = x + 'px'; tooltip.style.top = y + 'px';
+  });
+
+  new ResizeObserver(() => { if (lwChart) lwChart.applyOptions({ width: container.clientWidth }); }).observe(container);
+}
+
+function setChartType(type) {
+  currentChartType = type;
+  document.querySelectorAll('.chart-type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === type));
+  if (priceHistory) {
+    initPriceChart(document.getElementById('chart-container'), priceHistory, type);
+    buildSubCharts();
+  }
+}
+
+function calcZScoreSeries(adj) {
+  const w = 200, s = [];
+  for (let i = w - 1; i < adj.length; i++) {
+    const sl = adj.slice(i - w + 1, i + 1);
+    const mean = sl.reduce((a, b) => a + b, 0) / w;
+    const std  = Math.sqrt(sl.reduce((a, b) => a + (b - mean) ** 2, 0) / w);
+    s.push(std === 0 ? 0 : (adj[i] - mean) / std);
+  }
+  return s;
+}
+function calcRSISeries(adj, period = 14) {
+  if (adj.length < period + 1) return [];
+  const gains = [], losses = [];
+  for (let i = 1; i < adj.length; i++) {
+    const d = adj[i] - adj[i - 1];
+    gains.push(Math.max(0, d));
+    losses.push(Math.max(0, -d));
+  }
+  const alpha = 1 / period;
+  let sumG = 0, sumL = 0;
+  for (let i = 0; i < period; i++) { sumG += gains[i]; sumL += losses[i]; }
+  let avgG = sumG / period, avgL = sumL / period;
+  const s = [avgL === 0 ? 100 : 100 - 100 / (1 + avgG / avgL)];
+  for (let i = period; i < gains.length; i++) {
+    avgG = avgG * (1 - alpha) + gains[i] * alpha;
+    avgL = avgL * (1 - alpha) + losses[i] * alpha;
+    s.push(avgL === 0 ? 100 : 100 - 100 / (1 + avgG / avgL));
+  }
+  return s;
+}
+function calc52WRangeSeries(adj) {
+  const w = 252, s = [];
+  for (let i = w - 1; i < adj.length; i++) {
+    const sl = adj.slice(i - w + 1, i + 1);
+    const lo = Math.min(...sl), hi = Math.max(...sl);
+    s.push(hi === lo ? 50 : (adj[i] - lo) / (hi - lo) * 100);
+  }
+  return s;
+}
+function calcMDDSeries(adj) {
+  const w = 252, s = [];
+  for (let i = w - 1; i < adj.length; i++) {
+    const hi = Math.max(...adj.slice(i - w + 1, i + 1));
+    s.push((adj[i] / hi - 1) * 100);
+  }
+  return s;
+}
+function calcMetricSeries(adj, metricType) {
+  let s;
+  if      (metricType === 'zscore')   s = calcZScoreSeries(adj);
+  else if (metricType === 'rsi')      s = calcRSISeries(adj);
+  else if (metricType === 'range52w') s = calc52WRangeSeries(adj);
+  else if (metricType === 'mdd')      s = calcMDDSeries(adj);
+  else return [];
+  return s.slice(-252);
+}
+
+function calcMASeries(adj, period) {
+  if (!priceHistory || adj.length < period) return [];
+  const result = [];
+  for (let i = period - 1; i < adj.length; i++) {
+    const sl = adj.slice(i - period + 1, i + 1);
+    result.push({ time: priceHistory[i].date, value: sl.reduce((a, b) => a + b, 0) / period });
+  }
+  return result;
+}
+function calcBBData(adj, period = 20, mult = 2) {
+  if (!priceHistory || adj.length < period) return { upper: [], lower: [], mid: [] };
+  const upper = [], lower = [], mid = [];
+  for (let i = period - 1; i < adj.length; i++) {
+    const sl = adj.slice(i - period + 1, i + 1);
+    const mean = sl.reduce((a, b) => a + b, 0) / period;
+    const std = Math.sqrt(sl.reduce((a, b) => a + (b - mean) ** 2, 0) / period);
+    const t = priceHistory[i].date;
+    upper.push({ time: t, value: mean + mult * std });
+    lower.push({ time: t, value: mean - mult * std });
+    mid.push({ time: t, value: mean });
+  }
+  return { upper, lower, mid };
+}
+function getSubChartData(key) {
+  if (!priceHistory) return [];
+  const adj = priceHistory.map(d => d.close);
+  if (key === 'volume') {
+    return priceHistory.map(d => ({
+      time: d.date, value: d.volume ?? 0,
+      color: (d.close >= (d.open ?? d.close)) ? 'rgba(74,222,128,0.45)' : 'rgba(248,113,113,0.45)',
+    }));
+  }
+  let series;
+  if      (key === 'rsi')      series = calcRSISeries(adj);
+  else if (key === 'zscore')   series = calcZScoreSeries(adj);
+  else if (key === 'range52w') series = calc52WRangeSeries(adj);
+  else if (key === 'mdd')      series = calcMDDSeries(adj);
+  else return [];
+  const startIdx = priceHistory.length - series.length;
+  return series.map((val, i) => ({ time: priceHistory[startIdx + i].date, value: val }));
+}
+
+function buildSubCharts() {
+  Object.values(subChartMap).forEach(sc => { try { sc.chart.remove(); } catch(e) {} });
+  subChartMap = {};
+  const wrapper = document.getElementById('sub-charts-wrapper');
+  if (!wrapper) return;
+  wrapper.innerHTML = '';
+  if (!priceHistory || !lwChart) return;
+
+  const order = ['volume','rsi','zscore','range52w','mdd'];
+  const keys  = order.filter(k => activeIndicators[k]);
+
+  lwChart.applyOptions({ timeScale: { visible: keys.length === 0 } });
+  if (keys.length === 0) return;
+
+  const mainRange = lwChart.timeScale().getVisibleRange();
+
+  keys.forEach((key, idx) => {
+    const cfg = SUBCHART_CONF[key];
+    const isLast = idx === keys.length - 1;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'sub-chart-wrap';
+    const labelEl = document.createElement('div');
+    labelEl.className = 'sub-chart-label';
+    labelEl.textContent = cfg.label;
+    wrap.appendChild(labelEl);
+    const chartEl = document.createElement('div');
+    chartEl.style.cssText = `width:100%;height:${cfg.height}px`;
+    wrap.appendChild(chartEl);
+    wrapper.appendChild(wrap);
+
+    const chart = LightweightCharts.createChart(chartEl, {
+      width: wrapper.clientWidth || 600, height: cfg.height,
+      layout: { background: { type:'solid', color:'transparent' }, textColor:'#64748b', fontSize:10 },
+      grid: { vertLines: { color:'rgba(255,255,255,0.03)' }, horzLines: { color:'rgba(255,255,255,0.04)' } },
+      crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+      rightPriceScale: { borderColor:'rgba(255,255,255,0.08)', minimumWidth:50 },
+      timeScale: { borderColor:'rgba(255,255,255,0.08)', visible: isLast, timeVisible: isLast },
+      handleScroll: { mouseWheel:true, pressedMouseMove:true, horzTouchDrag:true },
+      handleScale: { mouseWheel:true, pinch:true },
+    });
+
+    const data = getSubChartData(key);
+    let series;
+    if (key === 'volume') {
+      series = chart.addHistogramSeries({ color: cfg.color, priceFormat: { type:'volume' } });
+      chart.priceScale('right').applyOptions({ scaleMargins: { top:0.1, bottom:0 } });
+    } else {
+      series = chart.addLineSeries({ color:cfg.color, lineWidth:1.5, priceLineVisible:false, lastValueVisible:true });
+      cfg.refs.forEach(r => series.createPriceLine({ price:r.v, color:r.c, lineWidth:1, lineStyle:1, axisLabelVisible:false }));
+    }
+    series.setData(data);
+
+    chart.timeScale().subscribeVisibleTimeRangeChange(range => {
+      if (!range || isSyncing) return;
+      isSyncing = true;
+      try { if (lwChart) lwChart.timeScale().setVisibleRange(range); } catch(e) {}
+      Object.entries(subChartMap).forEach(([k, sc]) => { if (k !== key) try { sc.chart.timeScale().setVisibleRange(range); } catch(e) {} });
+      isSyncing = false;
+    });
+
+    new ResizeObserver(() => chart.applyOptions({ width: chartEl.clientWidth })).observe(chartEl);
+    subChartMap[key] = { chart, series };
+  });
+
+  if (mainRange) {
+    setTimeout(() => {
+      isSyncing = true;
+      Object.values(subChartMap).forEach(sc => { try { sc.chart.timeScale().setVisibleRange(mainRange); } catch(e) {} });
+      isSyncing = false;
+    }, 60);
+  }
+}
+
+function toggleIndicator(key, enabled) {
+  activeIndicators[key] = enabled;
+  if (['ma20','ma50','ma200','bb'].includes(key)) {
+    if (!lwChart || !priceHistory) return;
+    const overAdj = priceHistory.map(d => d.close);
+    if (key === 'bb') {
+      ['bbUpper','bbLower','bbMid'].forEach(k => {
+        if (overlaySeriesMap[k]) { try { lwChart.removeSeries(overlaySeriesMap[k]); } catch(e) {} delete overlaySeriesMap[k]; }
+      });
+      if (enabled) {
+        const bb = calcBBData(overAdj);
+        const addLine = (d, c, ls) => { const s = lwChart.addLineSeries({ color:c, lineWidth:1, priceLineVisible:false, crosshairMarkerVisible:false, lastValueVisible:false, lineStyle:ls }); s.setData(d); return s; };
+        overlaySeriesMap.bbUpper = addLine(bb.upper, 'rgba(96,165,250,0.65)', 0);
+        overlaySeriesMap.bbLower = addLine(bb.lower, 'rgba(96,165,250,0.65)', 0);
+        overlaySeriesMap.bbMid   = addLine(bb.mid,   'rgba(71,85,105,0.8)',   2);
+      }
+    } else {
+      if (overlaySeriesMap[key]) { try { lwChart.removeSeries(overlaySeriesMap[key]); } catch(e) {} delete overlaySeriesMap[key]; }
+      if (enabled) {
+        const cfg = OVERLAY_CONF[key];
+        const s = lwChart.addLineSeries({ color:cfg.color, lineWidth:1.5, priceLineVisible:false, crosshairMarkerVisible:false, lastValueVisible:false });
+        s.setData(calcMASeries(overAdj, cfg.period));
+        overlaySeriesMap[key] = s;
+      }
+    }
+  } else {
+    buildSubCharts();
+  }
+}
+function toggleIndicatorPanel() {
+  const panel = document.getElementById('ind-panel');
+  const btn   = document.getElementById('ind-settings-btn');
+  if (!panel) return;
+  const isOpen = panel.classList.toggle('open');
+  if (btn) btn.classList.toggle('active', isOpen);
+}
+
+function generateChartSVG(ticker, cagr, vol, n) {
+  const prices = generatePrices(ticker, cagr, vol, n);
+  const N = prices.length;
+  const W = 700, H = 200;
+  const P = { t: 18, r: 10, b: 30, l: 50 };
+  const cw = W - P.l - P.r, ch = H - P.t - P.b;
+
+  const minP = Math.min(...prices) * 0.998;
+  const maxP = Math.max(...prices) * 1.002;
+  const rng  = maxP - minP || 1;
+  const toX  = i => P.l + (i / (N - 1)) * cw;
+  const toY  = p => P.t + ch - ((p - minP) / rng) * ch;
+
+  const pts = prices.map((p, i) => toX(i).toFixed(1) + ',' + toY(p).toFixed(1));
+  const line = 'M ' + pts.join(' L ');
+  const area = line + ' L ' + toX(N-1).toFixed(1) + ',' + (P.t+ch) + ' L ' + P.l + ',' + (P.t+ch) + ' Z';
+  const isUp = prices[N-1] >= prices[0];
+  const col  = isUp ? '#4ade80' : '#f87171';
+  const pct  = ((prices[N-1] / prices[0] - 1) * 100).toFixed(1);
+
+  const gridY = [0, 0.25, 0.5, 0.75, 1.0].map(f => {
+    const yv  = (P.t + ch - f * ch).toFixed(1);
+    const pv  = ((minP + f * rng) / prices[0] - 1) * 100;
+    const lbl = (pv > 0 ? '+' : '') + pv.toFixed(0) + '%';
+    return `<line x1="${P.l}" y1="${yv}" x2="${P.l+cw}" y2="${yv}" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+    <text x="${P.l-6}" y="${(+yv+3.5).toFixed(1)}" text-anchor="end" font-size="10" fill="rgba(100,116,139,0.7)" font-family="monospace">${lbl}</text>`;
+  }).join('');
+
+  const xPts = n <= 22 ? ['4주 전','3주 전','2주 전','1주 전','현재']
+             : n <= 65 ? ['3개월 전','2개월 전','1개월 전','현재','']
+             : n <= 130? ['6개월 전','4개월 전','2개월 전','현재','']
+             :           ['1년 전','9개월 전','6개월 전','3개월 전','현재'];
+  const gridX = xPts.map((lbl, i) => {
+    const xv = (P.l + (i / (xPts.length - 1)) * cw).toFixed(1);
+    return `<text x="${xv}" y="${H-5}" text-anchor="middle" font-size="10" fill="rgba(100,116,139,0.6)" font-family="Inter,sans-serif">${lbl}</text>`;
+  }).join('');
+
+  return {
+    svg: `<svg viewBox="0 0 ${W} ${H}" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${col}" stop-opacity="0.18"/><stop offset="100%" stop-color="${col}" stop-opacity="0"/></linearGradient></defs>
+  ${gridY}${gridX}
+  <path d="${area}" fill="url(#ag)"/>
+  <path d="${line}" stroke="${col}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="${P.l}" cy="${toY(prices[0]).toFixed(1)}" r="3" fill="${col}" opacity="0.5"/>
+  <circle cx="${(P.l+cw).toFixed(1)}" cy="${toY(prices[N-1]).toFixed(1)}" r="4" fill="${col}"/>
+</svg>`, pct, isUp
+  };
+}
+
+function renderPage(etf, sectorId) {
+  currentETF = etf;
+  const supp = SUPP[etf.ticker] || {};
+  const sector = SECTOR_NAMES[sectorId] || sectorId || '—';
+
+  // ── Hero ───────────────────────────────────────
+  document.getElementById('h-ticker').textContent = etf.ticker;
+  document.getElementById('h-ticker').style.color = '#e2e8f0';
+  document.getElementById('h-name').textContent   = etf.name;
+  document.getElementById('h-aum').textContent     = fmtAUM(etf.aum);
+  document.getElementById('h-desc').textContent    = supp.desc || I18n.t('detail.desc.pending');
+  document.getElementById('h-datadate').textContent = '2026-02-26';
+  document.getElementById('note-datadate').textContent = '2026-02-26';
+
+  const badgesHtml =
+    `<span class="badge badge-sector">${sector}</span>` +
+    (etf.is_legacy ? '<span class="badge badge-legacy">Legacy</span>' : '<span class="badge badge-active">Active</span>') +
+    (etf.short_history ? `<span class="badge badge-short">${I18n.t('detail.short.badge')}</span>` : '');
+  document.getElementById('h-badges').innerHTML = badgesHtml;
+  updateStarBtn();
+
+  // ── Quick Stats ─────────────────────────────────
+  document.getElementById('qs-exp').textContent      = supp.exp      || fmtExpRatio(etf.exp_ratio) || I18n.t('detail.data.pending');
+  document.getElementById('qs-inception').textContent = (etf.inception && etf.inception !== '1900-01-01') ? etf.inception : '—';
+  document.getElementById('qs-issuer').textContent   = supp.issuer   || inferIssuer(etf.name) || I18n.t('detail.data.pending');
+  document.getElementById('qs-bench').textContent    = supp.bench    || I18n.t('detail.data.pending');
+  document.getElementById('qs-numh').textContent     = supp.numH !== undefined ? I18n.t('detail.numh.format', { n: supp.numH.toLocaleString() }) : '—';
+
+  // ── 차트 ────────────────────────────────────────
+  if (priceHistory) initPriceChart(document.getElementById('chart-container'), priceHistory, currentChartType);
+  document.getElementById('chart-cagr').textContent = fmtPct(etf.cagr);
+  document.getElementById('chart-vol').textContent  = fmtPct(etf.vol);
+
+  // ── 기간별 수익률 (실데이터 로드 후 updatePerfFromHistory()로 갱신) ──
+  if (priceHistory) {
+    updatePerfFromHistory();
+  } else {
+    const perfPeriods = [
+      { key: '1M',     labelKey: 'detail.perf.period.1M',    ann: false },
+      { key: '3M',     labelKey: 'detail.perf.period.3M',    ann: false },
+      { key: 'YTD',    labelKey: 'detail.perf.period.YTD',   ann: false },
+      { key: '1Y',     labelKey: 'detail.perf.period.1Y',    ann: false },
+      { key: '3Y_ann', labelKey: 'detail.perf.period.3Y_ann',ann: true },
+      { key: '5Y_ann', labelKey: 'detail.perf.period.5Y_ann',ann: true },
+    ];
+    document.getElementById('perf-table-body').innerHTML = perfPeriods.map(p => {
+      const annLabel = p.ann ? I18n.t('detail.perf.ann') : I18n.t('detail.perf.accumulated');
+      return `<tr>
+        <td class="perf-period">${I18n.t(p.labelKey)}</td>
+        <td class="ret-na">—</td>
+        <td style="color:var(--text-muted);font-size:0.75rem">${annLabel}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ── 상위 구성종목 ───────────────────────────────
+  const holdings = supp.holdings;
+  let holdHtml = '';
+  if (!holdings || holdings.length === 0) {
+    holdHtml = `<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:0.85rem">${I18n.t('detail.holdings.empty')}</div>`;
+  } else {
+    const maxW = Math.max(...holdings.map(h => h[2]));
+    holdHtml = holdings.map(([tk, nm, wt], i) =>
+      `<div class="holding-row">
+        <span class="holding-rank">${i+1}</span>
+        <span class="holding-ticker">${tk}</span>
+        <span class="holding-name">${nm}</span>
+        <div class="holding-bar-wrap">
+          <div class="holding-bar-bg"><div class="holding-bar" style="width:${(wt/maxW*100).toFixed(1)}%"></div></div>
+        </div>
+        <span class="holding-weight">${wt.toFixed(2)}%</span>
+      </div>`
+    ).join('');
+    const top10Sum = holdings.reduce((s, h) => s + h[2], 0);
+    holdHtml += `<div class="holdings-footer">
+      <span>${I18n.t('detail.holdings.sum', { pct: top10Sum.toFixed(1) })}</span>
+      <span>${I18n.t('detail.holdings.total', { n: (supp.numH || '?').toLocaleString() })}</span>
+    </div>`;
+  }
+  document.getElementById('holdings-container').innerHTML = holdHtml;
+
+  // ── 분석 지표 ───────────────────────────────────
+  const metrics = [
+    { label: 'Z-Score', key: 'z_score',   val: etf.short_history ? null : etf.z_score,   fmt: v => fmtNum(v, 2),   gauge: [v => renderGauge(v, -3, 3, '#3b82f6')] },
+    { label: I18n.t('detail.metric.rsi'), key: 'rsi',     val: etf.rsi,           fmt: v => fmtNum(v, 0) + '  ', gauge: [v => renderGauge(v, 0, 100, '#f59e0b')] },
+    { label: '52W Range', key: 'range_52w', val: etf.range_52w,    fmt: v => fmtNum(v, 0) + '%',  gauge: [v => renderGauge(v, 0, 100, '#8b5cf6')] },
+    { label: I18n.t('detail.metric.ma200'), key: 'ma200_pct', val: etf.short_history ? null : etf.ma200_pct, fmt: v => fmtPct(v), gauge: [] },
+    { label: '52W MDD',   key: 'mdd_52w',  val: etf.short_history ? null : etf.mdd_52w,  fmt: v => fmtPct(v), gauge: [] },
+    { label: 'r_Anchor',  key: 'r_anchor', val: etf.r_anchor,      fmt: v => fmtNum(v, 2), gauge: [] },
+    { label: 'SMH Corr',  key: 'smh_corr', val: etf.smh_corr,      fmt: v => v !== null && v !== undefined ? fmtNum(v, 2) : '—', gauge: [] },
+    { label: 'CAGR',      key: 'cagr',     val: etf.short_history ? null : etf.cagr,     fmt: v => fmtPct(v), gauge: [] },
+    { label: I18n.t('detail.metric.vol'), key: 'vol',  val: etf.short_history ? null : etf.vol,      fmt: v => fmtPct(v, 1), gauge: [] },
+    { label: 'Sortino',   key: 'sortino',  val: etf.short_history ? null : etf.sortino,  fmt: v => fmtNum(v, 2), gauge: [] },
+  ];
+  const metricsHtml = metrics.map(m => {
+    const display = m.val === null || m.val === undefined ? '—' : m.fmt(m.val);
+    const cls     = m.val !== null && m.val !== undefined ? metricColor(m.key, m.val) : 'val-neutral';
+    return `<div class="metric-row">
+      <span class="metric-label">${m.label}</span>
+      <span class="metric-value ${cls}">${display}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('metrics-container').innerHTML = metricsHtml;
+
+  // ── 펀드 정보 ───────────────────────────────────
+  const infoRows = [
+    { label: 'Rank',                           val: etf.rank === 9999 ? '—' : ('#' + etf.rank) },
+    { label: 'AUM',                            val: fmtAUM(etf.aum) },
+    { label: I18n.t('detail.info.fee'),        val: supp.exp       || fmtExpRatio(etf.exp_ratio) || '—' },
+    { label: I18n.t('detail.info.issuer'),     val: supp.issuer    || inferIssuer(etf.name) || '—' },
+    { label: I18n.t('detail.info.structure'),  val: supp.structure || '—' },
+    { label: I18n.t('detail.info.div'),        val: supp.div       || '—' },
+    { label: I18n.t('detail.info.divyield'),   val: supp.divYield  || '—' },
+    { label: I18n.t('detail.info.bench'),      val: supp.bench     || '—' },
+    { label: I18n.t('detail.info.inception'),  val: (etf.inception && etf.inception !== '1900-01-01') ? etf.inception : '—' },
+    { label: I18n.t('detail.info.sector'),     val: sector },
+    { label: 'Status',                         val: etf.is_legacy ? (etf._user_override ? 'User Legacy' : 'Legacy') : 'Active' },
+  ];
+  const infoHtml = infoRows.map(r =>
+    `<div class="info-row"><span class="info-label">${r.label}</span><span class="info-value">${r.val}</span></div>`
+  ).join('');
+  document.getElementById('fund-info-container').innerHTML = infoHtml;
+
+  // ── 비교하기 버튼 URL 세팅 ──
+  const compareLink = document.getElementById('compare-hero-link');
+  if (compareLink) compareLink.href = '/compare?tickers=' + encodeURIComponent(etf.ticker);
+
+  // ── 서브차트 초기화 ──
+  // short_history ETF는 Z-Score 없음 — zscore 서브차트 비활성화
+  if (etf.short_history) activeIndicators.zscore = false;
+  const zchk = document.getElementById('ind-zscore');
+  if (zchk) zchk.checked = activeIndicators.zscore;
+  buildSubCharts();
+
+  // 페이지 표시
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('page-content').style.display = 'block';
+}
+
+
+// ── 데이터 로드 ───────────────────────────────────
+// i18n 먼저 초기화 (fetch 실패 시 에러 메시지가 번역되도록)
+I18n.init();
+let _i18nReady = false;
+document.addEventListener('i18n:ready', () => { _i18nReady = true; });
+
+function _applyEtfData(found, foundSid) {
+  // localStorage 오버라이드 반영 (읽기 전용)
+  const ov = JSON.parse(localStorage.getItem('corryu_user_overrides') || '{}');
+  if (ov[TICKER]) {
+    if ('is_legacy' in ov[TICKER]) found.is_legacy = ov[TICKER].is_legacy;
+    if (ov[TICKER].is_legacy) found._user_override = true;
+  }
+  renderPage(found, foundSid);
+  loadPriceHistory(found.ticker).then(hist => {
+    if (hist) {
+      priceHistory = hist;
+      initPriceChart(document.getElementById('chart-container'), hist, currentChartType);
+      updatePerfFromHistory();
+      buildSubCharts();
+    }
+  });
+  document.addEventListener('i18n:ready', () => {
+    if (currentETF) {
+      renderPage(currentETF, foundSid);
+      if (priceHistory) {
+        initPriceChart(document.getElementById('chart-container'), priceHistory, currentChartType);
+        updatePerfFromHistory();
+        buildSubCharts();
+      }
+    }
+  });
+}
+
+function _showNotFound() {
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('error-title').textContent = '"' + TICKER + '" ' + I18n.t('detail.not.found');
+  document.getElementById('error-msg').textContent   = I18n.t('detail.error.notfound.msg');
+  document.getElementById('error-state').style.display = 'flex';
+}
+
+function _showLoadError() {
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('error-title').textContent = I18n.t('detail.error.load.title');
+  document.getElementById('error-msg').textContent   = I18n.t('detail.error.load.msg');
+  document.getElementById('error-state').style.display = 'flex';
+}
+
+// 1단계: 티커별 개별 JSON 로드 시도 (빠름 ~400B)
+// 2단계: 실패 시 전체 etf_data.json 폴백
+// ※ /etf-data/ 경로 사용 — /etf/:ticker rewrite 충돌 방지
+fetch('/etf-data/' + TICKER + '.json')
+  .then(r => { if (!r.ok) throw new Error('no per-ticker file'); return r.json(); })
+  .then(d => { _applyEtfData(d.etf, d.sid); })
+  .catch(() =>
+    fetch('/etf_data.json')
+      .then(r => { if (!r.ok) throw new Error('fetch failed'); return r.json(); })
+      .then(data => {
+        let found = null, foundSid = null;
+        for (const [sid, etfs] of Object.entries(data.allData || data)) {
+          if (!Array.isArray(etfs)) continue;
+          const e = etfs.find(x => x.ticker === TICKER);
+          if (e) { found = e; foundSid = sid; break; }
+        }
+        if (!found) { _showNotFound(); return; }
+        _applyEtfData(found, foundSid);
+      })
+      .catch(_showLoadError)
+  );
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 💬 댓글 시스템
+// ═══════════════════════════════════════════════════════════════════════════
+(async function initComments() {
+  const section = document.getElementById('comment-section');
+  section.style.display = 'block';
+
+  // Supabase 미연결 상태
+  if (!CorryuAuth.isConfigured) {
+    document.getElementById('c-not-configured').style.display = 'block';
+    return;
+  }
+
+  // ── 아바타 색상 팔레트 ────────────────────────────────────────────
+  const AVATAR_COLORS = [
+    '#3b82f6','#8b5cf6','#f59e0b','#22c55e','#ef4444',
+    '#0ea5e9','#f97316','#a855f7','#06b6d4','#84cc16',
+  ];
+  function nickColor(nick) {
+    let h = 0; for (const c of nick) h = (Math.imul(31,h)+c.charCodeAt(0))|0;
+    return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+  }
+
+  // ── 시간 포맷 ─────────────────────────────────────────────────────
+  function timeAgo(iso) {
+    const diff = (Date.now() - new Date(iso)) / 1000;
+    if (diff < 60)       return '방금 전';
+    if (diff < 3600)     return Math.floor(diff/60) + '분 전';
+    if (diff < 86400)    return Math.floor(diff/3600) + '시간 전';
+    if (diff < 604800)   return Math.floor(diff/86400) + '일 전';
+    return new Date(iso).toLocaleDateString('ko-KR', {year:'numeric',month:'2-digit',day:'2-digit'}).replace(/\. /g,'.').replace('.','');
+  }
+
+  // ── HTML 이스케이프 ───────────────────────────────────────────────
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // ── 상태 ─────────────────────────────────────────────────────────
+  let currentUser = null;
+  let currentProfile = null;
+  let myVotes = {}; // {comment_id: 'like'|'dislike'}
+  let comments = [];
+  let sortBy = 'recent'; // 'recent' | 'likes'
+  let offset = 0;
+  const PAGE_SIZE = 20;
+  const GUEST_LIMIT = 3; // 비로그인 시 보여줄 최대 수
+
+  // ── 로그인 상태 초기화 ────────────────────────────────────────────
+  currentUser = await CorryuAuth.getUser();
+  if (currentUser) {
+    currentProfile = await CorryuAuth.getProfile(currentUser.id);
+    showWriteForm();
+    await loadMyVotes();
+  } else {
+    document.getElementById('c-login-banner').style.display = 'block';
+  }
+
+  // 문자 수 카운터
+  document.getElementById('c-textarea')?.addEventListener('input', function() {
+    document.getElementById('c-char-count').textContent = this.value.length + ' / 2000';
+  });
+
+  // ── 내 투표 내역 로드 ─────────────────────────────────────────────
+  async function loadMyVotes() {
+    if (!currentUser) return;
+    const { data } = await _sb.from('comment_votes')
+      .select('comment_id, vote_type').eq('user_id', currentUser.id);
+    if (data) data.forEach(v => myVotes[v.comment_id] = v.vote_type);
+  }
+
+  // ── 댓글 로드 ─────────────────────────────────────────────────────
+  async function loadComments(reset = false) {
+    if (reset) { comments = []; offset = 0; }
+
+    let q = _sb.from('comments')
+      .select('*')
+      .eq('ticker', TICKER)
+      .is('parent_id', null)
+      .eq('is_deleted', false);
+
+    if (sortBy === 'likes') q = q.order('likes', { ascending: false }).order('created_at', { ascending: false });
+    else                    q = q.order('created_at', { ascending: false });
+
+    const limit = currentUser ? PAGE_SIZE : GUEST_LIMIT + 1;
+    q = q.range(offset, offset + limit - 1);
+
+    const { data, error } = await q;
+    if (error) { console.error('[CORRYU comments]', error); return; }
+
+    // 각 상위 댓글의 답글 로드
+    if (data && data.length > 0) {
+      const ids = data.map(c => c.id);
+      const { data: replies } = await _sb.from('comments')
+        .select('*').in('parent_id', ids).eq('is_deleted', false)
+        .order('created_at', { ascending: true });
+
+      const replyMap = {};
+      (replies || []).forEach(r => {
+        if (!replyMap[r.parent_id]) replyMap[r.parent_id] = [];
+        replyMap[r.parent_id].push(r);
+      });
+      data.forEach(c => c.replies = replyMap[c.id] || []);
+    }
+
+    if (reset) comments = data || [];
+    else       comments = comments.concat(data || []);
+    offset += data?.length || 0;
+
+    renderComments(data?.length || 0, limit);
+    await updateTotal();
+  }
+
+  // ── 전체 댓글 수 업데이트 ─────────────────────────────────────────
+  async function updateTotal() {
+    const { count } = await _sb.from('comments')
+      .select('*', { count: 'exact', head: true })
+      .eq('ticker', TICKER).eq('is_deleted', false).is('parent_id', null);
+    document.getElementById('c-total-badge').textContent = count ?? 0;
+  }
+
+  // ── 댓글 렌더링 ───────────────────────────────────────────────────
+  function renderComments(fetchedCount, limit) {
+    const list = document.getElementById('c-list');
+    const empty = document.getElementById('c-empty');
+    const gate  = document.getElementById('c-guest-gate');
+    const more  = document.getElementById('c-load-more');
+
+    if (comments.length === 0) {
+      list.innerHTML = ''; empty.style.display = 'block'; gate.style.display = 'none'; more.style.display = 'none'; return;
+    }
+    empty.style.display = 'none';
+
+    // 게스트 제한
+    const display = currentUser ? comments : comments.slice(0, GUEST_LIMIT);
+    const hasMore  = currentUser ? (fetchedCount >= limit) : (comments.length > GUEST_LIMIT);
+
+    list.innerHTML = display.map(c => renderTopComment(c)).join('');
+
+    gate.style.display = (!currentUser && comments.length >= GUEST_LIMIT) ? 'block' : 'none';
+    more.style.display = (currentUser && hasMore) ? 'block' : 'none';
+  }
+
+  function renderTopComment(c) {
+    const color = nickColor(c.nickname);
+    const myVote = myVotes[c.id];
+    const isOwn = currentUser && currentUser.id === c.user_id;
+    const repliesHtml = (c.replies || []).map(r => renderReply(r)).join('');
+    const replyCount = c.replies?.length || 0;
+    return `<div class="c-item" id="c-${c.id}">
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <div class="c-avatar" style="background:${color}">${esc(c.nickname.charAt(0).toUpperCase())}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="c-nick">${esc(c.nickname)}</span>
+            <span class="c-time">${timeAgo(c.created_at)}</span>
+            ${isOwn ? `<button class="c-del-btn" onclick="deleteComment('${c.id}',false)">삭제</button>` : ''}
+          </div>
+          <div class="c-body">${esc(c.content)}</div>
+          <div class="c-action-row">
+            <button class="c-vote-btn ${myVote==='like'?'voted-like':''}" onclick="vote('${c.id}','like')">
+              👍 <span id="lk-${c.id}">${c.likes}</span>
+            </button>
+            <button class="c-vote-btn ${myVote==='dislike'?'voted-dislike':''}" onclick="vote('${c.id}','dislike')">
+              👎 <span id="dk-${c.id}">${c.dislikes}</span>
+            </button>
+            ${currentUser ? `<button class="c-reply-toggle" onclick="toggleReplyForm('${c.id}')">💬 답글</button>` : ''}
+            ${replyCount > 0 ? `<span class="c-reply-count">${replyCount}개 답글</span>` : ''}
+          </div>
+          <!-- 답글 작성 폼 -->
+          <div id="rf-${c.id}" style="display:none;margin-top:10px">
+            <div class="c-reply-form" style="margin-left:0">
+              <textarea class="c-reply-textarea" id="rt-${c.id}" placeholder="답글을 작성하세요…" maxlength="2000"></textarea>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <button class="c-reply-submit" onclick="submitReply('${c.id}')">등록</button>
+                <button class="c-reply-cancel" onclick="toggleReplyForm('${c.id}')">취소</button>
+              </div>
+            </div>
+          </div>
+          <!-- 답글 목록 -->
+          <div class="c-replies-list" id="rl-${c.id}" style="${replyCount===0?'display:none':'display:block'}">${repliesHtml}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function renderReply(r) {
+    const color = nickColor(r.nickname);
+    const myVote = myVotes[r.id];
+    const isOwn = currentUser && currentUser.id === r.user_id;
+    return `<div class="c-reply-item-inner" id="c-${r.id}">
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <div class="c-avatar" style="width:28px;height:28px;font-size:.72rem;background:${color}">${esc(r.nickname.charAt(0).toUpperCase())}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span class="c-nick" style="font-size:.8rem">${esc(r.nickname)}</span>
+            <span class="c-time">${timeAgo(r.created_at)}</span>
+            ${isOwn ? `<button class="c-del-btn" onclick="deleteComment('${r.id}',true)">삭제</button>` : ''}
+          </div>
+          <div class="c-body" style="font-size:.82rem">${esc(r.content)}</div>
+          <div class="c-action-row">
+            <button class="c-vote-btn ${myVote==='like'?'voted-like':''}" onclick="vote('${r.id}','like')">
+              👍 <span id="lk-${r.id}">${r.likes}</span>
+            </button>
+            <button class="c-vote-btn ${myVote==='dislike'?'voted-dislike':''}" onclick="vote('${r.id}','dislike')">
+              👎 <span id="dk-${r.id}">${r.dislikes}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // ── 작성 폼 표시 ─────────────────────────────────────────────────
+  function showWriteForm() {
+    const form = document.getElementById('c-write-form');
+    const av   = document.getElementById('c-my-avatar');
+    form.style.display = 'block';
+    if (currentProfile) {
+      const color = nickColor(currentProfile.nickname);
+      av.style.background = color;
+      av.textContent = currentProfile.nickname.charAt(0).toUpperCase();
+    }
+  }
+
+  // ── 댓글 등록 ─────────────────────────────────────────────────────
+  window.submitTopComment = async function() {
+    if (!currentUser || !currentProfile) return;
+    const ta = document.getElementById('c-textarea');
+    const content = ta.value.trim();
+    if (!content) return;
+    const { error } = await _sb.from('comments').insert({
+      ticker: TICKER, user_id: currentUser.id, nickname: currentProfile.nickname,
+      content, parent_id: null, depth: 0,
+    });
+    if (error) { alert('등록 실패: ' + error.message); return; }
+    ta.value = ''; document.getElementById('c-char-count').textContent = '0 / 2000';
+    await loadComments(true);
+  };
+
+  // ── 답글 폼 토글 ─────────────────────────────────────────────────
+  window.toggleReplyForm = function(parentId) {
+    const form = document.getElementById('rf-' + parentId);
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    if (form.style.display === 'block') document.getElementById('rt-' + parentId)?.focus();
+  };
+
+  // ── 답글 등록 ─────────────────────────────────────────────────────
+  window.submitReply = async function(parentId) {
+    if (!currentUser || !currentProfile) return;
+    const ta = document.getElementById('rt-' + parentId);
+    const content = ta?.value.trim();
+    if (!content) return;
+    const { error } = await _sb.from('comments').insert({
+      ticker: TICKER, user_id: currentUser.id, nickname: currentProfile.nickname,
+      content, parent_id: parentId, depth: 1,
+    });
+    if (error) { alert('등록 실패: ' + error.message); return; }
+    ta.value = '';
+    document.getElementById('rf-' + parentId).style.display = 'none';
+    await loadComments(true);
+  };
+
+  // ── 댓글 삭제 (소프트) ───────────────────────────────────────────
+  window.deleteComment = async function(id, isReply) {
+    if (!confirm('댓글을 삭제하시겠습니까?')) return;
+    await _sb.from('comments').update({ is_deleted: true }).eq('id', id);
+    await loadComments(true);
+  };
+
+  // ── 좋아요 / 싫어요 ──────────────────────────────────────────────
+  window.vote = async function(commentId, type) {
+    if (!currentUser) { goLogin(); return; }
+    const prev = myVotes[commentId];
+    const lkEl = document.getElementById('lk-' + commentId);
+    const dkEl = document.getElementById('dk-' + commentId);
+
+    if (prev === type) {
+      // 같은 버튼 → 취소
+      await _sb.from('comment_votes').delete()
+        .eq('comment_id', commentId).eq('user_id', currentUser.id);
+      delete myVotes[commentId];
+    } else {
+      // 새 투표 또는 변경
+      await _sb.from('comment_votes').upsert(
+        { comment_id: commentId, user_id: currentUser.id, vote_type: type },
+        { onConflict: 'comment_id,user_id' }
+      );
+      myVotes[commentId] = type;
+    }
+
+    // 최신 카운트 가져오기
+    const { data } = await _sb.from('comments').select('likes,dislikes').eq('id', commentId).single();
+    if (data && lkEl && dkEl) { lkEl.textContent = data.likes; dkEl.textContent = data.dislikes; }
+
+    // 버튼 스타일 업데이트
+    const lkBtn = document.querySelector(`#c-${commentId} .c-vote-btn:first-child`);
+    const dkBtn = document.querySelector(`#c-${commentId} .c-vote-btn:nth-child(2)`);
+    lkBtn?.classList.toggle('voted-like',    myVotes[commentId] === 'like');
+    dkBtn?.classList.toggle('voted-dislike', myVotes[commentId] === 'dislike');
+  };
+
+  // ── 정렬 전환 ─────────────────────────────────────────────────────
+  window.setSortBy = function(s) {
+    sortBy = s;
+    document.querySelectorAll('.c-sort-btn').forEach(b => b.classList.toggle('c-sort-on', b.dataset.sort === s));
+    loadComments(true);
+  };
+
+  // ── 더 보기 ────────────────────────────────────────────────────────
+  window.loadMoreComments = function() { loadComments(false); };
+
+  // ── 로그인 리디렉션 ──────────────────────────────────────────────
+  window.goLogin = function(e) {
+    e?.preventDefault();
+    location.href = '/login?redirect=' + encodeURIComponent(location.href);
+  };
+
+  // ── 최초 로드 ─────────────────────────────────────────────────────
+  await loadComments(true);
+
+  // ── 실시간 구독 (새 댓글 알림) ───────────────────────────────────
+  _sb.channel('comments:' + TICKER)
+    .on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'comments', filter: 'ticker=eq.' + TICKER },
+      () => { loadComments(true); }
+    ).subscribe();
+
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ❤️ 종목 좋아요 시스템
+// ═══════════════════════════════════════════════════════════════════════════
+(async function initTickerLike() {
+  if (!CorryuAuth.isConfigured) return;
+
+  const btn   = document.getElementById('tl-btn');
+  const icon  = document.getElementById('tl-icon');
+  const countEl = document.getElementById('tl-count');
+
+  let liked = false;
+  let currentUser = null;
+
+  // ── 좋아요 수 조회 ────────────────────────────────────────────────
+  async function fetchCount() {
+    const { count } = await _sb.from('ticker_likes')
+      .select('id', { count: 'exact', head: true })
+      .eq('ticker', TICKER);
+    return count ?? 0;
+  }
+
+  // ── 본인 좋아요 여부 조회 ─────────────────────────────────────────
+  async function fetchMyLike(userId) {
+    const { data } = await _sb.from('ticker_likes')
+      .select('id').eq('ticker', TICKER).eq('user_id', userId).maybeSingle();
+    return !!data;
+  }
+
+  // ── UI 업데이트 ────────────────────────────────────────────────────
+  function updateUI(count, isLiked) {
+    countEl.textContent = count;
+    if (isLiked) {
+      btn.style.background   = 'rgba(244,114,182,0.18)';
+      btn.style.borderColor  = 'rgba(244,114,182,0.55)';
+      btn.style.color        = '#f472b6';
+      icon.setAttribute('fill', '#f472b6');
+      icon.setAttribute('stroke', '#f472b6');
+    } else {
+      btn.style.background   = 'rgba(244,114,182,0.07)';
+      btn.style.borderColor  = 'rgba(244,114,182,0.25)';
+      btn.style.color        = '#94a3b8';
+      icon.setAttribute('fill', 'none');
+      icon.setAttribute('stroke', 'currentColor');
+    }
+    btn.style.display = 'inline-flex';
+  }
+
+  // ── 최초 로드 ─────────────────────────────────────────────────────
+  currentUser = await CorryuAuth.getUser();
+  const [count, myLike] = await Promise.all([
+    fetchCount(),
+    currentUser ? fetchMyLike(currentUser.id) : Promise.resolve(false),
+  ]);
+  liked = myLike;
+  updateUI(count, liked);
+
+  // ── 좋아요 토글 ───────────────────────────────────────────────────
+  window.tickerLikeToggle = async function() {
+    if (!currentUser) {
+      location.href = '/login?redirect=' + encodeURIComponent(location.href);
+      return;
+    }
+    btn.disabled = true;
+    try {
+      if (liked) {
+        await _sb.from('ticker_likes').delete()
+          .eq('ticker', TICKER).eq('user_id', currentUser.id);
+      } else {
+        await _sb.from('ticker_likes').insert({ ticker: TICKER, user_id: currentUser.id });
+      }
+      liked = !liked;
+      const newCount = await fetchCount();
+      updateUI(newCount, liked);
+    } catch(e) {
+      console.warn('[CORRYU] ticker like error:', e.message);
+    } finally {
+      btn.disabled = false;
+    }
+  };
+
+  // ── Auth 상태 변화 감지 ───────────────────────────────────────────
+  CorryuAuth.onAuthChange(async (_event, session) => {
+    currentUser = session?.user ?? null;
+    const myLike = currentUser ? await fetchMyLike(currentUser.id) : false;
+    liked = myLike;
+    const count = await fetchCount();
+    updateUI(count, liked);
+  });
+})();
+</script>
 <script src="/nav.js"></script>
 </body>
 
