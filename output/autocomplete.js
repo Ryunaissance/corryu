@@ -16,11 +16,11 @@
       'box-shadow:0 8px 32px rgba(0,0,0,0.6);',
       'min-width:220px;}',
     '.ac-item{padding:9px 14px;cursor:pointer;',
-      'display:flex;align-items:center;gap:10px;',
-      'transition:background 0.1s;user-select:none;}',
+      'display:flex;align-items:baseline;gap:6px;',
+      'transition:background 0.1s;user-select:none;overflow:hidden;}',
     '.ac-item:hover,.ac-item.on{background:rgba(59,130,246,0.18);}',
     '.ac-tkr{font-size:.86rem;font-weight:800;color:#e2e8f0;',
-      'letter-spacing:.04em;min-width:52px;flex-shrink:0;}',
+      'letter-spacing:.04em;flex-shrink:0;}',
     '.ac-name{font-size:.76rem;color:#64748b;',
       'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
   ].join('');
@@ -109,9 +109,8 @@
         items.forEach(function (item) {
           var el = document.createElement('div');
           el.className = 'ac-item';
-          el.innerHTML =
-            '<span class="ac-tkr">' + item.ticker + '</span>' +
-            '<span class="ac-name">' + (item.name || '') + '</span>';
+          var nameStr = item.name ? ' <span class="ac-name">(' + item.name + ')</span>' : '';
+          el.innerHTML = '<span class="ac-tkr">' + item.ticker + '</span>' + nameStr;
 
           function pick(e) {
             e.preventDefault();
