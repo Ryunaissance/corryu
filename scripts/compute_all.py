@@ -185,6 +185,13 @@ def main():
         json.dump(cls_export, f, ensure_ascii=False, indent=2)
     print(f'  저장: {cls_path}')
 
+    # ── 6b. 개별 ETF JSON 생성 ───────────────────────────────────
+    print('\n=== build_etf_pages: 개별 ETF JSON 생성 ===')
+    sys.path.insert(0, str(ROOT))
+    from build_etf_pages import main as build_etf_pages_main
+    build_etf_pages_main()
+    print('✅ 개별 ETF JSON 생성 완료')
+
     # ── 7. HTML 생성 ─────────────────────────────────────────────
     print('\n[7/7] HTML 생성...')
     render_script = str(ROOT / 'render_html.py')

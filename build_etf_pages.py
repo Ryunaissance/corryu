@@ -47,6 +47,11 @@ def build_etf_pages():
     return count
 
 
-if __name__ == '__main__':
+def main():
     n = build_etf_pages()
+    return n
+
+
+if __name__ == '__main__':
+    n = main()
     sys.exit(0 if n > 0 else 1)
