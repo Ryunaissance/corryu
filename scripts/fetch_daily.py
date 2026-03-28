@@ -168,7 +168,7 @@ def update_meta(tickers: list[str]) -> None:
             continue
 
         aum = _safe(info.get('totalAssets'), 0)
-        exp = _safe(info.get('annualReportExpenseRatio')) or _safe(info.get('totalExpenseRatio'))
+        exp = _safe(info.get('netExpenseRatio')) or _safe(info.get('annualReportExpenseRatio')) or _safe(info.get('totalExpenseRatio'))
         div = _get_div_yield(info)
 
         if ticker in df_meta.index:
