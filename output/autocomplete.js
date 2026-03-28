@@ -21,8 +21,7 @@
     '.ac-item:hover,.ac-item.on{background:rgba(59,130,246,0.18);}',
     '.ac-tkr{font-size:.86rem;font-weight:800;color:#e2e8f0;',
       'letter-spacing:.04em;flex-shrink:0;}',
-    '.ac-name{font-size:.76rem;color:#64748b;',
-      'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
+    '.ac-name{font-size:.76rem;color:#64748b;white-space:nowrap;}',
   ].join('');
   document.head.appendChild(s);
 
@@ -99,12 +98,20 @@
         drop.className = 'ac-drop';
 
         var rect = input.getBoundingClientRect();
-        drop.style.top  = (rect.bottom + window.scrollY + 4) + 'px';
-        drop.style.left = (rect.left   + window.scrollX)     + 'px';
-        drop.style.width = Math.max(rect.width, 220) + 'px';
-        // viewport 하단 넘치면 위로 올림
+        drop.style.top = (rect.bottom + window.scrollY + 4) + 'px';
         drop.style.maxHeight = '280px';
         drop.style.overflowY = 'auto';
+        if (window.innerWidth <= 767) {
+          // 모바일: 좌우 16px 마진 제외 전체 너비
+          drop.style.left  = '16px';
+          drop.style.right = '16px';
+          drop.style.width = 'auto';
+        } else {
+          // PC: 입력박스 기준 정렬, 너비 제한 없음 (full name 표시)
+          drop.style.left  = (rect.left + window.scrollX) + 'px';
+          drop.style.width = 'max-content';
+          drop.style.minWidth = rect.width + 'px';
+        }
 
         items.forEach(function (item) {
           var el = document.createElement('div');
