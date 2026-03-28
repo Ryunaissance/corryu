@@ -151,9 +151,12 @@ def main():
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+    as_of = df_price.index[-1].strftime('%Y-%m-%d')
+
     etf_data_path = os.path.join(OUTPUT_DIR, 'etf_data.json')
     with open(etf_data_path, 'w', encoding='utf-8') as f:
         json.dump({
+            'as_of':      as_of,
             'sectorMeta': sector_meta,
             'allData':    all_etf_data,
             'superSectorDefs': {

@@ -27,6 +27,7 @@ def build_etf_pages():
         raw = json.load(f)
 
     all_data = raw.get('allData', raw)
+    as_of = raw.get('as_of', '')
     os.makedirs(ETF_DIR, exist_ok=True)
 
     count = 0
@@ -37,7 +38,7 @@ def build_etf_pages():
             ticker = etf.get('ticker', '').upper().strip()
             if not ticker:
                 continue
-            out = {'ticker': ticker, 'sid': sid, 'etf': etf}
+            out = {'ticker': ticker, 'sid': sid, 'etf': etf, 'as_of': as_of}
             path = os.path.join(ETF_DIR, f'{ticker}.json')
             with open(path, 'w', encoding='utf-8') as f:
                 json.dump(out, f, ensure_ascii=False, separators=(',', ':'))
