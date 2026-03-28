@@ -23,9 +23,34 @@
     }
     #graph-container { width: 100vw; height: 100vh; }
 
+    /* ── 네비게이션 ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 150;
+      background: rgba(13,17,23,0.92); backdrop-filter: blur(20px);
+      border-bottom: 1px solid #30363d; height: 56px;
+      display: flex; align-items: center;
+    }
+    .nav-i {
+      max-width: 1400px; margin: 0 auto; padding: 0 24px;
+      width: 100%; display: flex; align-items: center; gap: 14px;
+    }
+    .nav-back {
+      display: flex; align-items: center; gap: 6px;
+      color: #7d90a4; font-size: .82rem; font-weight: 600;
+      text-decoration: none; transition: color 0.15s;
+    }
+    .nav-back:hover { color: #60a5fa; }
+    .nav-link {
+      display: flex; align-items: center; gap: 5px;
+      color: #7d90a4; font-size: .82rem; font-weight: 600;
+      text-decoration: none; transition: color 0.15s; white-space: nowrap;
+    }
+    .nav-link:hover, .nav-link.active { color: #e2e8f0; }
+    .tg { background: linear-gradient(135deg,#60a5fa,#a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 900; }
+
     /* ── 컨트롤 패널 ── */
     #controls {
-      position: fixed; top: 73px; left: 14px; z-index: 100;
+      position: fixed; top: 70px; left: 14px; z-index: 100;
       background: rgba(13,17,23,0.90);
       border: 1px solid #30363d;
       border-radius: 10px;
@@ -79,11 +104,11 @@
 
     /* ── 레전드 ── */
     #legend {
-      position: fixed; top: 73px; right: 14px; z-index: 100;
+      position: fixed; top: 70px; right: 14px; z-index: 100;
       background: rgba(13,17,23,0.90);
       border: 1px solid #30363d;
       border-radius: 10px; padding: 12px 14px;
-      max-height: calc(100vh - 87px); overflow-y: auto;
+      max-height: calc(100vh - 84px); overflow-y: auto;
       backdrop-filter: blur(10px); min-width: 185px;
     }
     #legend::-webkit-scrollbar { width: 4px; }
@@ -174,7 +199,7 @@
     }
     @media (max-width: 767px) {
       #mob-panel-toggle { display: flex; }
-      #controls { display: none; left: 0; top: 59px; right: 0; border-radius: 0; min-width: unset; max-height: 60vh; overflow-y: auto; }
+      #controls { display: none; left: 0; top: 56px; right: 0; border-radius: 0; min-width: unset; max-height: 60vh; overflow-y: auto; }
       #controls.mob-visible { display: block; }
       #legend { display: none; }
       #hint { display: none; }
