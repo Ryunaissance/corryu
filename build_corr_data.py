@@ -1,9 +1,16 @@
-"""build_corr_data.py — 월간 수익률 데이터 생성
+"""build_corr_data.py — 전체 이력 월간 수익률 데이터 생성
 
 raw/prices_close.parquet → output/corr_returns.json
 
-correlation.html이 브라우저에서 직접 Pearson 상관계수를 계산할 수 있도록
-최근 5년치 월간 수익률을 컴팩트 JSON으로 출력합니다.
+포맷: {
+  "dates": ["1993-01-31", ...],          // 전체 월 인덱스
+  "returns": {
+    "SPY": [start_idx, [r0, r1, ...]],   // start_idx부터 연속 슬라이스 (leading null 제거)
+    ...
+  }
+}
+
+Vercel gzip 자동 압축 덕분에 실전 전송 크기 ~550KB.
 
 Usage:
     python3 build_corr_data.py
@@ -20,8 +27,7 @@ ROOT = Path(__file__).parent
 PRICES_PARQUET = ROOT / 'raw' / 'prices_close.parquet'
 OUT_PATH = ROOT / 'output' / 'corr_returns.json'
 
-LOOKBACK_MONTHS = 60   # 5년
-MIN_MONTHS = 36        # 유효 티커 최소 데이터 기간
+MIN_MONTHS = 12  # 최소 12개월 이상 데이터 있는 티커만
 
 
 def build_corr_data():
@@ -29,24 +35,29 @@ def build_corr_data():
 
     df = pd.read_parquet(PRICES_PARQUET)
 
-    # 월말 종가 → 월간 수익률
+    # 월말 종가 → 월간 수익률 (전체 이력)
     monthly = df.resample('ME').last()
     monthly_ret = monthly.pct_change(fill_method=None)
 
-    # 최근 N개월만
-    ret = monthly_ret.tail(LOOKBACK_MONTHS)
-
-    # 유효 데이터 충분한 티커만
-    valid = ret.columns[ret.notna().sum() >= MIN_MONTHS]
-    ret = ret[valid]
+    # 유효 티커 (최소 12개월)
+    valid = monthly_ret.columns[monthly_ret.notna().sum() >= MIN_MONTHS]
+    ret = monthly_ret[valid]
 
     dates = ret.index.strftime('%Y-%m-%d').tolist()
 
-    # {ticker: [r1, r2, ...]} — null 포함, round(5)
+    # compact 포맷: [start_idx, [r0, r1, ...]] — leading/trailing null 제거
     tickers_data = {}
     for col in ret.columns:
-        vals = [round(v, 5) if pd.notna(v) else None for v in ret[col]]
-        tickers_data[col] = vals
+        s = ret[col]
+        non_null = s.notna()
+        if not non_null.any():
+            continue
+        first = non_null.idxmax()
+        last = non_null[::-1].idxmax()
+        slice_ = s.loc[first:last]
+        start_idx = int(ret.index.get_loc(first))
+        vals = [round(v, 5) if pd.notna(v) else None for v in slice_]
+        tickers_data[col] = [start_idx, vals]
 
     out = {
         'as_of': df.index[-1].strftime('%Y-%m-%d'),
@@ -59,8 +70,9 @@ def build_corr_data():
         json.dump(out, f, separators=(',', ':'))
 
     size_kb = OUT_PATH.stat().st_size / 1024
-    print(f"[{datetime.now().strftime('%H:%M:%S')}] 완료: {len(valid)}개 티커 × {len(dates)}개월 → {size_kb:.0f} KB")
-    return len(valid)
+    date_range = f"{dates[0]} ~ {dates[-1]}"
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] 완료: {len(tickers_data)}개 티커 × {len(dates)}개월 ({date_range}) → {size_kb:.0f} KB")
+    return len(tickers_data)
 
 
 def main():

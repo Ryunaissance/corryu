@@ -164,7 +164,8 @@ nav { position: fixed; top: 3px; left: 0; right: 0; z-index: 100; background: rg
         <div class="heatmap-wrap" id="heatmap-container">
           <div class="empty-state"><span>—</span></div>
         </div>
-        <div class="chart-disclaimer" style="margin-top:10px" data-i18n="corr.disclaimer.matrix">※ 최근 5년 월간 수익률 기반 Pearson 상관계수. 데이터 부족 시 섹터 추정값 사용.</div>
+        <div class="chart-disclaimer" style="margin-top:10px">※ 월간 수익률 기반 Pearson 상관계수. 데이터 부족 시 섹터 추정값 사용.</div>
+        <div id="constraint-note" style="display:none;margin-top:8px;font-size:0.75rem;color:#64748b;line-height:1.5"></div>
       </div>
 
     </div>
@@ -238,22 +239,49 @@ function getSectorGroup(sid) {
 }
 
 // ── 실데이터 상관계수 ─────────────────────────────────
-var corrReturns = null;  // {dates, returns} — 로드 후 세팅
+var corrReturns = null;   // ticker → [start_idx, [r0, r1, ...]]
+var corrDates   = null;   // 전체 월 인덱스 배열
 
 fetch('/corr_returns.json')
   .then(r => r.json())
   .then(d => {
+    corrDates   = d.dates;
     corrReturns = d.returns;
-    // 이미 ETF가 선택된 상태라면 히트맵/인사이트 갱신
-    if (selected.length >= 2) { renderHeatmap(); renderInsights(); }
+    if (selected.length >= 2) { renderHeatmap(); renderInsights(); renderConstraintNote(); }
   })
   .catch(() => { /* 실패 시 추정값 폴백 */ });
 
-function pearsonCorr(tA, tB) {
+// compact 포맷 [start_idx, vals] → 전체 길이 배열 (null 패딩)
+function getFullSeries(ticker) {
+  if (!corrReturns || !corrDates) return null;
+  const entry = corrReturns[ticker];
+  if (!entry) return null;
+  const [startIdx, vals] = entry;
+  const full = new Array(corrDates.length).fill(null);
+  for (let i = 0; i < vals.length; i++) full[startIdx + i] = vals[i];
+  return full;
+}
+
+// 티커의 실제 데이터 범위 {firstIdx, lastIdx}
+function getDataRange(ticker) {
   if (!corrReturns) return null;
-  const ra = corrReturns[tA], rb = corrReturns[tB];
+  const entry = corrReturns[ticker];
+  if (!entry) return null;
+  const [startIdx, vals] = entry;
+  let lastNonNull = vals.length - 1;
+  while (lastNonNull >= 0 && vals[lastNonNull] === null) lastNonNull--;
+  return { firstIdx: startIdx, lastIdx: startIdx + lastNonNull };
+}
+
+function fmtMonthLabel(dateStr) {
+  // "2007-02-28" → "Feb 2007"
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+}
+
+function pearsonCorr(tA, tB) {
+  const ra = getFullSeries(tA), rb = getFullSeries(tB);
   if (!ra || !rb) return null;
-  // 두 시리즈 모두 유효한 인덱스만 사용
   const pairs = [];
   for (let i = 0; i < ra.length; i++) {
     if (ra[i] !== null && rb[i] !== null) pairs.push([ra[i], rb[i]]);
@@ -269,6 +297,28 @@ function pearsonCorr(tA, tB) {
   }
   const denom = Math.sqrt(dx2 * dy2);
   return denom === 0 ? null : Math.max(-0.99, Math.min(0.99, num / denom));
+}
+
+// "constrained by" 노트: 선택된 ETF 중 가장 이력이 짧은 것이 공통 기간을 제약함
+function renderConstraintNote() {
+  const el = document.getElementById('constraint-note');
+  if (!el) return;
+  if (!corrDates || !corrReturns || selected.length < 2) { el.style.display = 'none'; return; }
+
+  let constrainingETF = null, latestStart = -1, earliestEnd = corrDates.length;
+  for (const etf of selected) {
+    const range = getDataRange(etf.ticker);
+    if (!range) continue;
+    if (range.firstIdx > latestStart) { latestStart = range.firstIdx; constrainingETF = etf; }
+    if (range.lastIdx < earliestEnd)    earliestEnd = range.lastIdx;
+  }
+  if (!constrainingETF || latestStart < 0) { el.style.display = 'none'; return; }
+
+  const startLabel = fmtMonthLabel(corrDates[latestStart]);
+  const endLabel   = fmtMonthLabel(corrDates[earliestEnd]);
+  const name = constrainingETF.name || constrainingETF.ticker;
+  el.textContent = `The available historical data for the simulation inputs was constrained by ${name} (${constrainingETF.ticker}) [${startLabel} – ${endLabel}].`;
+  el.style.display = 'block';
 }
 
 const GC = { // group-group base correlations (폴백용)
@@ -405,6 +455,7 @@ function renderAll() {
   renderHeatmap();
   renderScatter();
   renderInsights();
+  renderConstraintNote();
   updateBacktestLink();
 }
 
