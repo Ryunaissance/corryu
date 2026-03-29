@@ -183,28 +183,65 @@ const ETF_COLORS_CHIP = ['chip-0','chip-1','chip-2'];
 
 // ── 보조 데이터 ──────────────────────────────────────
 const SUPP = {
-  'SPY':  { exp:'0.09%',  issuer:'State Street',        bench:'S&P 500',        numH:503,  div:'분기', divY:'1.24%', perf:{'1Y':22.4,'3Y':12.1,'5Y':14.7} },
-  'QQQ':  { exp:'0.20%',  issuer:'Invesco',              bench:'Nasdaq-100',     numH:101,  div:'분기', divY:'0.55%', perf:{'1Y':28.5,'3Y':15.4,'5Y':19.2} },
-  'IVV':  { exp:'0.03%',  issuer:'BlackRock',            bench:'S&P 500',        numH:503,  div:'분기', divY:'1.26%', perf:{'1Y':22.4,'3Y':12.1,'5Y':14.7} },
-  'VOO':  { exp:'0.03%',  issuer:'Vanguard',             bench:'S&P 500',        numH:503,  div:'분기', divY:'1.25%', perf:{'1Y':22.3,'3Y':12.0,'5Y':14.6} },
-  'VTI':  { exp:'0.03%',  issuer:'Vanguard',             bench:'CRSP US Total',  numH:3615, div:'분기', divY:'1.35%', perf:{'1Y':21.8,'3Y':11.7,'5Y':14.3} },
-  'GLD':  { exp:'0.40%',  issuer:'State Street',         bench:'Gold Price',     numH:1,    div:'없음', divY:'0%',    perf:{'1Y':18.7,'3Y':8.3, '5Y':11.2} },
-  'TLT':  { exp:'0.15%',  issuer:'BlackRock',            bench:'UST 20+Y',       numH:26,   div:'월',   divY:'4.12%', perf:{'1Y':-8.3,'3Y':-12.4,'5Y':-6.8} },
-  'XLK':  { exp:'0.09%',  issuer:'State Street',         bench:'S&P Tech',       numH:67,   div:'분기', divY:'0.68%', perf:{'1Y':34.2,'3Y':18.6,'5Y':22.8} },
-  'XLF':  { exp:'0.09%',  issuer:'State Street',         bench:'S&P Financials', numH:72,   div:'분기', divY:'1.68%', perf:{'1Y':18.4,'3Y':10.2,'5Y':12.1} },
-  'XLV':  { exp:'0.09%',  issuer:'State Street',         bench:'S&P Healthcare', numH:63,   div:'분기', divY:'1.42%', perf:{'1Y':10.2,'3Y':8.4, '5Y':10.8} },
-  'XLE':  { exp:'0.09%',  issuer:'State Street',         bench:'S&P Energy',     numH:22,   div:'분기', divY:'3.42%', perf:{'1Y':4.2, '3Y':22.4,'5Y':16.8} },
-  'IWM':  { exp:'0.19%',  issuer:'BlackRock',            bench:'Russell 2000',   numH:2000, div:'분기', divY:'1.23%', perf:{'1Y':14.2,'3Y':6.4, '5Y':9.1}  },
-  'VEA':  { exp:'0.05%',  issuer:'Vanguard',             bench:'FTSE Dev ex US', numH:3900, div:'반기', divY:'2.98%', perf:{'1Y':10.4,'3Y':5.2, '5Y':7.8}  },
-  'VWO':  { exp:'0.08%',  issuer:'Vanguard',             bench:'FTSE EM',        numH:5600, div:'반기', divY:'3.42%', perf:{'1Y':8.4, '3Y':2.1, '5Y':4.8}  },
-  'VNQ':  { exp:'0.13%',  issuer:'Vanguard',             bench:'MSCI US RE',     numH:163,  div:'분기', divY:'3.85%', perf:{'1Y':12.3,'3Y':2.8, '5Y':7.4}  },
-  'HYG':  { exp:'0.48%',  issuer:'BlackRock',            bench:'iBoxx HY',       numH:1195, div:'월',   divY:'5.82%', perf:{'1Y':8.7, '3Y':4.2, '5Y':4.8}  },
-  'BND':  { exp:'0.03%',  issuer:'Vanguard',             bench:'Bloomberg Agg',  numH:10418,div:'월',   divY:'3.72%', perf:{'1Y':2.3, '3Y':-1.8,'5Y':0.4}  },
-  'GBTC': { exp:'1.50%',  issuer:'Grayscale',            bench:'Bitcoin',        numH:1,    div:'없음', divY:'0%',    perf:{'1Y':124.3,'3Y':28.4,'5Y':48.7} },
-  'SQQQ': { exp:'0.95%',  issuer:'ProShares',            bench:'QQQ × −3',       numH:0,    div:'분기', divY:'3.21%', perf:{'1Y':-67.4,'3Y':-42.8,'5Y':-51.3} },
-  'PEY':  { exp:'0.53%',  issuer:'Invesco',              bench:'Dividend Achievers 50', numH:50, div:'월', divY:'4.87%', perf:{'1Y':8.4,'3Y':4.2,'5Y':7.8} },
-  'IWF':  { exp:'0.19%',  issuer:'BlackRock',            bench:'Russell 1000 Growth', numH:415, div:'분기', divY:'0.52%', perf:{'1Y':32.4,'3Y':16.8,'5Y':20.4} },
+  'SPY':  { issuer:'State Street',        bench:'S&P 500',        numH:503,  div:'분기' },
+  'QQQ':  { issuer:'Invesco',              bench:'Nasdaq-100',     numH:101,  div:'분기' },
+  'IVV':  { issuer:'BlackRock',            bench:'S&P 500',        numH:503,  div:'분기' },
+  'VOO':  { issuer:'Vanguard',             bench:'S&P 500',        numH:503,  div:'분기' },
+  'VTI':  { issuer:'Vanguard',             bench:'CRSP US Total',  numH:3615, div:'분기' },
+  'GLD':  { issuer:'State Street',         bench:'Gold Price',     numH:1,    div:'없음' },
+  'TLT':  { issuer:'BlackRock',            bench:'UST 20+Y',       numH:26,   div:'월'   },
+  'XLK':  { issuer:'State Street',         bench:'S&P Tech',       numH:67,   div:'분기' },
+  'XLF':  { issuer:'State Street',         bench:'S&P Financials', numH:72,   div:'분기' },
+  'XLV':  { issuer:'State Street',         bench:'S&P Healthcare', numH:63,   div:'분기' },
+  'XLE':  { issuer:'State Street',         bench:'S&P Energy',     numH:22,   div:'분기' },
+  'IWM':  { issuer:'BlackRock',            bench:'Russell 2000',   numH:2000, div:'분기' },
+  'VEA':  { issuer:'Vanguard',             bench:'FTSE Dev ex US', numH:3900, div:'반기' },
+  'VWO':  { issuer:'Vanguard',             bench:'FTSE EM',        numH:5600, div:'반기' },
+  'VNQ':  { issuer:'Vanguard',             bench:'MSCI US RE',     numH:163,  div:'분기' },
+  'HYG':  { issuer:'BlackRock',            bench:'iBoxx HY',       numH:1195, div:'월'   },
+  'BND':  { issuer:'Vanguard',             bench:'Bloomberg Agg',  numH:10418,div:'월'   },
+  'GBTC': { issuer:'Grayscale',            bench:'Bitcoin',        numH:1,    div:'없음' },
+  'SQQQ': { issuer:'ProShares',            bench:'QQQ × −3',       numH:0,    div:'분기' },
+  'PEY':  { issuer:'Invesco',              bench:'Dividend Achievers 50', numH:50, div:'월' },
+  'IWF':  { issuer:'BlackRock',            bench:'Russell 1000 Growth', numH:415, div:'분기' },
 };
+
+// ── getLiveSupp: SUPP 정적 메타 + 실데이터(divY, exp) 병합 ──────
+function getLiveSupp(ticker) {
+  const s = SUPP[ticker] || {};
+  const etf = allData[ticker] || {};
+  const divY = etf.div_yield != null && etf.div_yield > 0
+    ? (etf.div_yield * 100).toFixed(2) + '%'
+    : (s.divY || '—');
+  const exp = etf.exp_ratio != null
+    ? (etf.exp_ratio * 100).toFixed(2) + '%'
+    : (s.exp || '—');
+  return { ...s, divY, exp };
+}
+
+// ── perf 계산 (price history 기반) ──────────────────────────────
+var perfCache = {};  // ticker → { '1Y': number, '3Y': number, '5Y': number }
+
+function computePerfFromHistory(prices) {
+  if (!prices || prices.length < 2) return {};
+  const last = prices[prices.length - 1].adj_close;
+  const perf = {};
+  const lookbacks = { '1Y': 252, '3Y': 756, '5Y': 1260 };
+  for (const [key, days] of Object.entries(lookbacks)) {
+    if (prices.length > days) {
+      const base = prices[prices.length - 1 - days]?.adj_close;
+      if (base && base > 0) {
+        const annYears = parseInt(key);
+        if (annYears === 1) {
+          perf[key] = (last / base - 1) * 100;
+        } else {
+          perf[key] = (Math.pow(last / base, 1 / annYears) - 1) * 100;
+        }
+      }
+    }
+  }
+  return perf;
+}
 
 // ── 데이터 ────────────────────────────────────────────
 let allData = {};     // ticker → etf object (flattened from etf_data.json)
@@ -284,9 +321,9 @@ const METRIC_GROUPS = [
   ]},
   { group: () => I18n.t('compare.group.return'), metrics: [
     { label: ()=>I18n.t('compare.metric.cagr'),  get:(e,s)=>fmtPct(e.cagr),           raw:(e)=>e.cagr??-999,         best:'max', fmtClass:v=>v>=0?'ret-pos':'ret-neg', note:()=>I18n.t('compare.note.cagr') },
-    { label: ()=>I18n.t('compare.metric.ret1y'), get:(e,s)=>fmtPct(s.perf?.['1Y']),    raw:(e,s)=>s.perf?.['1Y']??-999, best:'max', fmtClass:v=>v>=0?'ret-pos':'ret-neg' },
-    { label: ()=>I18n.t('compare.metric.ret3y'), get:(e,s)=>fmtPct(s.perf?.['3Y']),   raw:(e,s)=>s.perf?.['3Y']??-999, best:'max', fmtClass:v=>v>=0?'ret-pos':'ret-neg' },
-    { label: ()=>I18n.t('compare.metric.ret5y'), get:(e,s)=>fmtPct(s.perf?.['5Y']),   raw:(e,s)=>s.perf?.['5Y']??-999, best:'max', fmtClass:v=>v>=0?'ret-pos':'ret-neg' },
+    { label: ()=>I18n.t('compare.metric.ret1y'), get:(e,s)=>fmtPct(perfCache[e.ticker]?.['1Y']),    raw:(e,s)=>perfCache[e.ticker]?.['1Y']??-999, best:'max', fmtClass:v=>v>=0?'ret-pos':'ret-neg' },
+    { label: ()=>I18n.t('compare.metric.ret3y'), get:(e,s)=>fmtPct(perfCache[e.ticker]?.['3Y']),   raw:(e,s)=>perfCache[e.ticker]?.['3Y']??-999, best:'max', fmtClass:v=>v>=0?'ret-pos':'ret-neg' },
+    { label: ()=>I18n.t('compare.metric.ret5y'), get:(e,s)=>fmtPct(perfCache[e.ticker]?.['5Y']),   raw:(e,s)=>perfCache[e.ticker]?.['5Y']??-999, best:'max', fmtClass:v=>v>=0?'ret-pos':'ret-neg' },
   ]},
   { group: () => I18n.t('compare.group.risk'), metrics: [
     { label: ()=>I18n.t('compare.metric.vol'),  get:(e,s)=>fmtPct(e.vol),     raw:(e)=>e.vol??999,         best:'min', fmtClass:v=>v<15?'ret-pos':'', note:()=>I18n.t('compare.note.vol') },
@@ -470,6 +507,16 @@ async function renderChart() {
   // Load all price histories in parallel
   const histories = await Promise.all(selectedETFs.map(e => loadCompareHistory(e.ticker)));
 
+  // perf 캐시 갱신 (price history 기반 실계산)
+  let perfUpdated = false;
+  selectedETFs.forEach((etf, i) => {
+    if (histories[i] && !perfCache[etf.ticker]) {
+      perfCache[etf.ticker] = computePerfFromHistory(histories[i]);
+      perfUpdated = true;
+    }
+  });
+  if (perfUpdated) renderTable();
+
   legend.innerHTML = '';
   let addedCount = 0;
   selectedETFs.forEach((etf, i) => {
@@ -514,7 +561,7 @@ function renderTable() {
     return;
   }
 
-  const supps = selectedETFs.map(e => SUPP[e.ticker] || {});
+  const supps = selectedETFs.map(e => getLiveSupp(e.ticker));
   const N = selectedETFs.length;
 
   // Header row

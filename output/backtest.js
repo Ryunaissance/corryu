@@ -113,9 +113,21 @@ function getActualReturn(ticker, year) {
     const v = rec[String(year)];
     if (v !== undefined) return v;
   }
-  // 데이터 없는 연도(상장 전 등) → ETF의 전체기간 CAGR로 대체
+  // 데이터 없는 연도 → 0으로 처리 (effectiveStartYear 이후만 계산하므로 극히 드문 케이스)
+  return 0;
+}
+
+function getETFFirstYear(ticker) {
+  const rec = btData[ticker];
+  if (rec) {
+    const years = Object.keys(rec).map(Number).filter(y => rec[String(y)] !== null && rec[String(y)] !== undefined);
+    if (years.length > 0) return Math.min(...years);
+  }
   const etf = allData[ticker];
-  return etf ? (etf.cagr || 10) / 100 : 0.10;
+  if (etf && etf.inception_date && etf.inception_date !== '1900-01-01') {
+    return new Date(etf.inception_date).getFullYear() + 1;
+  }
+  return null;
 }
 
 // DCA 주기 토글
@@ -149,16 +161,32 @@ function runBacktest() {
   const hasDCA    = dcaFreq !== 'none' && dcaAmount > 0;
 
   const currYear  = DATA_END_YEAR + 1; // 마지막 완성 연도 다음 = 시뮬레이션 상한
-  const startYear = currYear - period;
+  const userStartYear = currYear - period;
+
+  // constrained startYear: 선택된 모든 ETF의 실제 첫 데이터 연도 기준
+  const allTickers = [...holdings.map(h => h.etf.ticker)];
+  if (benchTicker !== 'none') allTickers.push(benchTicker);
+
+  let constrainingTicker = null;
+  let maxFirstYear = userStartYear;
+  for (const t of allTickers) {
+    const fy = getETFFirstYear(t);
+    if (fy !== null && fy > maxFirstYear) {
+      maxFirstYear = fy;
+      constrainingTicker = t;
+    }
+  }
+  const effectiveStartYear = maxFirstYear;
+  const effectivePeriod = currYear - effectiveStartYear;
 
   // 연도별 실수익률 사전 빌드
   const pre = {}; // "TICKER:YEAR" → annual return
   for (const h of holdings) {
-    for (let y = startYear; y < currYear; y++)
+    for (let y = effectiveStartYear; y < currYear; y++)
       pre[h.etf.ticker + ':' + y] = getActualReturn(h.etf.ticker, y);
   }
   if (benchTicker !== 'none') {
-    for (let y = startYear; y < currYear; y++)
+    for (let y = effectiveStartYear; y < currYear; y++)
       pre[benchTicker + ':' + y] = getActualReturn(benchTicker, y);
   }
 
@@ -170,17 +198,17 @@ function runBacktest() {
   let benchVal      = initVal;
   let totalInvested = initVal;
 
-  const portSeries     = [{ year: startYear, val: initVal }];
-  const benchSeries    = benchTicker !== 'none' ? [{ year: startYear, val: initVal }] : [];
-  const investedSeries = [{ year: startYear, val: initVal }];
+  const portSeries     = [{ year: effectiveStartYear, val: initVal }];
+  const benchSeries    = benchTicker !== 'none' ? [{ year: effectiveStartYear, val: initVal }] : [];
+  const investedSeries = [{ year: effectiveStartYear, val: initVal }];
   const monthlyVals    = [initVal]; // MDD 계산용
   const annualData     = [];
 
   let portYearStart  = initVal;
   let benchYearStart = initVal;
 
-  for (let m = 0; m < period * 12; m++) {
-    const year      = startYear + Math.floor(m / 12);
+  for (let m = 0; m < effectivePeriod * 12; m++) {
+    const year      = effectiveStartYear + Math.floor(m / 12);
     const monthOfYr = m % 12;
 
     // 연간 수익률 → 월 수익률
@@ -247,17 +275,35 @@ function runBacktest() {
   const alpha = benchCAGR != null ? cagr - benchCAGR : null;
 
   lastResult = {
-    holdings, period, portSeries, benchSeries, investedSeries, annualData, benchTicker,
+    holdings, period, effectiveStartYear, effectivePeriod, constrainingTicker,
+    portSeries, benchSeries, investedSeries, annualData, benchTicker,
     hasDCA, dcaAmount, dcaFreq,
     stats: { cagr, vol, mdd: mdd * 100, sharpe, sortino, totalRet, alpha, initVal, totalInvested, portVal, totalGain },
   };
 
   showResults(lastResult);
+  renderConstraintNote(constrainingTicker, effectiveStartYear, DATA_END_YEAR);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 결과 렌더링
 // ─────────────────────────────────────────────────────────────────────────────
+function renderConstraintNote(ticker, effectiveStart, effectiveEnd) {
+  let el = document.getElementById('bt-constraint-note');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'bt-constraint-note';
+    el.style.cssText = 'font-size:0.75rem;color:#64748b;margin-bottom:10px;line-height:1.5';
+    const statCards = document.getElementById('stat-cards');
+    if (statCards && statCards.parentNode) statCards.parentNode.insertBefore(el, statCards);
+  }
+  if (!ticker) { el.style.display = 'none'; return; }
+  const etf = allData[ticker];
+  const name = etf ? etf.name : ticker;
+  el.textContent = `The available historical data for the simulation inputs was constrained by ${name} (${ticker}) [${effectiveStart} – ${effectiveEnd}].`;
+  el.style.display = 'block';
+}
+
 function showResults(result) {
   document.getElementById('empty-hint').style.display = 'none';
   const res = document.getElementById('results');
@@ -581,5 +627,8 @@ Promise.all([
 
 document.addEventListener('i18n:ready', () => {
   renderRows();
-  if (lastResult) showResults(lastResult);
+  if (lastResult) {
+    showResults(lastResult);
+    renderConstraintNote(lastResult.constrainingTicker, lastResult.effectiveStartYear, DATA_END_YEAR);
+  }
 });
