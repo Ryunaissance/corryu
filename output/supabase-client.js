@@ -14,6 +14,32 @@
 const SUPABASE_URL = 'https://oqxkxzunjniqfzwcwqon.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xeGt4enVuam5pcWZ6d2N3cW9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NDMzMjcsImV4cCI6MjA5MjQxOTMyN30.1X5qmfjzeqSkrIYTVyQyM6qqIxZEKON-kJ4DDThQ58E';
 
+// ↓ 추가 (SUPABASE_URL 선언 바로 아래)
+const _cookieStorage = {
+  getItem(key) {
+    const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const match = document.cookie.match(new RegExp('(^| )' + escaped + '=([^;]+)'));
+    return match ? decodeURIComponent(match[2]) : null;
+  },
+  setItem(key, value) {
+    const maxAge = 365 * 24 * 60 * 60;
+    document.cookie = `${key}=${encodeURIComponent(value)}; domain=.ryunaissance.com; path=/; max-age=${maxAge}; secure; samesite=lax`;
+  },
+  removeItem(key) {
+    document.cookie = `${key}=; domain=.ryunaissance.com; path=/; max-age=0`;
+  },
+};
+
+// 기존 createClient에 storage 추가
+_sb = window.supabase?.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    storage: _cookieStorage,  // ← 이 줄만 추가
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+});
+
 // ── 클라이언트 초기화 ─────────────────────────────────────
 let _sb = null;
 try {
