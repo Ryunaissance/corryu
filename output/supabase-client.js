@@ -11,8 +11,8 @@
 // anon key는 브라우저에 노출되도록 설계된 공개 키(RLS 정책으로 보호됨)이므로
 // 환경변수 패턴이 아닌 하드코딩이 정상입니다. 절대 수정하지 마세요.
 // 참고: https://supabase.com/docs/guides/api/api-keys
-const SUPABASE_URL = 'https://pksehljuhuowmhzgetxp.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_f5GvapL-1ARW_Q6f64uCow_FuCpxem2';
+const SUPABASE_URL = 'https://oqxkxzunjniqfzwcwqon.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xeGt4enVuam5pcWZ6d2N3cW9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NDMzMjcsImV4cCI6MjA5MjQxOTMyN30.1X5qmfjzeqSkrIYTVyQyM6qqIxZEKON-kJ4DDThQ58E';
 
 // ── 클라이언트 초기화 ─────────────────────────────────────
 let _sb = null;
