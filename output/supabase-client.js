@@ -150,3 +150,28 @@ window.CorryuAuth = {
 };
 
 window._sb = _sb;
+
+// 서브도메인 SSO
+if (_sb) {
+  const _SSO_COOKIE = 'ryu-sso-token';
+  const _SSO_DOMAIN = '.ryunaissance.com';
+
+  _sb.auth.onAuthStateChange((event, session) => {
+    if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.refresh_token) {
+      const maxAge = 365 * 24 * 60 * 60;
+      document.cookie = `${_SSO_COOKIE}=${encodeURIComponent(session.refresh_token)}; domain=${_SSO_DOMAIN}; path=/; max-age=${maxAge}; secure; samesite=lax`;
+    } else if (event === 'SIGNED_OUT') {
+      document.cookie = `${_SSO_COOKIE}=; domain=${_SSO_DOMAIN}; path=/; max-age=0`;
+    }
+  });
+
+  _sb.auth.getSession().then(({ data: { session } }) => {
+    if (!session) {
+      const match = document.cookie.match(/(^| )ryu-sso-token=([^;]+)/);
+      const refreshToken = match ? decodeURIComponent(match[2]) : null;
+      if (refreshToken) {
+        _sb.auth.refreshSession({ refresh_token: refreshToken });
+      }
+    }
+  });
+}
