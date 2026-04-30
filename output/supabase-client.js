@@ -2,7 +2,7 @@
 // 참고: <https://supabase.com/docs/guides/api/api-keys>
 
 // Ryunaissance 메인 Supabase 프로젝트 (SSO 공유)
-const SUPABASE_URL = 'https://oqxkxzunjniqfzwcwqon.supabase.co>';
+const SUPABASE_URL = 'https://oqxkxzunjniqfzwcwqon.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xeGt4enVuam5pcWZ6d2N3cW9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NDMzMjcsImV4cCI6MjA5MjQxOTMyN30.1X5qmfjzeqSkrIYTVyQyM6qqIxZEKON-kJ4DDThQ58E'
 let _sb = null;
 try {
@@ -108,7 +108,7 @@ window._sb = _sb;
 // 서브도메인 SSO — <ryunaissance.com> 쿠키로 세션 복원
 if (_sb) {
   const _SSO_COOKIE = 'ryu-sso-token';
-  const _SSO_DOMAIN = '.<ryunaissance.com>';
+  const _SSO_DOMAIN = '.ryunaissance.com';
 
   _sb.auth.onAuthStateChange((event, session) => {
     if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.refresh_token) {
