@@ -111,7 +111,7 @@ if (_sb) {
   const _SSO_DOMAIN = '.ryunaissance.com';
 
   _sb.auth.onAuthStateChange((event, session) => {
-    if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.refresh_token) {
+    if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') && session?.refresh_token) {
       const maxAge = 365 * 24 * 60 * 60;
       document.cookie = `${_SSO_COOKIE}=${encodeURIComponent(session.refresh_token)}; domain=${_SSO_DOMAIN}; path=/; max-age=${maxAge}; secure; samesite=lax`;
     } else if (event === 'SIGNED_OUT') {
