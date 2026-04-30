@@ -2,7 +2,7 @@
 // 참고: <https://supabase.com/docs/guides/api/api-keys>
 
 // Ryunaissance 메인 Supabase 프로젝트 (SSO 공유)
-const SUPABASE_URL = '<https://mlzwuqyxcqgojjmnwyem.supabase.co>';
+const SUPABASE_URL = 'https://mlzwuqyxcqgojjmnwyem.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xeGt4enVuam5pcWZ6d2N3cW9uIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NDMzMjcsImV4cCI6MjA5MjQxOTMyN30.1X5qmfjzeqSkrIYTVyQyM6qqIxZEKON-kJ4DDThQ58E';
 
 let _sb = null;
