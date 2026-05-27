@@ -14,7 +14,12 @@ jobs:
     timeout-minutes: 60
 
     permissions:
-      contents: write   # raw/ 및 output/ 커밋·푸시 권한
+      contents: write   # output/ 커밋·푸시 권한
+
+    env:
+      # raw/ parquet은 git이 아니라 Supabase Storage에 보관 (src/storage.py)
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
 
     steps:
       - name: Checkout repository
@@ -44,7 +49,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add raw/prices_close.parquet raw/meta.parquet
+          # raw/ parquet은 더 이상 커밋하지 않음 (Supabase Storage에 업로드됨)
           git add output/etf_data.json output/classification.json output/backtest_data.json output/corr_returns.json
           git add output/*.html
 

@@ -30,6 +30,10 @@ RAW_DIR        = ROOT / 'raw'
 PRICES_PARQUET = RAW_DIR / 'prices_close.parquet'
 META_PARQUET   = RAW_DIR / 'meta.parquet'
 
+# src/ 모듈 경로 추가 (외부 스토리지 동기화)
+sys.path.insert(0, str(ROOT / 'src'))
+import storage
+
 # ── 파라미터 ─────────────────────────────────────────────────────────
 BATCH_YF     = 50
 SLEEP_YF     = 0.5
@@ -213,10 +217,13 @@ def update_meta(tickers: list[str]) -> None:
 # ════════════════════════════════════════════════════════════════════
 
 def main():
+    log.info('\n=== [1/3] 스토리지에서 raw/ 받기 ===')
+    storage.pull_raw(required=True)
+
     if not PRICES_PARQUET.exists() or not META_PARQUET.exists():
         log.error(
-            'raw/ 파일이 없습니다. 먼저 fetch_initial.py를 실행하세요.\n'
-            '  python scripts/fetch_initial.py'
+            'raw/ 파일이 없습니다. 먼저 fetch_initial.py로 초기 데이터를 만들고 '
+            '스토리지에 업로드하세요.\n  python scripts/fetch_initial.py'
         )
         sys.exit(1)
 
@@ -224,11 +231,14 @@ def main():
     tickers = sorted(df_existing.columns.tolist())
     log.info(f'업데이트 대상: {len(tickers)}개 ETF')
 
-    log.info('\n=== [1/2] 가격 업데이트 ===')
+    log.info('\n=== [2/3] 가격 업데이트 ===')
     update_prices(tickers)
 
-    log.info('\n=== [2/2] 메타 업데이트 (AUM·수수료·배당) ===')
+    log.info('\n=== 메타 업데이트 (AUM·수수료·배당) ===')
     update_meta(tickers)
+
+    log.info('\n=== [3/3] 스토리지에 raw/ 업로드 ===')
+    storage.push_raw(required=True)
 
     log.info('\n=== 일별 업데이트 완료 ===')
     log.info('다음 단계: python scripts/compute_all.py')
