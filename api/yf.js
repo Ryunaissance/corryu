@@ -11,6 +11,12 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'ticker required (e.g. ?ticker=SMH)' });
   }
 
+  const VALID_RANGE = new Set(['1d','5d','1mo','3mo','6mo','1y','2y','5y','10y','ytd','max']);
+  const VALID_INTERVAL = new Set(['1m','2m','5m','15m','30m','60m','90m','1h','1d','5d','1wk','1mo','3mo']);
+  if (!VALID_RANGE.has(range) || !VALID_INTERVAL.has(interval)) {
+    return res.status(400).json({ error: 'invalid range/interval' });
+  }
+
   const url =
     `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker.toUpperCase())}` +
     `?range=${range}&interval=${interval}&includeAdjustedClose=true`;

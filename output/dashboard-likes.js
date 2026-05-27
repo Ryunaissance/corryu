@@ -10,6 +10,7 @@
 // ═══════════════════════════════════════════════════════════
 // ❤️ 인기 종목 랭킹 (ticker_likes) — index.html only
 // ═══════════════════════════════════════════════════════════
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 (async function initTrending() {
   if (typeof CorryuAuth === 'undefined' || !CorryuAuth.isConfigured) return;
 
@@ -27,7 +28,7 @@
         ' style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);text-decoration:none;transition:background .15s"' +
         ' onmouseover="this.style.background=\'rgba(255,255,255,0.05)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.02)\'">' +
       '<span style="font-size:.9rem;flex-shrink:0;min-width:22px;text-align:center">' + medal + '</span>' +
-      '<span style="font-weight:800;font-size:.84rem;color:#e2e8f0;min-width:52px">' + ticker + '</span>' +
+      '<span style="font-weight:800;font-size:.84rem;color:#e2e8f0;min-width:52px">' + escHtml(ticker) + '</span>' +
       '<div style="flex:1;height:4px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden">' +
         '<div style="height:100%;border-radius:2px;background:' + barColor + ';width:' + barPct + '%"></div>' +
       '</div>' +

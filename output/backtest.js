@@ -37,11 +37,13 @@ function removeRow(id) {
   renderRows();
 }
 
+function escAttr(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
 function renderRows() {
   const container = document.getElementById('port-rows');
   container.innerHTML = rows.map((r, i) => `
     <div class="port-row" data-id="${r.id}">
-      <input class="ticker-inp" type="text" placeholder="${I18n.t('bt.placeholder.ticker')}" value="${r.ticker}"
+      <input class="ticker-inp" type="text" placeholder="${I18n.t('bt.placeholder.ticker')}" value="${escAttr(r.ticker)}"
         oninput="updateRow(${r.id},'ticker',this.value)" onblur="this.value=this.value.toUpperCase()" maxlength="10">
       <div style="position:relative">
         <input class="weight-inp" type="number" placeholder="%" min="0" max="100" step="0.5" value="${r.weight}"
@@ -576,7 +578,8 @@ function loadFromURL() {
     rows = [];
     portfolio.split(',').forEach(item => {
       const [ticker, weight] = item.split(':');
-      if (ticker && weight) { const id = ++rowId; rows.push({ id, ticker: ticker.toUpperCase(), weight }); }
+      const cleanTicker = ticker.toUpperCase().replace(/[^A-Z0-9.\-]/g, '');
+      if (cleanTicker && weight) { const id = ++rowId; rows.push({ id, ticker: cleanTicker, weight }); }
     });
     renderRows();
     if (rows.length >= 1 && Object.keys(allData).length > 0) runBacktest();
