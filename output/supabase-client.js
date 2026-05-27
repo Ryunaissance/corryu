@@ -112,7 +112,7 @@ if (_sb) {
 
   _sb.auth.onAuthStateChange((event, session) => {
     if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') && session?.refresh_token) {
-      const maxAge = 365 * 24 * 60 * 60;
+      const maxAge = 30 * 24 * 60 * 60;  // 30일로 단축 — refresh token 노출 창 축소
       document.cookie = `${_SSO_COOKIE}=${encodeURIComponent(session.refresh_token)}; domain=${_SSO_DOMAIN}; path=/; max-age=${maxAge}; secure; samesite=lax`;
     } else if (event === 'SIGNED_OUT') {
       document.cookie = `${_SSO_COOKIE}=; domain=${_SSO_DOMAIN}; path=/; max-age=0`;

@@ -24,7 +24,7 @@ create policy "profiles_own_update"   on profiles for update to authenticated us
 -- ── 2. comments ──────────────────────────────────────────────────────
 create table if not exists comments (
   id         uuid        primary key default gen_random_uuid(),
-  ticker     text        not null,
+  ticker     text        not null check (ticker ~ '^[A-Za-z0-9.\-]{1,20}$'),
   user_id    uuid        not null references auth.users(id) on delete cascade,
   nickname   text        not null,
   content    text        not null check (char_length(content) between 1 and 2000),
@@ -51,6 +51,30 @@ create policy "comments_auth_insert"   on comments for insert to authenticated
   with check (auth.uid() = user_id and depth <= 1);
 create policy "comments_own_update"    on comments for update to authenticated
   using (auth.uid() = user_id);   -- 소프트 삭제 (is_deleted = true) 용도
+
+
+-- ── 2-a. 닉네임 스푸핑 방지 트리거 ──────────────────────────────────
+-- 문제: INSERT 시 클라이언트가 nickname을 임의로 지정 가능 → 닉네임 위장.
+-- 수정: BEFORE INSERT 트리거로 nickname을 profiles 테이블의 실제 닉네임으로
+--       덮어씀. profiles 행이 없으면 클라이언트 제공값을 그대로 사용(폴백).
+
+create or replace function public.set_comment_nickname()
+returns trigger language plpgsql security definer
+set search_path = ''
+as $$
+begin
+  NEW.nickname := coalesce(
+    (select nickname from public.profiles where id = NEW.user_id),
+    NEW.nickname
+  );
+  return NEW;
+end;
+$$;
+
+drop trigger if exists trg_set_comment_nickname on public.comments;
+create trigger trg_set_comment_nickname
+  before insert on public.comments
+  for each row execute function public.set_comment_nickname();
 
 
 -- ── 3. comment_votes (중복 투표 방지) ───────────────────────────────
@@ -107,7 +131,7 @@ where schemaname = 'public'
 -- ── 6. ticker_likes (종목 좋아요) ────────────────────────────────
 create table if not exists ticker_likes (
   id         uuid        primary key default gen_random_uuid(),
-  ticker     text        not null,
+  ticker     text        not null check (ticker ~ '^[A-Za-z0-9.\-]{1,20}$'),
   user_id    uuid        not null references auth.users(id) on delete cascade,
   created_at timestamptz not null default now(),
   unique (ticker, user_id)

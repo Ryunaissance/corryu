@@ -5,6 +5,8 @@
 //   onSelect(ticker, name, inputEl)
 // ─────────────────────────────────────────────────────────────────────────────
 (function () {
+  function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
   // ── 스타일 주입 ───────────────────────────────────────────
   var s = document.createElement('style');
   s.textContent = [
@@ -115,8 +117,8 @@
         items.forEach(function (item) {
           var el = document.createElement('div');
           el.className = 'ac-item';
-          var nameStr = item.name ? ' <span class="ac-name">(' + item.name + ')</span>' : '';
-          el.innerHTML = '<span class="ac-tkr">' + item.ticker + '</span>' + nameStr;
+          var nameStr = item.name ? ' <span class="ac-name">(' + escHtml(item.name) + ')</span>' : '';
+          el.innerHTML = '<span class="ac-tkr">' + escHtml(item.ticker) + '</span>' + nameStr;
 
           function pick(e) {
             e.preventDefault();

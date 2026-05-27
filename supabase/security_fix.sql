@@ -6,6 +6,8 @@
 --   1. Security Definer View     → security_invoker = on 으로 변경
 --   2. RLS Disabled (etf_dividend) → RLS 활성화 + 공개 읽기 정책
 --   3. Function Search Path Mutable → SET search_path = '' 고정
+--   4. ticker 컬럼 포맷 미검증   → CHECK 제약 추가 (XSS 방지)
+--   5. 닉네임 스푸핑              → BEFORE INSERT 트리거로 강제 덮어쓰기
 --
 -- ※ Warning "Leaked Password Protection" 은 SQL로 수정 불가
 --    Supabase Dashboard → Authentication → Settings →
@@ -95,7 +97,62 @@ end;
 $$;
 
 
--- ── 4. 수정 결과 확인 쿼리 ────────────────────────────────────────
+-- ── 4. ticker 컬럼 포맷 CHECK 제약 추가 ──────────────────────────
+-- 문제: ticker_likes.ticker / comments.ticker 가 임의 문자열을 허용하여
+--       저장형 XSS(Stored XSS) 공격 벡터가 될 수 있음.
+-- 수정: 안전한 문자(영문자·숫자·점·하이픈, 1~20자)만 허용하는
+--       CHECK 제약을 추가. pg_constraint를 확인해 멱등 처리.
+
+do $$ begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'ticker_likes_ticker_format'
+  ) then
+    alter table public.ticker_likes
+      add constraint ticker_likes_ticker_format
+      check (ticker ~ '^[A-Za-z0-9.\-]{1,20}$');
+  end if;
+end $$;
+
+do $$ begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'comments_ticker_format'
+  ) then
+    alter table public.comments
+      add constraint comments_ticker_format
+      check (ticker ~ '^[A-Za-z0-9.\-]{1,20}$');
+  end if;
+end $$;
+
+
+-- ── 5. 닉네임 스푸핑 방지 트리거 ─────────────────────────────────
+-- 문제: comments INSERT RLS는 auth.uid() = user_id 만 검증하고
+--       nickname 컬럼은 클라이언트가 임의 값을 삽입 가능 → 닉네임 위장.
+-- 수정: BEFORE INSERT 트리거로 nickname을 profiles 테이블의 실제 닉네임으로
+--       덮어씀. profiles 행이 없으면 클라이언트 제공값을 그대로 사용(폴백).
+--       create or replace + drop if exists 로 멱등 처리.
+
+create or replace function public.set_comment_nickname()
+returns trigger language plpgsql security definer
+set search_path = ''
+as $$
+begin
+  NEW.nickname := coalesce(
+    (select nickname from public.profiles where id = NEW.user_id),
+    NEW.nickname
+  );
+  return NEW;
+end;
+$$;
+
+drop trigger if exists trg_set_comment_nickname on public.comments;
+create trigger trg_set_comment_nickname
+  before insert on public.comments
+  for each row execute function public.set_comment_nickname();
+
+
+-- ── 6. 수정 결과 확인 쿼리 ────────────────────────────────────────
 
 -- View security_invoker 확인
 select viewname, definition
@@ -114,4 +171,14 @@ select proname, proconfig
 from pg_proc
 join pg_namespace on pg_proc.pronamespace = pg_namespace.oid
 where nspname = 'public'
-  and proname = 'sync_vote_counts';
+  and proname in ('sync_vote_counts', 'set_comment_nickname');
+
+-- ticker 포맷 CHECK 제약 확인
+select conname, conrelid::regclass, consrc
+from pg_constraint
+where conname in ('ticker_likes_ticker_format', 'comments_ticker_format');
+
+-- 닉네임 트리거 확인
+select tgname, tgrelid::regclass, tgenabled
+from pg_trigger
+where tgname = 'trg_set_comment_nickname';
