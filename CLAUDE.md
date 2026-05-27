@@ -186,7 +186,7 @@ scripts/compute_all.py
 ## 배포 구조
 
 - **호스팅**: Vercel (정적 파일: `output/` 디렉토리)
-- **서버리스 API**: `api/yf.js` (Yahoo Finance 프록시), `api/sync.js` (사용자 오버라이드 저장)
+- **서버리스 API**: `api/yf.js` (Yahoo Finance 프록시) — 유일한 서버리스 API. 사용자 오버라이드는 브라우저 localStorage(`corryu_user_overrides`)에 저장됨
 - **DB**: Supabase (댓글, 투표 — 가격 데이터 제거됨)
 - **CI/CD**: GitHub Actions
   - `daily_update.yml`: 평일 UTC 22:00 (ET 17:00), yfinance → parquet → compute_all → commit
@@ -273,4 +273,5 @@ const SUPABASE_KEY = 'sb_publishable_...';
 - `graph_data.json`은 2MB로 크기가 큼 — 그래프 관련 코드 수정 후 `build_graph.py` 재실행 필요
 - 레거시 면제(`LEGACY_EXEMPTIONS`)는 앵커 ETF 자동 생성 — 직접 수정 불필요
 - 섹터 S23(레버리지 롱)은 폐지됨 — 레버리지 상품은 기초자산 섹터로 상관계수 분류
-- `raw/` 파일은 Git에 포함 (~10MB parquet) — GitHub Actions에서 자동 commit·push
+- `raw/` 파일은 Git에 포함 (현재 `prices_close.parquet` ≈ 30MB) — GitHub Actions에서 평일마다 전체 파일을 자동 commit·push
+  - ⚠️ 매일 전체 parquet을 다시 커밋하므로 `.git` 히스토리가 계속 누적·증가함. 향후 Git LFS(forward-only) 또는 외부 스토리지(Supabase Storage/S3)로 분리 검토 필요 (Vercel·daily_update.yml 영향 검증 동반).

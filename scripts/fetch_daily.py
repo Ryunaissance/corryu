@@ -140,19 +140,17 @@ def _safe(v, default=None):
         return default
 
 def _get_div_yield(info):
-    """안전하게 배당수익률(소수점 포맷)을 추출합니다."""
-    # trailingAnnualDividendYield는 일반적으로 소수 포맷 (예: 0.015)
+    """안전하게 배당수익률(소수 포맷, 예: 0.0275)을 추출합니다."""
+    # trailingAnnualDividendYield는 yfinance가 소수 포맷으로 반환 (예: 0.015)
     div = _safe(info.get('trailingAnnualDividendYield'))
-    if div is not None and div > 0 and div < 0.5:
+    if div is not None and 0 < div < 0.5:
         return div
-    # dividendYield는 퍼센트 포맷 (예: 1.5)이거나 소수 포맷일 수 있음
+    # dividendYield는 퍼센트 포맷으로 반환되므로 100으로 나눠 소수로 정규화
     dy = _safe(info.get('dividendYield')) or _safe(info.get('yield'))
-    if dy is not None and dy > 0:
-        # 0.5 이상이면 확실히 퍼센트 단위 (50% 이상 배당은 드물기 때문)
-        # 하지만 QQQ의 경우 0.46(0.46%)일 수 있음!
-        # yfinance 최근 버전은 dividendYield를 항상 퍼센트로 줌.
-        if dy > 0.001:
-            return dy / 100.0 if dy > 0.2 else dy # 보수적 휴리스틱
+    if dy is not None:
+        frac = dy / 100.0
+        if 0 < frac < 0.5:
+            return frac
     return None
 
 

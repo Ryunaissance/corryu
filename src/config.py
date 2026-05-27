@@ -185,10 +185,6 @@ KEYWORD_RULES: dict[str, dict[str, Any]] = {
 # ── 레거시 임계값 ────────────────────────────────────
 SHORT_HISTORY_CUTOFF = '2021-05-20'  # 이 날짜 이후 상장 ETF는 상장기간 부족으로 레거시 처리
 LEGACY_MIN_AUM = 100_000_000           # $100M
-LEGACY_MIN_TRADING_DAYS = 750          # ~3년
-LEGACY_TRACKING_ERROR_THRESHOLD = 0.50 # 앵커 대비 r
-LEGACY_NEAR_DUPLICATE_CORR = 0.95      # 같은 섹터 내 중복 기준
-LEGACY_NEAR_DUPLICATE_TOP_N = 20       # 중복 체크 대상 (섹터 내 AUM 상위 N개)
 
 # ── 수동 섹터 오버라이드 ────────────────────────────────
 # 키워드/상관계수 자동 분류 결과를 무시하고 강제로 특정 섹터에 배정
