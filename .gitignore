@@ -7,8 +7,9 @@ data_processed/
 data_scraped/
 archive/
 
-# raw/ 파일은 Git에 포함 (parquet ~10MB, append-only 원본 데이터)
-# raw/ 는 gitignore 하지 않음
+# raw/ parquet은 Git이 아니라 외부 스토리지(Supabase Storage)에 보관 (src/storage.py)
+# git 히스토리 비대화 방지 — daily 파이프라인이 pull/push로 동기화
+raw/*.parquet
 
 # 개별 ETF JSON — Vercel 빌드 시 build_etf_pages.py가 etf_data.json으로부터 자동 생성
 output/etf-data/

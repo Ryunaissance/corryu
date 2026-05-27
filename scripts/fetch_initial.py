@@ -34,6 +34,10 @@ ETF_DB  = ROOT / 'etf_database.json'
 PRICES_PARQUET = RAW_DIR / 'prices_close.parquet'
 META_PARQUET   = RAW_DIR / 'meta.parquet'
 
+# src/ 모듈 경로 추가 (외부 스토리지 동기화)
+sys.path.insert(0, str(ROOT / 'src'))
+import storage
+
 # ── 튜닝 파라미터 ────────────────────────────────────────────────────
 BATCH_YF   = 50      # yfinance 1회 요청 티커 수
 SLEEP_YF   = 1.0     # 배치 간 대기 (초)
@@ -246,6 +250,15 @@ def main():
     df_meta = fetch_meta(tickers)
     df_meta.to_parquet(META_PARQUET, compression='snappy')
     log.info(f'저장: {META_PARQUET}  ({META_PARQUET.stat().st_size / 1e6:.1f} MB)')
+
+    # 3. 외부 스토리지 업로드 (설정돼 있을 때만)
+    if storage.is_configured():
+        log.info('\n=== [3/3] 스토리지 업로드 ===')
+        storage.push_raw(required=True)
+    else:
+        log.info('\nSUPABASE 미설정 — 스토리지 업로드 생략 (로컬 raw/ 에만 저장됨).')
+        log.info('스토리지 사용 시: SUPABASE_URL / SUPABASE_SERVICE_KEY 설정 후 재실행하거나')
+        log.info('  python -c "import sys; sys.path.insert(0,\'src\'); import storage; storage.push_raw()"')
 
     log.info('\n=== 초기 다운로드 완료 ===')
     log.info(f'  가격: {df_prices.shape[1]} ETF × {df_prices.shape[0]} 거래일')

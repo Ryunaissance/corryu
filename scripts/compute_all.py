@@ -23,6 +23,7 @@ import pandas as pd
 ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(ROOT / 'src'))
 
+import storage
 from config import SECTOR_DEFS, SUPER_SECTOR_DEFS, MY_PORTFOLIO, OUTPUT_DIR
 from data_loader import (
     load_price_data, load_scraped_info, load_meta_df,
@@ -94,6 +95,7 @@ def main():
 
     # ── 1. 원본 데이터 로드 ──────────────────────────────────────
     print('\n[1/7] 원본 데이터 로드...')
+    storage.ensure_raw(required=True)   # 로컬에 raw/ 없으면 스토리지에서 받음
     df_price = load_price_data()
     scraped  = load_scraped_info()
     print(f'  가격: {df_price.shape[1]} ETF × {df_price.shape[0]} 거래일')

@@ -36,6 +36,18 @@ etf_data.json             ← 항상 완전 재생성 (절대 수동 패치 금�
 config.py 규칙 변경       → compute_all.py 재실행으로 즉시 반영
 ```
 
+**raw/ parquet 저장 위치**: git이 아니라 **Supabase Storage**(`src/storage.py`)에 보관.
+git 히스토리 비대화를 막기 위해 `raw/*.parquet`은 `.gitignore` 처리됨.
+
+```
+fetch_initial.py  → 로컬 raw/ 생성 후 storage.push_raw()로 업로드
+fetch_daily.py    → storage.pull_raw() → 증분 갱신 → storage.push_raw()
+compute_all.py    → storage.ensure_raw() (로컬에 없으면 pull)
+```
+
+필요 env: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY` (service_role), 선택 `RAW_STORAGE_BUCKET`(기본 `raw-data`).
+로컬에 raw/ 파일이 이미 있으면 미설정이어도 그대로 사용 가능.
+
 ---
 
 ## 섹터 구조 (24개)
@@ -273,5 +285,6 @@ const SUPABASE_KEY = 'sb_publishable_...';
 - `graph_data.json`은 2MB로 크기가 큼 — 그래프 관련 코드 수정 후 `build_graph.py` 재실행 필요
 - 레거시 면제(`LEGACY_EXEMPTIONS`)는 앵커 ETF 자동 생성 — 직접 수정 불필요
 - 섹터 S23(레버리지 롱)은 폐지됨 — 레버리지 상품은 기초자산 섹터로 상관계수 분류
-- `raw/` 파일은 Git에 포함 (현재 `prices_close.parquet` ≈ 30MB) — GitHub Actions에서 평일마다 전체 파일을 자동 commit·push
-  - ⚠️ 매일 전체 parquet을 다시 커밋하므로 `.git` 히스토리가 계속 누적·증가함. 향후 Git LFS(forward-only) 또는 외부 스토리지(Supabase Storage/S3)로 분리 검토 필요 (Vercel·daily_update.yml 영향 검증 동반).
+- `raw/*.parquet`은 git이 아니라 **Supabase Storage**에 보관 (`src/storage.py`) — daily 파이프라인이 pull/push로 동기화하고 git에는 커밋하지 않음 (히스토리 비대화 방지)
+  - 자격증명: `SUPABASE_URL` / `SUPABASE_SERVICE_KEY` (GitHub Actions secret). 미설정 시 daily 워크플로우는 실패함
+  - durability: 원본 유실 방지를 위해 Supabase 버킷의 versioning/백업 활성화 권장
