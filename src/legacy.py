@@ -3,14 +3,11 @@ CORRYU ETF Dashboard - 레거시 ETF 판별 엔진
 자동 규칙 + 수동 오버라이드
 """
 from typing import Any
-import numpy as np
 import pandas as pd
 
 from config import (
     SECTOR_DEFS, MANUAL_LEGACY_OVERRIDES, LEGACY_EXEMPTIONS,
-    LEGACY_MIN_AUM, LEGACY_MIN_TRADING_DAYS,
-    LEGACY_TRACKING_ERROR_THRESHOLD, LEGACY_NEAR_DUPLICATE_CORR,
-    LEGACY_NEAR_DUPLICATE_TOP_N, SHORT_HISTORY_CUTOFF,
+    LEGACY_MIN_AUM, SHORT_HISTORY_CUTOFF,
 )
 
 
@@ -24,22 +21,6 @@ def assess_sector_legacy(sector_id: str, sector_tickers: set[str], classificatio
     """
     anchor = SECTOR_DEFS[sector_id]['anchor']
     results = {}
-
-    # 섹터 내 소르티노 분포 계산 (하위 20% 기준)
-    sortinos = []
-    for t in sector_tickers:
-        s = perf_stats.get(t, {}).get('Sortino', None)
-        if s is not None and s != 0:
-            sortinos.append(s)
-    sortino_20th = np.percentile(sortinos, 20) if len(sortinos) >= 5 else -999
-
-    # AUM 기준 상위 N개 추출 (중복 체크용)
-    aum_sorted = sorted(
-        sector_tickers,
-        key=lambda t: scraped.get(t, {}).get('market_cap', 0),
-        reverse=True
-    )
-    top_n_tickers = set(aum_sorted[:LEGACY_NEAR_DUPLICATE_TOP_N])
 
     for ticker in sector_tickers:
         reasons = []

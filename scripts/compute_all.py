@@ -124,8 +124,11 @@ def main():
     fill_anchor_correlations(classification, sector_members, df_corr_monthly, df_corr_daily)
     fill_super_anchor_correlations(classification, df_corr_monthly, df_corr_daily)
 
-    verify_mece(classification, all_tickers)
-    spot_check(classification, scraped)
+    ok_mece = verify_mece(classification, all_tickers)
+    ok_spot = spot_check(classification, scraped)
+    if not (ok_mece and ok_spot):
+        print('❌ 검증 실패(MECE/스팟체크) — 파이프라인 중단: 출력 생성·커밋 안 함')
+        sys.exit(1)
 
     # ── 5. 레거시 판별 ───────────────────────────────────────────
     print('\n[5/7] 레거시 판별...')

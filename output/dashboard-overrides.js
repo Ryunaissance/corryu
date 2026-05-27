@@ -251,7 +251,6 @@ function _makeYfUrls(ticker) {
         '/api/yf?ticker=' + tk + '&range=max&interval=1mo',
         yf1,
         'https://query2.finance.yahoo.com/v8/finance/chart/' + tk + '?range=max&interval=1mo&includeAdjustedClose=true',
-        'https://corsproxy.io/?' + encodeURIComponent(yf1),
     ];
 }
 
