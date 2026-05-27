@@ -108,9 +108,20 @@ def push_raw(required: bool = True) -> bool:
             print(f'  [storage] push 건너뜀(로컬 없음): {name}')
             continue
         data = path.read_bytes()
-        client.storage.from_(BUCKET).upload(
-            name, data,
-            {'content-type': 'application/octet-stream', 'upsert': 'true'},
-        )
+        _upload_overwrite(client, name, data)
         print(f'  [storage] push: {name} ({len(data) / 1e6:.1f} MB)')
     return True
+
+
+def _upload_overwrite(client, name: str, data: bytes) -> None:
+    """버킷 객체를 덮어쓴다. supabase/storage3 버전차를 흡수.
+
+    1순위: upload(upsert=true). 객체가 이미 있으면 upsert를 무시하고
+    예외를 내는 버전이 있어, 그 경우 update()로 재시도한다.
+    """
+    bucket = client.storage.from_(BUCKET)
+    opts = {'content-type': 'application/octet-stream', 'upsert': 'true'}
+    try:
+        bucket.upload(name, data, opts)
+    except Exception:
+        bucket.update(name, data, opts)
