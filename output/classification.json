@@ -16,8 +16,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7052,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "AAUM": {
     "sector_id": "S04",
@@ -250,8 +252,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6718,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "AIVL": {
     "sector_id": "S07",
@@ -324,8 +328,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6321,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "ARGT": {
     "sector_id": "S12",
@@ -1878,8 +1884,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.2387,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "CA": {
     "sector_id": "S14",
@@ -3249,10 +3257,8 @@
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
     "r_anchor": 0.902,
-    "is_legacy": true,
-    "legacy_reasons": [
-      "LOW_AUM"
-    ]
+    "is_legacy": false,
+    "legacy_reasons": []
   },
   "EAOM": {
     "sector_id": "S11",
@@ -3305,10 +3311,8 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.715,
-    "is_legacy": true,
-    "legacy_reasons": [
-      "LOW_AUM"
-    ]
+    "is_legacy": false,
+    "legacy_reasons": []
   },
   "EDEN": {
     "sector_id": "S11",
@@ -3334,10 +3338,8 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8228,
-    "is_legacy": true,
-    "legacy_reasons": [
-      "LOW_AUM"
-    ]
+    "is_legacy": false,
+    "legacy_reasons": []
   },
   "EDOW": {
     "sector_id": "S01",
@@ -3417,10 +3419,8 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9846,
-    "is_legacy": true,
-    "legacy_reasons": [
-      "LOW_AUM"
-    ]
+    "is_legacy": false,
+    "legacy_reasons": []
   },
   "EFA": {
     "sector_id": "S11",
@@ -7152,7 +7152,7 @@
     "sector_name": "TIPS/인플레이션",
     "asset_class": "FIXED_INCOME",
     "method": "keyword",
-    "r_anchor": 0.8986,
+    "r_anchor": 0.9515,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -12804,7 +12804,7 @@
     "sector_name": "중소형주",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.8009,
+    "r_anchor": 0.7057,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
