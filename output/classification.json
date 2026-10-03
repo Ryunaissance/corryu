@@ -1356,8 +1356,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8048,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "BND": {
     "sector_id": "S14",
@@ -1474,8 +1476,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6938,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "BRRR": {
     "sector_id": "S21",
@@ -1926,8 +1930,10 @@
     "asset_class": "REAL_ASSETS",
     "method": "manual_override",
     "r_anchor": 0.2609,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "CATF": {
     "sector_id": "S14",
@@ -1955,8 +1961,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.5722,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "CCNR": {
     "sector_id": "S11",
@@ -2004,8 +2012,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8472,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "CFA": {
     "sector_id": "S07",
@@ -2042,8 +2052,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7394,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "CHIQ": {
     "sector_id": "S12",
@@ -2153,8 +2165,10 @@
     "asset_class": "THEMATIC",
     "method": "fallback",
     "r_anchor": 0.4552,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "CNYA": {
     "sector_id": "S12",
@@ -2392,8 +2406,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6853,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "DBO": {
     "sector_id": "S19",
@@ -3257,8 +3273,10 @@
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
     "r_anchor": 0.902,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EAOM": {
     "sector_id": "S11",
@@ -3311,8 +3329,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.715,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EDEN": {
     "sector_id": "S11",
@@ -3338,8 +3358,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8228,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EDOW": {
     "sector_id": "S01",
@@ -3419,8 +3441,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9846,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EFA": {
     "sector_id": "S11",
