@@ -16,8 +16,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7045,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "AAUM": {
     "sector_id": "S04",
@@ -45,8 +47,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6731,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "ACWI": {
     "sector_id": "S01",
@@ -92,8 +96,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8309,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "AGEM": {
     "sector_id": "S12",
@@ -193,7 +199,7 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.903,
+    "r_anchor": 0.9,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -250,8 +256,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6717,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "AIVL": {
     "sector_id": "S07",
@@ -324,8 +332,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.616,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "ARGT": {
     "sector_id": "S12",
@@ -447,8 +457,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7814,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "ASHR": {
     "sector_id": "S12",
@@ -568,7 +580,7 @@
     "sector_name": "에너지/원자재",
     "asset_class": "REAL_ASSETS",
     "method": "correlation",
-    "r_anchor": 0.821,
+    "r_anchor": 0.8216,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -621,7 +633,7 @@
     "sector_name": "중소형주",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.702,
+    "r_anchor": 0.7025,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -643,7 +655,7 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.8334,
+    "r_anchor": 0.8313,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -729,7 +741,7 @@
     "sector_name": "단기채/현금성",
     "asset_class": "FIXED_INCOME",
     "method": "keyword",
-    "r_anchor": 0.5361,
+    "r_anchor": 0.5459,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -738,7 +750,7 @@
     "sector_name": "US 대형주 종합",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.872,
+    "r_anchor": 0.8726,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -859,8 +871,10 @@
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
     "r_anchor": 0.954,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "BBEM": {
     "sector_id": "S12",
@@ -945,7 +959,7 @@
     "sector_name": "중소형주",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.7368,
+    "r_anchor": 0.7378,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -1004,8 +1018,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6134,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "BELT": {
     "sector_id": "S01",
@@ -1046,8 +1062,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.5611,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "BFOR": {
     "sector_id": "S13",
@@ -1164,8 +1182,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.4518,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "BITB": {
     "sector_id": "S21",
@@ -1342,8 +1362,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7692,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "BND": {
     "sector_id": "S14",
@@ -1460,8 +1482,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6171,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "BRRR": {
     "sector_id": "S21",
@@ -1553,7 +1577,7 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.961,
+    "r_anchor": 0.9559,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -1671,7 +1695,7 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.8527,
+    "r_anchor": 0.8517,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -1680,7 +1704,7 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.8084,
+    "r_anchor": 0.8066,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -1689,7 +1713,7 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.8812,
+    "r_anchor": 0.8802,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -1720,7 +1744,7 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.8136,
+    "r_anchor": 0.8118,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -1822,7 +1846,7 @@
     "sector_name": "US 대형주 종합",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.7315,
+    "r_anchor": 0.7334,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -1870,8 +1894,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.2395,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "CA": {
     "sector_id": "S14",
@@ -1910,8 +1936,10 @@
     "asset_class": "REAL_ASSETS",
     "method": "manual_override",
     "r_anchor": 0.2782,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "CATF": {
     "sector_id": "S14",
@@ -1939,8 +1967,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.5599,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "CCNR": {
     "sector_id": "S11",
@@ -1988,8 +2018,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8438,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "CFA": {
     "sector_id": "S07",
@@ -2026,8 +2058,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7426,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "CHIQ": {
     "sector_id": "S12",
@@ -2035,8 +2069,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6925,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "CHPS": {
     "sector_id": "S02",
@@ -2137,8 +2173,10 @@
     "asset_class": "THEMATIC",
     "method": "fallback",
     "r_anchor": 0.454,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "CNYA": {
     "sector_id": "S12",
@@ -2274,7 +2312,7 @@
     "sector_name": "US 대형주 종합",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.8832,
+    "r_anchor": 0.8833,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -2376,8 +2414,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.684,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "DBO": {
     "sector_id": "S19",
@@ -2539,11 +2579,11 @@
     "legacy_reasons": []
   },
   "DFCA": {
-    "sector_id": "S14",
-    "sector_name": "투자등급 채권",
+    "sector_id": "S17",
+    "sector_name": "TIPS/인플레이션",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.7697,
+    "r_anchor": 0.7678,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -2678,7 +2718,7 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.8605,
+    "r_anchor": 0.8576,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -2825,7 +2865,7 @@
     "sector_name": "국제선진국",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.7129,
+    "r_anchor": 0.713,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -2998,8 +3038,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.5649,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "DSI": {
     "sector_id": "S01",
@@ -3036,8 +3078,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8547,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "DTH": {
     "sector_id": "S11",
@@ -3085,8 +3129,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.1278,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "DVY": {
     "sector_id": "S04",
@@ -3103,8 +3149,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.4711,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "DVYE": {
     "sector_id": "S12",
@@ -3121,8 +3169,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8344,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "DWLD": {
     "sector_id": "S12",
@@ -3148,24 +3198,28 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.5784,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "DWSH": {
     "sector_id": "S22",
     "sector_name": "인버스/숏",
     "asset_class": "ALTERNATIVE",
     "method": "correlation",
-    "r_anchor": 0.5529,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "r_anchor": 0.5533,
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "DWUS": {
     "sector_id": "S01",
     "sector_name": "US 대형주 종합",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.9164,
+    "r_anchor": 0.9166,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -3229,8 +3283,10 @@
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
     "r_anchor": 0.902,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EAOM": {
     "sector_id": "S11",
@@ -3283,8 +3339,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7175,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EDEN": {
     "sector_id": "S11",
@@ -3310,8 +3368,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8159,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EDOW": {
     "sector_id": "S01",
@@ -3391,8 +3451,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9843,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EFA": {
     "sector_id": "S11",
@@ -3505,8 +3567,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6424,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EIS": {
     "sector_id": "S01",
@@ -3522,7 +3586,7 @@
     "sector_name": "US 대형주 종합",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.6604,
+    "r_anchor": 0.6598,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -3583,8 +3647,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9099,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EMCB": {
     "sector_id": "S16",
@@ -3592,8 +3658,10 @@
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
     "r_anchor": 0.7814,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EMCS": {
     "sector_id": "S12",
@@ -3648,8 +3716,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8522,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EMLC": {
     "sector_id": "S16",
@@ -3722,8 +3792,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6067,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EPHE": {
     "sector_id": "S12",
@@ -3785,8 +3857,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.6865,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EQAL": {
     "sector_id": "S13",
@@ -3907,7 +3981,7 @@
     "sector_name": "부동산/REITs",
     "asset_class": "REAL_ASSETS",
     "method": "correlation",
-    "r_anchor": 0.8673,
+    "r_anchor": 0.8668,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -4003,8 +4077,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6826,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EUDV": {
     "sector_id": "S11",
@@ -4012,8 +4088,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6886,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EUFN": {
     "sector_id": "S11",
@@ -4030,8 +4108,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.3524,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EURL": {
     "sector_id": "S11",
@@ -4039,8 +4119,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6719,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EUSA": {
     "sector_id": "S01",
@@ -4125,7 +4207,7 @@
     "sector_name": "부동산/REITs",
     "asset_class": "REAL_ASSETS",
     "method": "correlation",
-    "r_anchor": 0.8633,
+    "r_anchor": 0.8615,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -4299,8 +4381,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6542,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EWV": {
     "sector_id": "S22",
@@ -4308,8 +4392,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.6623,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EWW": {
     "sector_id": "S11",
@@ -4395,15 +4481,17 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6517,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "EZM": {
     "sector_id": "S13",
     "sector_name": "중소형주",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.749,
+    "r_anchor": 0.7492,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -4449,8 +4537,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.6665,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "FB": {
     "sector_id": "S01",
@@ -4507,15 +4597,17 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8051,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "FCAL": {
     "sector_id": "S14",
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.762,
+    "r_anchor": 0.7604,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -4599,8 +4691,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6399,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "FDVV": {
     "sector_id": "S01",
@@ -4742,8 +4836,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6472,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "FHLC": {
     "sector_id": "S03",
@@ -4768,7 +4864,7 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.961,
+    "r_anchor": 0.9514,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -4858,8 +4954,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6367,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "FLAX": {
     "sector_id": "S12",
@@ -4867,8 +4965,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9517,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "FLBR": {
     "sector_id": "S12",
@@ -4932,8 +5032,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6637,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "FLEU": {
     "sector_id": "S11",
@@ -4941,8 +5043,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6642,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "FLGB": {
     "sector_id": "S11",
@@ -5022,8 +5126,10 @@
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
     "r_anchor": 0.8258,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "FLMI": {
     "sector_id": "S14",
@@ -5102,7 +5208,7 @@
     "sector_name": "단기채/현금성",
     "asset_class": "FIXED_INCOME",
     "method": "keyword",
-    "r_anchor": 0.9033,
+    "r_anchor": 0.9038,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -5142,7 +5248,7 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.7891,
+    "r_anchor": 0.7875,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -5171,7 +5277,7 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.7251,
+    "r_anchor": 0.7229,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -5264,8 +5370,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.8707,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "FNGO": {
     "sector_id": "S02",
@@ -5329,8 +5437,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7993,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "FQAL": {
     "sector_id": "S01",
@@ -5410,7 +5520,7 @@
     "sector_name": "단기채/현금성",
     "asset_class": "FIXED_INCOME",
     "method": "keyword",
-    "r_anchor": 0.2137,
+    "r_anchor": 0.2178,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -5503,8 +5613,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8516,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "FTXL": {
     "sector_id": "S02",
@@ -5547,7 +5659,7 @@
     "sector_name": "헬스케어",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.8787,
+    "r_anchor": 0.8784,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -5576,7 +5688,7 @@
     "sector_name": "금융",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.638,
+    "r_anchor": 0.6383,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -5586,8 +5698,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.3242,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "FXU": {
     "sector_id": "S08",
@@ -5889,8 +6003,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6017,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "GLL": {
     "sector_id": "S22",
@@ -6077,7 +6193,7 @@
     "sector_name": "중소형주",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.6892,
+    "r_anchor": 0.6895,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -6143,8 +6259,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6511,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "GSLC": {
     "sector_id": "S01",
@@ -6160,7 +6278,7 @@
     "sector_name": "중소형주",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.6983,
+    "r_anchor": 0.6987,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -6225,7 +6343,7 @@
     "sector_name": "US 대형주 종합",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.8155,
+    "r_anchor": 0.8164,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -6315,8 +6433,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.6138,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "HDV": {
     "sector_id": "S24",
@@ -6333,8 +6453,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6274,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "HEDJ": {
     "sector_id": "S11",
@@ -6409,8 +6531,10 @@
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
     "r_anchor": 0.8091,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "HODL": {
     "sector_id": "S21",
@@ -6542,8 +6666,10 @@
     "asset_class": "FIXED_INCOME",
     "method": "keyword",
     "r_anchor": 0.9753,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "HYEM": {
     "sector_id": "S16",
@@ -6600,8 +6726,10 @@
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
     "r_anchor": 0.8061,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "HYLB": {
     "sector_id": "S16",
@@ -6645,8 +6773,10 @@
     "asset_class": "FIXED_INCOME",
     "method": "keyword",
     "r_anchor": 0.9815,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "HYXF": {
     "sector_id": "S16",
@@ -7030,7 +7160,7 @@
     "sector_name": "TIPS/인플레이션",
     "asset_class": "FIXED_INCOME",
     "method": "keyword",
-    "r_anchor": 0.8461,
+    "r_anchor": 0.8479,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -7041,7 +7171,7 @@
     "sector_name": "TIPS/인플레이션",
     "asset_class": "FIXED_INCOME",
     "method": "keyword",
-    "r_anchor": 0.9239,
+    "r_anchor": 0.9243,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -7052,7 +7182,7 @@
     "sector_name": "TIPS/인플레이션",
     "asset_class": "FIXED_INCOME",
     "method": "keyword",
-    "r_anchor": 0.9467,
+    "r_anchor": 0.9486,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -7063,7 +7193,7 @@
     "sector_name": "TIPS/인플레이션",
     "asset_class": "FIXED_INCOME",
     "method": "keyword",
-    "r_anchor": 0.9623,
+    "r_anchor": 0.9636,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -7085,7 +7215,7 @@
     "sector_name": "TIPS/인플레이션",
     "asset_class": "FIXED_INCOME",
     "method": "keyword",
-    "r_anchor": 0.9678,
+    "r_anchor": 0.9714,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -7176,7 +7306,7 @@
     "sector_name": "하이일드/신흥채",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.8348,
+    "r_anchor": 0.836,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -7484,8 +7614,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8168,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "IEF": {
     "sector_id": "S14",
@@ -7753,8 +7885,10 @@
     "asset_class": "FIXED_INCOME",
     "method": "keyword",
     "r_anchor": 0.8308,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "IHYF": {
     "sector_id": "S16",
@@ -7842,7 +7976,7 @@
     "sector_name": "US 대형주 종합",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.7232,
+    "r_anchor": 0.7233,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -7880,7 +8014,7 @@
     "sector_name": "중소형주",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.8291,
+    "r_anchor": 0.8292,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -7946,8 +8080,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6664,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "INDS": {
     "sector_id": "S20",
@@ -8151,7 +8287,7 @@
     "sector_name": "US 대형주 종합",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.7777,
+    "r_anchor": 0.7779,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -8750,7 +8886,7 @@
     "sector_name": "단기채/현금성",
     "asset_class": "FIXED_INCOME",
     "method": "keyword",
-    "r_anchor": 0.5208,
+    "r_anchor": 0.5279,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -8816,8 +8952,10 @@
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
     "r_anchor": 0.8398,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "JPRE": {
     "sector_id": "S20",
@@ -8975,8 +9113,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8803,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "KEUA": {
     "sector_id": "S24",
@@ -8995,8 +9135,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6147,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "KIE": {
     "sector_id": "S04",
@@ -9042,8 +9184,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.0632,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "KORP": {
     "sector_id": "S14",
@@ -9147,8 +9291,10 @@
     "asset_class": "EQUITY",
     "method": "manual_override",
     "r_anchor": 0.4283,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "LABD": {
     "sector_id": "S22",
@@ -9156,8 +9302,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.5494,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "LABU": {
     "sector_id": "S13",
@@ -9174,8 +9322,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9814,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "LDRC": {
     "sector_id": "S15",
@@ -9235,7 +9385,7 @@
     "sector_name": "산업재",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.6105,
+    "r_anchor": 0.6109,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -9244,7 +9394,7 @@
     "sector_name": "US 대형주 종합",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.8679,
+    "r_anchor": 0.8687,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -9314,8 +9464,10 @@
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
     "r_anchor": 0.9653,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "LQDH": {
     "sector_id": "S16",
@@ -9331,9 +9483,11 @@
     "sector_name": "하이일드/신흥채",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.8852,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "r_anchor": 0.8842,
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "LQDW": {
     "sector_id": "S14",
@@ -9362,7 +9516,7 @@
     "sector_name": "US 대형주 종합",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.9473,
+    "r_anchor": 0.9469,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -9421,8 +9575,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6191,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "MAGS": {
     "sector_id": "S01",
@@ -9472,17 +9628,21 @@
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
     "r_anchor": 0.9683,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "MBND": {
     "sector_id": "S14",
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.8724,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "r_anchor": 0.8706,
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "MBNE": {
     "sector_id": "S14",
@@ -9595,8 +9755,10 @@
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
     "r_anchor": 0.9724,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "MINT": {
     "sector_id": "S15",
@@ -9624,8 +9786,10 @@
     "asset_class": "THEMATIC",
     "method": "fallback",
     "r_anchor": 0.4786,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "MLN": {
     "sector_id": "S17",
@@ -9696,7 +9860,7 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.8758,
+    "r_anchor": 0.8725,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -9716,7 +9880,7 @@
     "sector_name": "US 대형주 종합",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.8881,
+    "r_anchor": 0.8887,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -9811,9 +9975,11 @@
     "sector_name": "부동산/REITs",
     "asset_class": "REAL_ASSETS",
     "method": "keyword",
-    "r_anchor": 0.6312,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "r_anchor": 0.6276,
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "MTUM": {
     "sector_id": "S02",
@@ -10077,8 +10243,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6295,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "NFTY": {
     "sector_id": "S12",
@@ -10157,8 +10325,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9479,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "NTSI": {
     "sector_id": "S11",
@@ -10183,7 +10353,7 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.9746,
+    "r_anchor": 0.9704,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -10192,7 +10362,7 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.9707,
+    "r_anchor": 0.9669,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -10262,15 +10432,17 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8946,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "NULG": {
     "sector_id": "S01",
     "sector_name": "US 대형주 종합",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.9454,
+    "r_anchor": 0.9453,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -10279,7 +10451,7 @@
     "sector_name": "US 대형주 종합",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.6866,
+    "r_anchor": 0.6869,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -10288,7 +10460,7 @@
     "sector_name": "US 대형주 종합",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.8354,
+    "r_anchor": 0.8356,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -10297,7 +10469,7 @@
     "sector_name": "금융",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.6463,
+    "r_anchor": 0.6469,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -10318,8 +10490,10 @@
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
     "r_anchor": 0.9027,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "NUSC": {
     "sector_id": "S13",
@@ -10418,8 +10592,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8041,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "OIH": {
     "sector_id": "S19",
@@ -10497,7 +10673,7 @@
     "sector_name": "소재",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.9029,
+    "r_anchor": 0.9034,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -10609,8 +10785,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7528,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "PBE": {
     "sector_id": "S03",
@@ -10746,8 +10924,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.739,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "PGX": {
     "sector_id": "S09",
@@ -10792,7 +10972,7 @@
     "sector_name": "금/귀금속",
     "asset_class": "REAL_ASSETS",
     "method": "keyword",
-    "r_anchor": 0.9719,
+    "r_anchor": 0.9711,
     "is_legacy": true,
     "legacy_reasons": [
       "MANUAL"
@@ -10946,9 +11126,11 @@
     "sector_name": "중소형주",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.5562,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "r_anchor": 0.5566,
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "PSCH": {
     "sector_id": "S13",
@@ -10974,8 +11156,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.507,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "PSI": {
     "sector_id": "S02",
@@ -11002,7 +11186,7 @@
     "sector_name": "금/귀금속",
     "asset_class": "REAL_ASSETS",
     "method": "keyword",
-    "r_anchor": 0.7771,
+    "r_anchor": 0.7766,
     "is_legacy": true,
     "legacy_reasons": [
       "MANUAL"
@@ -11045,8 +11229,10 @@
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
     "r_anchor": 0.7546,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "PTEU": {
     "sector_id": "S11",
@@ -11054,8 +11240,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.4243,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "PTF": {
     "sector_id": "S02",
@@ -11089,7 +11277,7 @@
     "sector_name": "중소형주",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.4686,
+    "r_anchor": 0.4697,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -11099,8 +11287,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9364,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "PVAL": {
     "sector_id": "S07",
@@ -11215,8 +11405,10 @@
     "asset_class": "EQUITY",
     "method": "manual_override",
     "r_anchor": 0.4292,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "QBF": {
     "sector_id": "S21",
@@ -11326,8 +11518,10 @@
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
     "r_anchor": 0.9266,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "QLD": {
     "sector_id": "S02",
@@ -11444,8 +11638,10 @@
     "asset_class": "FIXED_INCOME",
     "method": "keyword",
     "r_anchor": 0.3425,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "QSML": {
     "sector_id": "S13",
@@ -11544,8 +11740,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6723,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "RDIV": {
     "sector_id": "S04",
@@ -11624,8 +11822,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.5601,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "REZ": {
     "sector_id": "S20",
@@ -11643,18 +11843,22 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.9604,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "r_anchor": 0.9568,
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "RFDA": {
     "sector_id": "S01",
     "sector_name": "US 대형주 종합",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.8001,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "r_anchor": 0.8,
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "RFEU": {
     "sector_id": "S11",
@@ -11670,9 +11874,11 @@
     "sector_name": "US 대형주 종합",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.8533,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "r_anchor": 0.8535,
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "RFG": {
     "sector_id": "S13",
@@ -11689,8 +11895,10 @@
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
     "r_anchor": 0.843,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "RING": {
     "sector_id": "S18",
@@ -11718,8 +11926,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.5792,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "RNTY": {
     "sector_id": "S20",
@@ -11891,7 +12101,7 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.8005,
+    "r_anchor": 0.7993,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -11970,8 +12180,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.3606,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "RXL": {
     "sector_id": "S03",
@@ -12259,8 +12471,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.6778,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "SDG": {
     "sector_id": "S11",
@@ -12295,8 +12509,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.1323,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "SDS": {
     "sector_id": "S22",
@@ -12393,8 +12609,10 @@
     "asset_class": "FIXED_INCOME",
     "method": "keyword",
     "r_anchor": 0.3846,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "SHLD": {
     "sector_id": "S18",
@@ -12540,8 +12758,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7801,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "SKYY": {
     "sector_id": "S02",
@@ -12567,8 +12787,10 @@
     "asset_class": "FIXED_INCOME",
     "method": "keyword",
     "r_anchor": 0.0684,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "SLV": {
     "sector_id": "S18",
@@ -12684,7 +12906,7 @@
     "sector_name": "중소형주",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.6948,
+    "r_anchor": 0.6953,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -12713,7 +12935,7 @@
     "sector_name": "중소형주",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.7643,
+    "r_anchor": 0.765,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -12722,7 +12944,7 @@
     "sector_name": "단기채/현금성",
     "asset_class": "FIXED_INCOME",
     "method": "keyword",
-    "r_anchor": 0.2989,
+    "r_anchor": 0.3062,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -12843,8 +13065,10 @@
     "asset_class": "REAL_ASSETS",
     "method": "manual_override",
     "r_anchor": 0.2723,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "SPAB": {
     "sector_id": "S14",
@@ -13108,8 +13332,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.897,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "SPY": {
     "sector_id": "S01",
@@ -13222,8 +13448,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.5769,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "SRVR": {
     "sector_id": "S20",
@@ -13242,8 +13470,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.8513,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "SSO": {
     "sector_id": "S01",
@@ -13312,7 +13542,7 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.948,
+    "r_anchor": 0.9388,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -13341,7 +13571,7 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.8692,
+    "r_anchor": 0.8636,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -13408,7 +13638,7 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.7994,
+    "r_anchor": 0.7969,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -13417,9 +13647,11 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.8857,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "r_anchor": 0.8825,
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "TBLL": {
     "sector_id": "S15",
@@ -13436,8 +13668,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6484,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "TBUX": {
     "sector_id": "S15",
@@ -13533,9 +13767,11 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.7987,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "r_anchor": 0.791,
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "TFLO": {
     "sector_id": "S15",
@@ -13841,8 +14077,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.8457,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "UBR": {
     "sector_id": "S12",
@@ -13850,8 +14088,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7033,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "UCO": {
     "sector_id": "S19",
@@ -13876,7 +14116,7 @@
     "sector_name": "투자등급 채권",
     "asset_class": "FIXED_INCOME",
     "method": "correlation",
-    "r_anchor": 0.9688,
+    "r_anchor": 0.9642,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -13888,15 +14128,17 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6604,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "UDI": {
     "sector_id": "S04",
     "sector_name": "금융",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.3734,
+    "r_anchor": 0.3738,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -13976,7 +14218,7 @@
     "sector_name": "중소형주",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.689,
+    "r_anchor": 0.6949,
     "is_legacy": true,
     "legacy_reasons": [
       "SHORT_HISTORY"
@@ -13997,8 +14239,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.695,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "UPW": {
     "sector_id": "S08",
@@ -14006,8 +14250,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9906,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "URA": {
     "sector_id": "S19",
@@ -14248,7 +14494,7 @@
     "sector_name": "중소형주",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.6965,
+    "r_anchor": 0.6968,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -14267,8 +14513,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.9907,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "UVIX": {
     "sector_id": "S22",
@@ -14316,8 +14564,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7945,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "UYG": {
     "sector_id": "S04",
@@ -14333,7 +14583,7 @@
     "sector_name": "US 대형주 종합",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.7061,
+    "r_anchor": 0.7063,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -14607,8 +14857,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.6511,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "VIG": {
     "sector_id": "S01",
@@ -15478,7 +15730,7 @@
     "sector_name": "중소형주",
     "asset_class": "EQUITY",
     "method": "correlation",
-    "r_anchor": 0.6941,
+    "r_anchor": 0.6953,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -15624,7 +15876,7 @@
     "sector_name": "부동산/REITs",
     "asset_class": "REAL_ASSETS",
     "method": "correlation",
-    "r_anchor": 0.8589,
+    "r_anchor": 0.8585,
     "is_legacy": false,
     "legacy_reasons": []
   },
@@ -15672,8 +15924,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.7567,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "XRPI": {
     "sector_id": "S21",
@@ -15681,8 +15935,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "correlation",
     "r_anchor": 0.8298,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "XRPT": {
     "sector_id": "S21",
@@ -15710,8 +15966,10 @@
     "asset_class": "EQUITY",
     "method": "correlation",
     "r_anchor": 0.5293,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "XSHQ": {
     "sector_id": "S13",
@@ -15802,8 +16060,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.3519,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "YBIT": {
     "sector_id": "S21",
@@ -15864,8 +16124,10 @@
     "asset_class": "THEMATIC",
     "method": "fallback",
     "r_anchor": 0.5207,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "YXI": {
     "sector_id": "S22",
@@ -15873,8 +16135,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.3213,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "YYY": {
     "sector_id": "S11",
@@ -15911,8 +16175,10 @@
     "asset_class": "ALTERNATIVE",
     "method": "keyword",
     "r_anchor": 0.2411,
-    "is_legacy": false,
-    "legacy_reasons": []
+    "is_legacy": true,
+    "legacy_reasons": [
+      "LOW_AUM"
+    ]
   },
   "ZVOL": {
     "sector_id": "S01",
